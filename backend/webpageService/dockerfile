@@ -1,5 +1,5 @@
 FROM eclipse-temurin:25
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN groupadd -r spring && useradd -r -g spring spring
 USER spring:spring
 ARG JAR_FILE=build/libs/*SNAPSHOT.jar
 COPY ${JAR_FILE} app.jar
