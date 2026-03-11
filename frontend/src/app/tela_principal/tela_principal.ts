@@ -1,5 +1,5 @@
-import {Component} from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-tela_principal',
@@ -7,7 +7,8 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './tela_principal.css',
   standalone: true,
   imports: [
-    RouterOutlet
+    RouterOutlet,
+    RouterLink,
   ]
 })
 
