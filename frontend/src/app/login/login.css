@@ -1,0 +1,94 @@
+.login-card {
+  display: flex;
+  align-self: center;
+  margin: 200px auto;
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  padding: 32px 24px;
+  flex-direction: column;
+  gap: 16px;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.login-title {
+  color: #202124;
+  text-align: center;
+  margin: 0;
+  font-weight: 600;
+  font-size: 24px;
+  width: 100%;
+}
+
+.section-subtitle {
+  color: #5f6368;
+  font-size: 16px;
+  margin: 16px 0 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 4px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.full-width {
+  flex: 1;
+}
+
+.two-cols > mat-form-field {
+  flex: 1;
+}
+
+.two-cols-cep > mat-form-field:first-child {
+  flex: 0 0 150px;
+}
+
+.two-cols-cep > mat-form-field:last-child {
+  flex: 1;
+}
+
+.three-cols > mat-form-field {
+  flex: 1;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin-top: 16px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 24px 0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.voltar-button {
+  width: 100%;
+  padding: 8px 0;
+}
