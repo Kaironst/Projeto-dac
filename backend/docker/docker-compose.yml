@@ -3,18 +3,18 @@ version: "3.9"
 services:
   webpage-service:
     build:
-      context: .
-      dockerfile: ./spring-boot-service.dockerfile
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
       args:
-        JAR_FILE: ../webpageService/build/libs/users.jar
+        JAR_FILE: ./webpageService/build/libs/webpageService-0.0.1-SNAPSHOT.jar
     ports:
-      - "8082:8080"
+      - "8080:8080"
 
   users-service:
     build:
-      context: .
-      dockerfile: ./spring-boot-service.dockerfile
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
       args:
-        JAR_FILE: ../usersService/build/libs/users.jar
+        JAR_FILE: ./usersService/build/libs/usersService-0.0.1-SNAPSHOT.jar
     ports:
-      - "8082:8080"
+      - "8081:8080"

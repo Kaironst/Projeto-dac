@@ -30,7 +30,7 @@ public class Cliente {
   private String telefone;
   private int salario;
 
-  @OneToMany(mappedBy = "endereco")
+  @OneToMany(mappedBy = "cliente")
   private List<Endereco> enderecos;
 
 }
