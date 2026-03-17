@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  webpage-service:
+    build:
+      context: .
+      dockerfile: ./spring-boot-service.dockerfile
+      args:
+        JAR_FILE: ../webpageService/build/libs/users.jar
+    ports:
+      - "8082:8080"
+
+  users-service:
+    build:
+      context: .
+      dockerfile: ./spring-boot-service.dockerfile
+      args:
+        JAR_FILE: ../usersService/build/libs/users.jar
+    ports:
+      - "8082:8080"
