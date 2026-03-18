@@ -22,19 +22,19 @@
 
         <mat-form-field appearance="outline">
           <mat-label>CPF</mat-label>
-          <input matInput formControlName="cpf" placeholder="000.000.000-00">
+          <input matInput formControlName="cpf" placeholder="000.000.000-00" mask="999.999.999-99">
         </mat-form-field>
       </div>
 
       <div class="form-row two-cols">
         <mat-form-field appearance="outline">
           <mat-label>Telefone</mat-label>
-          <input matInput formControlName="telefone" placeholder="(00) 00000-0000">
+          <input matInput formControlName="telefone" placeholder="(00) 00000-0000" mask="(99) 99999-9999">
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Salário</mat-label>
-          <input type="number" matInput formControlName="salario" placeholder="0.00">
+          <input type="number" matInput formControlName="salario" placeholder="0000,00">
         </mat-form-field>
       </div>
 
@@ -43,7 +43,7 @@
       <div class="form-row two-cols-cep">
         <mat-form-field appearance="outline">
           <mat-label>CEP</mat-label>
-          <input matInput formControlName="cep" placeholder="00000-000">
+          <input matInput formControlName="cep" mask="00000-000" placeholder="00000-000">
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
