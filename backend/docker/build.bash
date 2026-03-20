@@ -1,5 +1,7 @@
 #!/bin/bash
 
+docker compose down
+
 (
   cd ..
 
