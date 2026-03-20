@@ -1,6 +1,21 @@
 version: "3.9"
 
 services:
+  users-database:
+    image: postgres
+    container_name: users-database
+    ports:
+      - "1501:1501"
+
+    environment:
+      POSTGRES_DB: web2database
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: admin
+      PGDATA: /var/lib/postgresql/data
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   webpage-service:
     build:
       context: ..
@@ -18,3 +33,6 @@ services:
         JAR_FILE: ./usersService/build/libs/usersService-0.0.1-SNAPSHOT.jar
     ports:
       - "8081:8080"
+
+volumes:
+  pgdata:
