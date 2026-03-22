@@ -1,14 +1,24 @@
-version: "3.9"
-
 services:
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672" #porta para o webapp de gerenciamento
+    environment:
+      RABBITMQ_DEFAULT_USER: usuario
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
   users-database:
     image: postgres
     container_name: users-database
     ports:
-      - "1501:1501"
+      - "1501:5432"
 
     environment:
-      POSTGRES_DB: web2database
+      POSTGRES_DB: users_database
       POSTGRES_USER: usuario
       POSTGRES_PASSWORD: admin
       PGDATA: /var/lib/postgresql/data
@@ -36,3 +46,4 @@ services:
 
 volumes:
   pgdata:
+  rabbitmq_data:
