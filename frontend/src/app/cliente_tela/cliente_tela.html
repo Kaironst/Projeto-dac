@@ -1,0 +1,51 @@
+<div class="container">
+    <header>
+  <h1>Tela do Cliente</h1>
+    </header>
+  <div class="saldo" [ngClass]="{ negativo: saldo < 0 }">
+    Saldo: R$ {{ saldo.toFixed(2) }}
+  </div>
+
+  <div class="acoes">
+    <div class="card">
+      <h2>Depositar</h2>
+      <input type="number" [(ngModel)]="valorDeposito" placeholder="Valor" />
+      <button (click)="depositar()">Depositar</button>
+    </div>
+    <div class="card">
+      <h2>Sacar</h2>
+      <input type="number" [(ngModel)]="valorSaque" placeholder="Valor" />
+      <button (click)="sacar()">Sacar</button>
+    </div>
+    <div class="card">
+      <h2>Transferir</h2>
+      <input type="text" [(ngModel)]="contaDestino" placeholder="Conta destino" />
+      <input type="number" [(ngModel)]="valorTransferencia" placeholder="Valor" />
+      <button (click)="transferir()">Transferir</button>
+    </div>
+
+  </div>
+  <div class="extrato">
+    <h2>Extrato</h2>
+
+    @if (extrato.length === 0) {
+      <div>
+        Nenhuma transação ainda.
+      </div>
+    } @else {
+      @for (t of extrato; track t) {
+        <div class="transacao">
+          <div>
+            <strong>{{ t.tipo }}</strong> - {{ t.descricao }}
+          </div>
+          <div>
+            R$ {{ t.valor.toFixed(2) }}
+          </div>
+          <small>
+            {{ t.data | date:'dd/MM/yyyy HH:mm' }}
+          </small>
+        </div>
+      }
+    }
+  </div>
+</div>
