@@ -1,0 +1,100 @@
+.consulta-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.consulta-card {
+  width: 100%;
+  max-width: 600px;
+}
+
+.cpf-field {
+  width: 60%;
+  margin-left: 15px;
+  align-items: center;
+}
+
+.card-header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.consulta-title {
+  color: #202124;
+  text-align: center;
+  margin: 0;
+  font-weight: 600;
+  font-size: 24px;
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0;
+}
+
+.input-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.action-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 7px;
+  gap: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.search-button {
+  width: 100%;
+}
+
+.voltar-button {
+  width: 100%;
+}
+
+.error-wrapper {
+  display: flex;
+  margin-left: 15px;
+}
+
+.error-message {
+  color: #f44336;
+  font-weight: 500;
+  text-align: center;
+  margin: 0;
+}
+
+.section-subtitle {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: #3f51b5;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.25rem;
+}
+
+.resultados-container {
+  margin-top: -25px;
+  padding: 1rem;
+  background-color: #fafafa;
+  border-radius: 4px;
+}
+
+.resultados-container p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}

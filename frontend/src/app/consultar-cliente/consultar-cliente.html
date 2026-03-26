@@ -1,0 +1,56 @@
+<div class="consulta-container">
+  <mat-card class="consulta-card" appearance="outlined">
+    
+    <mat-card-header class="card-header">
+      <mat-card-title class="consulta-title">Consultar Cliente</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content class="card-content">
+      <form [formGroup]="formGroup" (ngSubmit)="consultar()" class="consulta-form">
+        <div class="form-row">
+          <div class="input-section">
+            <mat-form-field appearance="outline" class="cpf-field">
+              <mat-label>CPF</mat-label>
+              <input matInput formControlName="cpf" placeholder="000.000.000-00" mask="000.000.000-00">
+            </mat-form-field>
+
+            <div *ngIf="pesquisado && !clienteConsultado" class="error-wrapper">
+              <p class="error-message">Cliente não encontrado com o CPF informado.</p>
+            </div>
+          </div>
+
+          <div class="action-section">
+            <button type="submit" mat-flat-button color="primary" class="search-button" [disabled]="!formGroup.valid">
+              Pesquisar
+            </button>
+            <button type="button" mat-button color="warn" class="voltar-button" (click)="voltar()">Voltar</button>
+          </div>
+        </div>
+      </form>
+
+      <div *ngIf="pesquisado && clienteConsultado" class="resultados-container">
+        
+        <ng-container>
+          <h3 class="section-subtitle">Dados Pessoais</h3>
+          <p><strong>Nome:</strong> {{ clienteConsultado.nome }}</p>
+          <p><strong>Email:</strong> {{ clienteConsultado.email }}</p>
+          <p><strong>CPF:</strong> {{ clienteConsultado.cpf | mask: '000.000.000-00' }}</p>
+          <p><strong>Telefone:</strong> {{ clienteConsultado.telefone | mask: '(00) 00000-0000' }}</p>
+          <p><strong>Salário:</strong> {{ clienteConsultado.salario | currency:'BRL':'symbol' }}</p>
+
+          <h3 class="section-subtitle">Endereço</h3>
+          <p><strong>Logradouro:</strong> {{ clienteConsultado.endereco.logradouro }}, {{ clienteConsultado.endereco.numero }}</p>
+          <p><strong>Complemento:</strong> {{ clienteConsultado.endereco.complemento || 'N/A' }}</p>
+          <p><strong>Cidade/UF:</strong> {{ clienteConsultado.endereco.cidade }} - {{ clienteConsultado.endereco.estado }}</p>
+          <p><strong>CEP:</strong> {{ clienteConsultado.endereco.cep | mask: '00000-000' }}</p>
+
+          <h3 class="section-subtitle">Dados da Conta</h3>
+          <p><strong>Saldo:</strong> {{ clienteConsultado.conta.saldo | currency:'BRL':'symbol' }}</p>
+          <p><strong>Limite:</strong> {{ clienteConsultado.conta.limite | currency:'BRL':'symbol' }}</p>
+        </ng-container>
+
+      </div>
+    </mat-card-content>
+
+  </mat-card>
+</div>
