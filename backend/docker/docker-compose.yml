@@ -35,6 +35,15 @@ services:
     ports:
       - "8080:8080"
 
+  orchestrator-service:
+    build:
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
+      args:
+        JAR_FILE: ./orchestratorService/build/libs/orchestratorService-0.0.1-SNAPSHOT.jar
+    ports:
+      - "8082:8080"
+
   users-service:
     build:
       context: ..
@@ -42,7 +51,7 @@ services:
       args:
         JAR_FILE: ./usersService/build/libs/usersService-0.0.1-SNAPSHOT.jar
     ports:
-      - "8081:8080"
+      - "8083:8080"
 
 volumes:
   pgdata:
