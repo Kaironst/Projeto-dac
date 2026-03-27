@@ -19,7 +19,7 @@ public class Producer {
    */
   public void messageUsers(String message) {
     rabbitTemplate.convertAndSend(
-        RabbitMQConfig.ORCHESTRATOR_EXCHANGE,
+        RabbitMQConfig.APP_EXCHANGE,
         RabbitMQConfig.USERS_KEY,
         message);
   }
