@@ -65,6 +65,8 @@ public class RabbitMQConfig {
   }
 
   // sobrescreve o rabbit listener padrão para usar serialização json
+  // TODO: Remover essa função do comportamento padrão para conseguir expandir
+  // para os outros bancos necessários
   @Bean
   public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
       ConnectionFactory connectionFactory,

@@ -13,13 +13,15 @@ import br.ufpr.dac.usersService.config.RabbitMQConfig;
 import br.ufpr.dac.usersService.entity.Cliente;
 import br.ufpr.dac.usersService.entity.Endereco;
 import br.ufpr.dac.usersService.messaging.dto.UsersDto;
+import br.ufpr.dac.usersService.messaging.producer.MessageProducer;
 import br.ufpr.dac.usersService.repository.ClienteRepository;
 import lombok.AllArgsConstructor;
 
 @Component
 @AllArgsConstructor
-public class Consumer {
+public class MessageConsumer {
 
+  private final MessageProducer producer;
   private final ClienteRepository repo;
 
   @RabbitListener(queues = RabbitMQConfig.USERS_QUEUE)
@@ -40,10 +42,11 @@ public class Consumer {
     }
   }
 
-  @Transactional
-  private void handleCreate(List<UsersDto.Cliente> clientes) {
+  private static List<UsersDto.Cliente> clientesToDto(List<Cliente> clientes) {
+    var clientesDto = new ArrayList<UsersDto.Cliente>();
+
     clientes.forEach(cliente -> {
-      var novoCliente = Cliente.builder()
+      var novoClienteDto = UsersDto.Cliente.builder()
           .salario(cliente.getSalario())
           .nome(cliente.getNome())
           .email(cliente.getEmail())
@@ -51,8 +54,40 @@ public class Consumer {
           .estado(cliente.getEstado())
           .build();
 
-      var enderecosCliente = new ArrayList<Endereco>();
+      var enderecosCliente = new ArrayList<UsersDto.Endereco>();
       cliente.getEnderecos().forEach(endereco -> {
+        var novoEndereco = UsersDto.Endereco.builder()
+            .logradouro(endereco.getLogradouro())
+            .numero(endereco.getNumero())
+            .cidade(endereco.getCidade())
+            .cep(endereco.getCep())
+            .complemento(endereco.getComplemento())
+            .estado(endereco.getEstado())
+            .build();
+        enderecosCliente.add(novoEndereco);
+      });
+      novoClienteDto.setEnderecos(enderecosCliente);
+      clientesDto.add(novoClienteDto);
+    });
+
+    return clientesDto;
+
+  }
+
+  private static List<Cliente> dtoToClientes(List<UsersDto.Cliente> clientesDto) {
+    var clientes = new ArrayList<Cliente>();
+
+    clientesDto.forEach(clienteDto -> {
+      var novoCliente = Cliente.builder()
+          .salario(clienteDto.getSalario())
+          .nome(clienteDto.getNome())
+          .email(clienteDto.getEmail())
+          .cpf(clienteDto.getCpf())
+          .estado(clienteDto.getEstado())
+          .build();
+
+      var enderecosCliente = new ArrayList<Endereco>();
+      clienteDto.getEnderecos().forEach(endereco -> {
         var novoEndereco = Endereco.builder()
             .logradouro(endereco.getLogradouro())
             .numero(endereco.getNumero())
@@ -65,28 +100,32 @@ public class Consumer {
         enderecosCliente.add(novoEndereco);
       });
       novoCliente.setEnderecos(enderecosCliente);
-
-      repo.save(novoCliente);
+      clientes.add(novoCliente);
     });
+
+    return clientes;
+
+  }
+
+  @Transactional
+  private void handleCreate(List<UsersDto.Cliente> clientes) {
+    repo.saveAll(dtoToClientes(clientes));
   }
 
   @Transactional(readOnly = true)
   private void handleRead(List<UsersDto.Cliente> clientes) {
-    List<Cliente> clientesEncontrados = new ArrayList<>();
+    var idList = new ArrayList<Long>();
+    clientes.forEach(c -> idList.add(c.getId()));
 
-    clientes.forEach(cliente -> {
-      clientesEncontrados.add(repo.findById(cliente.getId()).orElseThrow());
-    });
-
-    // producer.returnReadMessage(clientesEncontrados);
-
+    List<Cliente> clientesEncontrados = repo.findAllById(idList);
+    producer.messageOrchestrator("RESULT", clientesToDto(clientesEncontrados));
   }
 
   @Transactional(readOnly = true)
   private void handleReadAll() {
     var clientesEncontrados = repo.findAll();
 
-    // producer.returnReadMessage(clientesEncontrados);
+    producer.messageOrchestrator("RESULT", clientesToDto(clientesEncontrados));
 
   }
 

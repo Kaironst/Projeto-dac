@@ -2,6 +2,7 @@ package br.ufpr.dac.orchestratorService.messaging.dto;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,6 +10,7 @@ public class UsersDto {
 
   @Data
   @Builder
+  @AllArgsConstructor
   public static class Message {
     private String operation;
     private List<Cliente> data;
