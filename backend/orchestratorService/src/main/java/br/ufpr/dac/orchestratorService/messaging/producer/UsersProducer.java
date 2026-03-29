@@ -37,6 +37,10 @@ public class UsersProducer {
     enviarMenssagem("READ", clienteId);
   }
 
+  public void readAllClientes() {
+    enviarMenssagem("READ_ALL", null);
+  }
+
   public void updateCliente(UsersDto.Cliente cliente) {
     enviarMenssagem("UPDATE", cliente);
   }
