@@ -50,9 +50,9 @@ header {
 }
 
 input {
-  width: 94%;
-  padding: 8px;
-  margin: 5px 0;
+  width:100%;
+  padding: 8px 0px;
+  margin: 5px 0px 5px 0px;
 }
 
 button {
@@ -76,4 +76,12 @@ button:hover {
 .transacao {
   border-bottom: 1px solid #ccc;
   padding: 10px 0;
+}
+
+.positivo {
+  color: blue;
+}
+
+.negativo {
+  color: red;
 }

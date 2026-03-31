@@ -1,44 +1,90 @@
 <div class="container">
-    <header>
-  <h1>Tela do Cliente</h1>
-    </header>
+  <header>
+    <h1>Tela do Cliente</h1>
+  </header>
+
+  <form [formGroup]="perfilForm" (ngSubmit)="atualizarPerfil()">
+
+    <div class="card">
+      <h2>Perfil do Cliente</h2>
+
+      <div class="form-row">
+        <label>Nome:</label>
+        <input type="text" formControlName="nome" />
+      </div>
+
+      <div class="form-row">
+        <label>Email:</label>
+        <input type="text" formControlName="email" />
+      </div>
+
+      <div class="form-row">
+        <label>Telefone:</label>
+        <input type="text" formControlName="telefone" mask="(99) 99999-9999" />
+      </div>
+
+      <div class="form-row">
+        <label>CPF:</label>
+        <input type="text" [value]="cpf" disabled />
+      </div>
+
+      <div class="form-row">
+        <label>Salário:</label>
+        <input type="number" formControlName="salario" />
+      </div>
+
+      <div class="form-row">
+        <label>Gerente:</label>
+        <input type="text" [value]="gerente" disabled />
+      </div>
+
+      <button type="submit">Atualizar Perfil</button>
+    </div>
+
+  </form>
+
   <div class="saldo" [ngClass]="{ negativo: saldo < 0 }">
-    Saldo: R$ {{ saldo.toFixed(2) }}
+    Saldo: R$ {{ saldo.toFixed(2) }} <br>
+    Limite: R$ {{ limite.toFixed(2) }}
   </div>
 
   <div class="acoes">
     <div class="card">
       <h2>Depositar</h2>
-      <input type="number" [(ngModel)]="valorDeposito" placeholder="Valor" />
+      <label>Valor:</label>
+      <input type="number" [(ngModel)]="valorDeposito" />
       <button (click)="depositar()">Depositar</button>
     </div>
+
     <div class="card">
       <h2>Sacar</h2>
-      <input type="number" [(ngModel)]="valorSaque" placeholder="Valor" />
+      <label>Valor:</label>
+      <input type="number" [(ngModel)]="valorSaque" />
       <button (click)="sacar()">Sacar</button>
     </div>
+
     <div class="card">
       <h2>Transferir</h2>
-      <input type="text" [(ngModel)]="contaDestino" placeholder="Conta destino" />
-      <input type="number" [(ngModel)]="valorTransferencia" placeholder="Valor" />
+      <label>Conta de Destino:</label>
+      <input type="text" [(ngModel)]="contaDestino" />
+      <label>Valor:</label>
+      <input type="number" [(ngModel)]="valorTransferencia" />
       <button (click)="transferir()">Transferir</button>
     </div>
-
   </div>
+
   <div class="extrato">
     <h2>Extrato</h2>
 
     @if (extrato.length === 0) {
-      <div>
-        Nenhuma transação ainda.
-      </div>
+      <div>Nenhuma transação ainda.</div>
     } @else {
       @for (t of extrato; track t) {
         <div class="transacao">
           <div>
             <strong>{{ t.tipo }}</strong> - {{ t.descricao }}
           </div>
-          <div>
+          <div [ngClass]="{ positivo: t.valor >= 0, negativo: t.valor < 0 }">
             R$ {{ t.valor.toFixed(2) }}
           </div>
           <small>
