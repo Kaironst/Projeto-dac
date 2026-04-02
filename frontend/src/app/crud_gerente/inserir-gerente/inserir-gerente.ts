@@ -7,6 +7,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { NgxMaskDirective } from 'ngx-mask';
 
+interface GerenteCadastro {
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
+  senha: string;
+}
+
+const CHAVE_GERENTES = 'gerentes';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -39,10 +49,41 @@ export class InserirGerente {
   }
 
   inserir() {
-    // a ser implementado
+    if (this.formGroup.invalid) {
+      this.formGroup.markAllAsTouched();
+      return;
+    }
+
+    const gerentes = this.obterGerentes();
+    const novoGerente: GerenteCadastro = {
+      nome: this.formGroup.value.nome,
+      cpf: this.formGroup.value.cpf,
+      email: this.formGroup.value.email,
+      telefone: this.formGroup.value.telefone,
+      senha: this.formGroup.value.senha,
+    };
+
+    gerentes.push(novoGerente);
+    localStorage.setItem(CHAVE_GERENTES, JSON.stringify(gerentes));
+    this.formGroup.reset();
+    this.router.navigate(['/tela-principal']);
     }
 
   voltar() {
     this.router.navigate(['/tela-principal']);
+  }
+
+  private obterGerentes(): GerenteCadastro[] {
+    const gerentesSalvos = localStorage.getItem(CHAVE_GERENTES);
+
+    if (!gerentesSalvos) {
+      return [];
+    }
+
+    try {
+      return JSON.parse(gerentesSalvos) as GerenteCadastro[];
+    } catch {
+      return [];
+    }
   }
 }
