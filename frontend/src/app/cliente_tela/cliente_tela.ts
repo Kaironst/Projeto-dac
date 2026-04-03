@@ -34,6 +34,11 @@ export class ClienteTela {
 
   extrato: Transacao[] = [];
 
+  dataInicio: string = '';
+  dataFim: string = '';
+
+  extratoFiltrado: Transacao[] = [];
+
   constructor(private fb: FormBuilder) {
     this.perfilForm = this.fb.group({
       nome: ['João Silva'],
@@ -41,6 +46,8 @@ export class ClienteTela {
       telefone: ['41998765432'],
       salario: [2000]
     });
+
+    this.extratoFiltrado = this.extrato;
   }
 
   depositar() {
@@ -55,6 +62,7 @@ export class ClienteTela {
       });
 
       this.valorDeposito = 0;
+      this.atualizarFiltro();
     }
   }
 
@@ -79,6 +87,7 @@ export class ClienteTela {
     });
 
     this.valorSaque = 0;
+    this.atualizarFiltro();
   }
 
   transferir() {
@@ -108,6 +117,7 @@ export class ClienteTela {
 
     this.valorTransferencia = 0;
     this.contaDestino = '';
+    this.atualizarFiltro();
   }
 
   calcularLimite(salario: number): number {
@@ -134,4 +144,33 @@ export class ClienteTela {
       `Perfil atualizado!\n\nNome: ${nome}\nEmail: ${email}\nTelefone: ${telefone}\nSalário: R$ ${salario.toFixed(2)}\nLimite: R$ ${this.limite.toFixed(2)}\nSaldo: R$ ${this.saldo.toFixed(2)}\nGerente: ${this.gerente}`
     );
   }
+
+  filtrarExtrato() {
+  if (!this.dataInicio && !this.dataFim) {
+    this.extratoFiltrado = this.extrato;
+    return;
+  }
+
+  const inicio = this.dataInicio ? new Date(this.dataInicio) : null;
+  const fim = this.dataFim ? new Date(this.dataFim) : null;
+
+  this.extratoFiltrado = this.extrato.filter(t => {
+    const data = new Date(t.data);
+
+    if (inicio && data < inicio) return false;
+    if (fim && data > fim) return false;
+
+    return true;
+  });
+  }
+
+  atualizarFiltro() {
+  this.filtrarExtrato();
+  }
+
+  limparFiltro() {
+  this.dataInicio = '';
+  this.dataFim = '';
+  this.extratoFiltrado = this.extrato;
+}
 }

@@ -85,3 +85,19 @@ button:hover {
 .negativo {
   color: red;
 }
+
+.extrato-filtrar {
+  background-color:1976d2;
+}
+
+.extrato-limpar {
+  background-color:red;
+}
+
+.extrato-limpar:hover {
+  background-color: darkred;
+}
+
+.filtro-extrato {
+  padding-right: 65%;
+}
