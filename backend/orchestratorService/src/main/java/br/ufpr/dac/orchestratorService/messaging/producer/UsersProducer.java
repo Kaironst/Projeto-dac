@@ -1,5 +1,6 @@
 package br.ufpr.dac.orchestratorService.messaging.producer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -15,39 +16,33 @@ public class UsersProducer {
   @Autowired
   private RabbitTemplate template;
 
-  public void enviarMenssagem(String operacao, UsersDto.Cliente cliente) {
-
-    var menssagem = UsersDto.Message.builder()
-        .data(List.of(cliente))
-        .operation(operacao)
-        .build();
-
-    template.convertAndSend(
+  public UsersDto.Message enviarMenssagem(String operacao, List<UsersDto.Cliente> clientes) {
+    return (UsersDto.Message) template.convertSendAndReceive(
         RabbitMQConfig.APP_EXCHANGE,
         RabbitMQConfig.USERS_KEY,
-        menssagem);
+        new UsersDto.Message(operacao, clientes));
   }
 
-  public void createCliente(UsersDto.Cliente cliente) {
-    enviarMenssagem("CREATE", cliente);
+  public UsersDto.Message createCliente(UsersDto.Cliente cliente) {
+    return enviarMenssagem("CREATE", List.of(cliente));
   }
 
-  public void readCliente(long id) {
+  public UsersDto.Message readCliente(long id) {
     var clienteId = UsersDto.Cliente.builder().id(id).build();
-    enviarMenssagem("READ", clienteId);
+    return enviarMenssagem("READ", List.of(clienteId));
   }
 
-  public void readAllClientes() {
-    enviarMenssagem("READ_ALL", null);
+  public UsersDto.Message readAllClientes() {
+    return enviarMenssagem("READ_ALL", null);
   }
 
-  public void updateCliente(UsersDto.Cliente cliente) {
-    enviarMenssagem("UPDATE", cliente);
+  public UsersDto.Message updateCliente(UsersDto.Cliente cliente) {
+    return enviarMenssagem("UPDATE", List.of(cliente));
   }
 
-  public void deleteCliente(long id) {
+  public UsersDto.Message deleteCliente(Long id) {
     var clienteId = UsersDto.Cliente.builder().id(id).build();
-    enviarMenssagem("DELETE", clienteId);
+    return enviarMenssagem("DELETE", List.of(clienteId));
   }
 
 };

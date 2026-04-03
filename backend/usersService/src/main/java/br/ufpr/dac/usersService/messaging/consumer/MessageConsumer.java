@@ -13,7 +13,6 @@ import br.ufpr.dac.usersService.config.RabbitMQConfig;
 import br.ufpr.dac.usersService.entity.Cliente;
 import br.ufpr.dac.usersService.entity.Endereco;
 import br.ufpr.dac.usersService.messaging.dto.UsersDto;
-import br.ufpr.dac.usersService.messaging.producer.MessageProducer;
 import br.ufpr.dac.usersService.repository.ClienteRepository;
 import lombok.AllArgsConstructor;
 
@@ -21,23 +20,28 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class MessageConsumer {
 
-  private final MessageProducer producer;
   private final ClienteRepository repo;
 
   @RabbitListener(queues = RabbitMQConfig.USERS_QUEUE)
-  public void recieve(UsersDto.Message message) {
+  public UsersDto.Message recieve(UsersDto.Message message) {
     switch (message.getOperation()) {
       case "CREATE" -> {
-        handleCreate(message.getData());
+        return handleCreate(message.getData());
       }
       case "READ" -> {
-        handleRead(message.getData());
+        return handleRead(message.getData());
+      }
+      case "READ_ALL" -> {
+        return handleRead(message.getData());
       }
       case "UPDATE" -> {
-        handleUpdate(message.getData());
+        return handleUpdate(message.getData());
       }
       case "DELETE" -> {
-        handleDelete(message.getData());
+        return handleDelete(message.getData());
+      }
+      default -> {
+        throw new UnsupportedOperationException();
       }
     }
   }
@@ -108,29 +112,31 @@ public class MessageConsumer {
   }
 
   @Transactional
-  private void handleCreate(List<UsersDto.Cliente> clientes) {
-    repo.saveAll(dtoToClientes(clientes));
+  private UsersDto.Message handleCreate(List<UsersDto.Cliente> clientes) {
+    List<Cliente> qResult = repo.saveAll(dtoToClientes(clientes));
+    return new UsersDto.Message("RESULT", clientesToDto(qResult));
   }
 
   @Transactional(readOnly = true)
-  private void handleRead(List<UsersDto.Cliente> clientes) {
+  private UsersDto.Message handleRead(List<UsersDto.Cliente> clientes) {
     var idList = new ArrayList<Long>();
     clientes.forEach(c -> idList.add(c.getId()));
 
     List<Cliente> clientesEncontrados = repo.findAllById(idList);
-    producer.messageOrchestrator("RESULT", clientesToDto(clientesEncontrados));
+    return new UsersDto.Message("RESULT", clientesToDto(clientesEncontrados));
   }
 
   @Transactional(readOnly = true)
-  private void handleReadAll() {
+  private UsersDto.Message handleReadAll() {
     var clientesEncontrados = repo.findAll();
 
-    producer.messageOrchestrator("RESULT", clientesToDto(clientesEncontrados));
+    return new UsersDto.Message("RESULT", clientesToDto(clientesEncontrados));
 
   }
 
   @Transactional
-  private void handleUpdate(List<UsersDto.Cliente> clientes) {
+  private UsersDto.Message handleUpdate(List<UsersDto.Cliente> clientes) {
+    List<Cliente> clientesAtualizados = new ArrayList<>();
     clientes.forEach(cliente -> {
 
       var clienteAtual = repo.findById(cliente.getId()).orElseThrow();
@@ -189,14 +195,18 @@ public class MessageConsumer {
       clienteAtual.getEnderecos().clear();
       clienteAtual.getEnderecos().addAll(enderecosAtualizados);
 
+      clientesAtualizados.add(clienteAtual);
+
     });
+    return new UsersDto.Message("RESULT", clientesToDto(clientesAtualizados));
   }
 
   @Transactional
-  private void handleDelete(List<UsersDto.Cliente> clientes) {
+  private UsersDto.Message handleDelete(List<UsersDto.Cliente> clientes) {
     clientes.forEach(cliente -> {
       repo.deleteById(cliente.getId());
     });
+    return new UsersDto.Message("RESULT", null);
   }
 
 }
