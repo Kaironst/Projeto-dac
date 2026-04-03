@@ -76,10 +76,21 @@
   <div class="extrato">
     <h2>Extrato</h2>
 
+    <div class="filtro-extrato">
+      <label>Data início:</label>
+      <input type="date" [(ngModel)]="dataInicio" />
+
+      <label>Data fim:</label>
+      <input type="date" [(ngModel)]="dataFim" />
+
+      <button class="extrato-filtrar" (click)="filtrarExtrato()">Filtrar</button>
+      <button class="extrato-limpar" (click)="limparFiltro()">Limpar</button>
+    </div>
+
     @if (extrato.length === 0) {
       <div>Nenhuma transação ainda.</div>
     } @else {
-      @for (t of extrato; track t) {
+      @for (t of extratoFiltrado; track t) {
         <div class="transacao">
           <div>
             <strong>{{ t.tipo }}</strong> - {{ t.descricao }}

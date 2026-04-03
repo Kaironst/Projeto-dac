@@ -19,15 +19,14 @@ public class RabbitMQConfig {
 
   // exchange do orquestrador
   public static final String APP_EXCHANGE = "app.exchange";
-
   // queue para receber menssagens
   public static final String ORCHESTRATOR_QUEUE = "orchestrator.queue";
-
   // chave para receber menssagens
-  public static final String ORCHESTRATOR_KEY = "orchestrator.queue";
-
+  public static final String ORCHESTRATOR_KEY = "orchestrator.key";
   // chave para enviar menssagens para usersService
   public static final String USERS_KEY = "users.key";
+  // chave para enviar menssagens para apiGatewayService
+  public static final String API_GATEWAY_KEY = "apiGateway.key";
 
   @Bean
   public Queue queue() {
@@ -65,8 +64,6 @@ public class RabbitMQConfig {
   }
 
   // sobrescreve o rabbit listener padrão para usar serialização json
-  // TODO: Remover essa função do comportamento padrão para conseguir expandir
-  // para os outros bancos necessários
   @Bean
   public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
       ConnectionFactory connectionFactory,
