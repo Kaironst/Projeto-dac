@@ -9,10 +9,9 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.amqp.support.converter.JacksonJavaTypeMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import lombok.var;
 
 @Configuration
 public class RabbitMQConfig {
@@ -48,7 +47,10 @@ public class RabbitMQConfig {
 
   @Bean
   public JacksonJsonMessageConverter jsonMessageConverter() {
-    return new JacksonJsonMessageConverter();
+    var converter = new JacksonJsonMessageConverter();
+    converter.setAlwaysConvertToInferredType(true);
+    converter.setTypePrecedence(JacksonJavaTypeMapper.TypePrecedence.INFERRED);
+    return converter;
   }
 
   // sobrescreve o rabbit template para utilizar a serialização em json
