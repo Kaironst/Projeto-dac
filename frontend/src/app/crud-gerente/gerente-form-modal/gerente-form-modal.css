@@ -1,0 +1,73 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1200;
+}
+
+.modal-card {
+  display: flex;
+  width: 100%;
+  max-width: 620px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border-radius: 16px;
+  padding: 28px 24px;
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-header {
+  padding: 0 0 12px;
+}
+
+.modal-title {
+  color: #202124;
+  margin: 0;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.gerente-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  margin-top: 16px;
+}
+
+.card-actions button {
+  width: auto;
+  min-width: 160px;
+}

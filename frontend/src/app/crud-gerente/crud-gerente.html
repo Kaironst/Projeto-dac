@@ -1,0 +1,55 @@
+<section class="crud-gerente-page">
+	<mat-card class="crud-card" appearance="outlined">
+		<mat-card-header class="card-header">
+			<mat-card-title class="crud-title">CRUD Gerentes - RF17 - 20</mat-card-title>
+		</mat-card-header>
+
+		<mat-card-content class="card-content">
+			<div class="card-topbar">
+				<p class="card-description">A tela lista os gerentes cadastrados em ordem crescente por nome.</p>
+				<button
+					class="add-button"
+					type="button"
+					aria-label="Adicionar gerente"
+					title="Adicionar gerente"
+					(click)="abrirCadastro()"
+				>
+					+
+				</button>
+			</div>
+
+			@if (mensagemStatus) {
+				<p class="status-message">{{ mensagemStatus }}</p>
+			}
+
+			@if (gerentesOrdenados.length > 0) {
+				<div class="table-wrapper">
+					<table class="gerentes-table">
+						<thead>
+							<tr>
+								<th>Nome</th>
+								<th>CPF</th>
+								<th>E-mail</th>
+								<th>Telefone</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (gerente of gerentesOrdenados; track gerente.cpf) {
+								<tr>
+									<td>{{ gerente.nome }}</td>
+									<td>{{ gerente.cpf }}</td>
+									<td>{{ gerente.email }}</td>
+									<td>{{ gerente.telefone }}</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			} @else {
+				<p class="empty-state">Nenhum gerente cadastrado.</p>
+			}
+		</mat-card-content>
+	</mat-card>
+
+	<app-gerente-form-modal [aberto]="modalAberto" (fechar)="fecharCadastro($event)"></app-gerente-form-modal>
+</section>
