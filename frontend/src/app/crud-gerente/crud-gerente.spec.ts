@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { InserirGerente } from "./inserir-gerente";
+import { CrudGerente } from "./crud-gerente";
 
-describe("InserirGerente", () => {
-  let component: InserirGerente;
-  let fixture: ComponentFixture<InserirGerente>;
+describe("CrudGerente", () => {
+  let component: CrudGerente;
+  let fixture: ComponentFixture<CrudGerente>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InserirGerente],
+      imports: [CrudGerente],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(InserirGerente);
+    fixture = TestBed.createComponent(CrudGerente);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
