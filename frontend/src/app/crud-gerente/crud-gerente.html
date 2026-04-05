@@ -31,6 +31,7 @@
 								<th>CPF</th>
 								<th>E-mail</th>
 								<th>Telefone</th>
+								<th>Ações</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -40,6 +41,17 @@
 									<td>{{ gerente.cpf }}</td>
 									<td>{{ gerente.email }}</td>
 									<td>{{ gerente.telefone }}</td>
+									<td class="actions-cell">
+										<button
+											class="delete-button"
+											type="button"
+											aria-label="Remover gerente"
+											title="Remover gerente"
+											(click)="abrirConfirmacaoRemocao(gerente)"
+										>
+											<span class="material-icons">delete</span>
+										</button>
+									</td>
 								</tr>
 							}
 						</tbody>
@@ -52,4 +64,10 @@
 	</mat-card>
 
 	<app-gerente-form-modal [aberto]="modalAberto" (fechar)="fecharCadastro($event)"></app-gerente-form-modal>
+	<app-gerente-remover-modal
+		[aberto]="confirmacaoRemocaoAberta"
+		[gerenteNome]="gerenteSelecionadoParaRemocao?.nome ?? ''"
+		(confirmar)="removerGerenteSelecionado()"
+		(cancelar)="cancelarRemocao()"
+	></app-gerente-remover-modal>
 </section>
