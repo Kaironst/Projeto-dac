@@ -30,3 +30,18 @@
 
   </mat-card>
 </form>
+
+@if (mostrarMensagemSucesso) {
+  <div class="success-backdrop" (click)="fecharMensagemSucesso()">
+    <mat-card class="success-card" appearance="outlined" (click)="$event.stopPropagation()">
+      <mat-card-content class="success-content">
+        <h2>Login realizado com sucesso</h2>
+        <p>Seu acesso foi enviado. Você será direcionado para a tela inicial.</p>
+      </mat-card-content>
+
+      <mat-card-actions class="success-actions">
+        <button type="button" mat-flat-button color="primary" (click)="fecharMensagemSucesso()">OK</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+}

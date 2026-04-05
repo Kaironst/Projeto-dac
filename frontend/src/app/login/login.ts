@@ -25,6 +25,7 @@ import { MatCardModule } from '@angular/material/card';
 export class Login {
   private router = inject(Router);
   public formGroup: FormGroup;
+  public mostrarMensagemSucesso = false;
 
   constructor() {
     this.formGroup = new FormGroup({
@@ -34,8 +35,18 @@ export class Login {
   }
 
   login() {
-    // a ser implementado
+    if (this.formGroup.invalid) {
+      this.formGroup.markAllAsTouched();
+      return;
     }
+
+    this.mostrarMensagemSucesso = true;
+  }
+
+  fecharMensagemSucesso() {
+    this.mostrarMensagemSucesso = false;
+    this.router.navigate(['/tela-principal']);
+  }
 
   voltar() {
     this.router.navigate(['/tela-principal']);

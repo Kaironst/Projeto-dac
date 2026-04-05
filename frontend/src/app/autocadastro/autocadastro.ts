@@ -26,6 +26,7 @@ import { NgxMaskDirective } from 'ngx-mask';
 export class Autocadastro {
   private router = inject(Router);
   public formGroup: FormGroup;
+  public mostrarMensagemSucesso = false;
 
   constructor() {
     this.formGroup = new FormGroup({
@@ -44,7 +45,17 @@ export class Autocadastro {
   }
 
   cadastrar() {
-    // a ser implementado
+    if (this.formGroup.invalid) {
+      this.formGroup.markAllAsTouched();
+      return;
+    }
+
+    this.mostrarMensagemSucesso = true;
+  }
+
+  fecharMensagemSucesso() {
+    this.mostrarMensagemSucesso = false;
+    this.router.navigate(['/tela-principal']);
   }
 
   voltar() {

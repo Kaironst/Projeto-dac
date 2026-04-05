@@ -91,3 +91,53 @@ mat-form-field {
   width: 100%;
   padding: 8px 0;
 }
+
+.success-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1200;
+}
+
+.success-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  padding: 28px 24px;
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.success-content {
+  padding: 0;
+}
+
+.success-content h2 {
+  margin: 0;
+  color: #202124;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.success-content p {
+  margin: 12px 0 0;
+  color: #5f6368;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.success-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0;
+  margin-top: 16px;
+}
+
+.success-actions button {
+  min-width: 120px;
+}
