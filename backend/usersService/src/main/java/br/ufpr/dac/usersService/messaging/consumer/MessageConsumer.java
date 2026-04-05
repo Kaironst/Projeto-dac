@@ -24,25 +24,31 @@ public class MessageConsumer {
 
   @RabbitListener(queues = RabbitMQConfig.USERS_QUEUE)
   public UsersDto.Message recieve(UsersDto.Message message) {
-    switch (message.getOperation()) {
-      case "CREATE" -> {
-        return handleCreate(message.getData());
+    try {
+      switch (message.getOperation()) {
+        case "CREATE" -> {
+          return handleCreate(message.getData());
+        }
+        case "READ" -> {
+          return handleRead(message.getData());
+        }
+        case "READ_ALL" -> {
+          return handleReadAll();
+        }
+        case "UPDATE" -> {
+          return handleUpdate(message.getData());
+        }
+        case "DELETE" -> {
+          return handleDelete(message.getData());
+        }
+        default -> {
+          throw new UnsupportedOperationException();
+        }
       }
-      case "READ" -> {
-        return handleRead(message.getData());
-      }
-      case "READ_ALL" -> {
-        return handleRead(message.getData());
-      }
-      case "UPDATE" -> {
-        return handleUpdate(message.getData());
-      }
-      case "DELETE" -> {
-        return handleDelete(message.getData());
-      }
-      default -> {
-        throw new UnsupportedOperationException();
-      }
+    } catch (Exception e) {
+      System.out.println("error on message consumer listener");
+      e.printStackTrace();
+      return new UsersDto.Message("ERROR", null);
     }
   }
 
@@ -59,17 +65,18 @@ public class MessageConsumer {
           .build();
 
       var enderecosCliente = new ArrayList<UsersDto.Endereco>();
-      cliente.getEnderecos().forEach(endereco -> {
-        var novoEndereco = UsersDto.Endereco.builder()
-            .logradouro(endereco.getLogradouro())
-            .numero(endereco.getNumero())
-            .cidade(endereco.getCidade())
-            .cep(endereco.getCep())
-            .complemento(endereco.getComplemento())
-            .estado(endereco.getEstado())
-            .build();
-        enderecosCliente.add(novoEndereco);
-      });
+      if (cliente.getEnderecos() != null)
+        cliente.getEnderecos().forEach(endereco -> {
+          var novoEndereco = UsersDto.Endereco.builder()
+              .logradouro(endereco.getLogradouro())
+              .numero(endereco.getNumero())
+              .cidade(endereco.getCidade())
+              .cep(endereco.getCep())
+              .complemento(endereco.getComplemento())
+              .estado(endereco.getEstado())
+              .build();
+          enderecosCliente.add(novoEndereco);
+        });
       novoClienteDto.setEnderecos(enderecosCliente);
       clientesDto.add(novoClienteDto);
     });
@@ -91,18 +98,19 @@ public class MessageConsumer {
           .build();
 
       var enderecosCliente = new ArrayList<Endereco>();
-      clienteDto.getEnderecos().forEach(endereco -> {
-        var novoEndereco = Endereco.builder()
-            .logradouro(endereco.getLogradouro())
-            .numero(endereco.getNumero())
-            .cidade(endereco.getCidade())
-            .cep(endereco.getCep())
-            .complemento(endereco.getComplemento())
-            .estado(endereco.getEstado())
-            .cliente(novoCliente)
-            .build();
-        enderecosCliente.add(novoEndereco);
-      });
+      if (clienteDto.getEnderecos() != null)
+        clienteDto.getEnderecos().forEach(endereco -> {
+          var novoEndereco = Endereco.builder()
+              .logradouro(endereco.getLogradouro())
+              .numero(endereco.getNumero())
+              .cidade(endereco.getCidade())
+              .cep(endereco.getCep())
+              .complemento(endereco.getComplemento())
+              .estado(endereco.getEstado())
+              .cliente(novoCliente)
+              .build();
+          enderecosCliente.add(novoEndereco);
+        });
       novoCliente.setEnderecos(enderecosCliente);
       clientes.add(novoCliente);
     });
@@ -155,36 +163,37 @@ public class MessageConsumer {
 
       List<Endereco> enderecosAtualizados = new ArrayList<>();
 
-      cliente.getEnderecos().forEach(endereco -> {
-        // atualiza endereco existente
-        if (endereco.getId() != 0 && enderecosExistentes.containsKey(endereco.getId())) {
-          var enderecoAtual = enderecosExistentes.get(endereco.getId());
+      if (cliente.getEnderecos() != null)
+        cliente.getEnderecos().forEach(endereco -> {
+          // atualiza endereco existente
+          if (endereco.getId() != 0 && enderecosExistentes.containsKey(endereco.getId())) {
+            var enderecoAtual = enderecosExistentes.get(endereco.getId());
 
-          enderecoAtual.setLogradouro(endereco.getLogradouro());
-          enderecoAtual.setNumero(endereco.getNumero());
-          enderecoAtual.setComplemento(endereco.getComplemento());
-          enderecoAtual.setCep(endereco.getCep());
-          enderecoAtual.setCidade(endereco.getCidade());
-          enderecoAtual.setEstado(endereco.getEstado());
+            enderecoAtual.setLogradouro(endereco.getLogradouro());
+            enderecoAtual.setNumero(endereco.getNumero());
+            enderecoAtual.setComplemento(endereco.getComplemento());
+            enderecoAtual.setCep(endereco.getCep());
+            enderecoAtual.setCidade(endereco.getCidade());
+            enderecoAtual.setEstado(endereco.getEstado());
 
-          enderecosAtualizados.add(enderecoAtual);
-          enderecosExistentes.remove(endereco.getId());
-        }
-        // cria novo endereco
-        else {
-          var enderecoNovo = new Endereco();
+            enderecosAtualizados.add(enderecoAtual);
+            enderecosExistentes.remove(endereco.getId());
+          }
+          // cria novo endereco
+          else {
+            var enderecoNovo = new Endereco();
 
-          enderecoNovo.setLogradouro(endereco.getLogradouro());
-          enderecoNovo.setNumero(endereco.getNumero());
-          enderecoNovo.setComplemento(endereco.getComplemento());
-          enderecoNovo.setCep(endereco.getCep());
-          enderecoNovo.setCidade(endereco.getCidade());
-          enderecoNovo.setEstado(endereco.getEstado());
-          enderecoNovo.setCliente(clienteAtual);
+            enderecoNovo.setLogradouro(endereco.getLogradouro());
+            enderecoNovo.setNumero(endereco.getNumero());
+            enderecoNovo.setComplemento(endereco.getComplemento());
+            enderecoNovo.setCep(endereco.getCep());
+            enderecoNovo.setCidade(endereco.getCidade());
+            enderecoNovo.setEstado(endereco.getEstado());
+            enderecoNovo.setCliente(clienteAtual);
 
-          enderecosAtualizados.add(enderecoNovo);
-        }
-      });
+            enderecosAtualizados.add(enderecoNovo);
+          }
+        });
 
       // remove enderecos desligados manualmente
       enderecosExistentes.values().forEach(enderecoRemovido -> {

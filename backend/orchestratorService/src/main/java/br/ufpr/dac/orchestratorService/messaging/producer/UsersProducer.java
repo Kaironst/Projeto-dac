@@ -1,10 +1,10 @@
 package br.ufpr.dac.orchestratorService.messaging.producer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import br.ufpr.dac.orchestratorService.config.RabbitMQConfig;
@@ -17,10 +17,17 @@ public class UsersProducer {
   private RabbitTemplate template;
 
   public UsersDto.Message enviarMenssagem(String operacao, List<UsersDto.Cliente> clientes) {
-    return (UsersDto.Message) template.convertSendAndReceive(
+    var response = (UsersDto.Message) template.convertSendAndReceiveAsType(
         RabbitMQConfig.APP_EXCHANGE,
         RabbitMQConfig.USERS_KEY,
-        new UsersDto.Message(operacao, clientes));
+        new UsersDto.Message(operacao, clientes),
+        new ParameterizedTypeReference<UsersDto.Message>() {
+        });
+
+    if (response == null)
+      System.out.println("error on enviarMenssagem from usersService");
+    return response == null ? new UsersDto.Message("ERROR", null) : response;
+
   }
 
   public UsersDto.Message createCliente(UsersDto.Cliente cliente) {

@@ -46,7 +46,9 @@ public class RabbitMQConfig {
 
   @Bean
   public JacksonJsonMessageConverter jsonMessageConverter() {
-    return new JacksonJsonMessageConverter();
+    var converter = new JacksonJsonMessageConverter();
+    converter.setAlwaysConvertToInferredType(true);
+    return converter;
   }
 
   // sobrescreve o rabbit template para utilizar a serialização em json
