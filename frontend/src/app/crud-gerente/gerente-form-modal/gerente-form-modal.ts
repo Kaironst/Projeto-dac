@@ -14,6 +14,8 @@ interface GerenteCadastro {
   senha: string;
 }
 
+type ModoFormulario = 'novo' | 'editar';
+
 @Component({
   selector: 'app-gerente-form-modal',
   standalone: true,
@@ -23,6 +25,8 @@ interface GerenteCadastro {
 })
 export class GerenteFormModal implements OnChanges {
   @Input() aberto = false;
+  @Input() gerente: GerenteCadastro | null = null;
+  @Input() modo: ModoFormulario = 'novo';
   @Output() fechar = new EventEmitter<GerenteCadastro | undefined>();
 
   protected readonly formGroup = new FormGroup({
@@ -34,7 +38,18 @@ export class GerenteFormModal implements OnChanges {
   });
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['aberto']?.currentValue) {
+    if (changes['aberto']?.currentValue || changes['gerente']) {
+      if (this.gerente) {
+        this.formGroup.reset({
+          nome: this.gerente.nome,
+          cpf: this.gerente.cpf,
+          email: this.gerente.email,
+          telefone: this.gerente.telefone,
+          senha: this.gerente.senha,
+        });
+        return;
+      }
+
       this.formGroup.reset({
         nome: '',
         cpf: '',
@@ -43,6 +58,14 @@ export class GerenteFormModal implements OnChanges {
         senha: '',
       });
     }
+  }
+
+  protected get titulo(): string {
+    return this.modo === 'editar' ? 'Editar Gerente' : 'Adicionar Gerente';
+  }
+
+  protected get textoSalvar(): string {
+    return this.modo === 'editar' ? 'Salvar alterações' : 'Salvar gerente';
   }
 
   protected salvar(): void {

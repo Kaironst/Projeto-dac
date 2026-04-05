@@ -26,6 +26,9 @@ const CHAVE_GERENTES = 'gerentes';
 export class CrudGerente implements OnInit {
   protected gerentes: GerenteCadastro[] = [];
   protected modalAberto = false;
+  protected modalModo: 'novo' | 'editar' = 'novo';
+  protected gerenteSelecionadoParaEdicao: GerenteCadastro | null = null;
+  protected cpfOriginalParaEdicao: string | null = null;
   protected confirmacaoRemocaoAberta = false;
   protected gerenteSelecionadoParaRemocao: GerenteCadastro | null = null;
   protected mensagemStatus = '';
@@ -42,6 +45,17 @@ export class CrudGerente implements OnInit {
 
   protected abrirCadastro(): void {
     this.mensagemStatus = '';
+    this.modalModo = 'novo';
+    this.gerenteSelecionadoParaEdicao = null;
+    this.cpfOriginalParaEdicao = null;
+    this.modalAberto = true;
+  }
+
+  protected abrirEdicao(gerente: GerenteCadastro): void {
+    this.mensagemStatus = '';
+    this.modalModo = 'editar';
+    this.gerenteSelecionadoParaEdicao = { ...gerente };
+    this.cpfOriginalParaEdicao = gerente.cpf;
     this.modalAberto = true;
   }
 
@@ -75,13 +89,27 @@ export class CrudGerente implements OnInit {
     this.modalAberto = false;
 
     if (!gerente) {
+      this.modalModo = 'novo';
+      this.gerenteSelecionadoParaEdicao = null;
+      this.cpfOriginalParaEdicao = null;
       return;
     }
 
-    this.gerentes = [...this.gerentes, gerente];
+    if (this.modalModo === 'editar' && this.cpfOriginalParaEdicao) {
+      this.gerentes = this.gerentes.map((item) =>
+        item.cpf === this.cpfOriginalParaEdicao ? gerente : item
+      );
+      this.mensagemStatus = `Gerente ${gerente.nome} atualizado com sucesso.`;
+    } else {
+      this.gerentes = [...this.gerentes, gerente];
+      this.mensagemStatus = `Gerente ${gerente.nome} cadastrado com sucesso.`;
+    }
+
     this.salvarGerentes();
     this.carregarGerentes();
-    this.mensagemStatus = `Gerente ${gerente.nome} cadastrado com sucesso.`;
+    this.modalModo = 'novo';
+    this.gerenteSelecionadoParaEdicao = null;
+    this.cpfOriginalParaEdicao = null;
   }
 
   private carregarGerentes(): void {

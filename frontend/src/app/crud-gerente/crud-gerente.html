@@ -43,6 +43,15 @@
 									<td>{{ gerente.telefone }}</td>
 									<td class="actions-cell">
 										<button
+											class="edit-button"
+											type="button"
+											aria-label="Editar gerente"
+											title="Editar gerente"
+											(click)="abrirEdicao(gerente)"
+										>
+											<span class="material-icons">edit</span>
+										</button>
+										<button
 											class="delete-button"
 											type="button"
 											aria-label="Remover gerente"
@@ -63,7 +72,12 @@
 		</mat-card-content>
 	</mat-card>
 
-	<app-gerente-form-modal [aberto]="modalAberto" (fechar)="fecharCadastro($event)"></app-gerente-form-modal>
+	<app-gerente-form-modal
+		[aberto]="modalAberto"
+		[gerente]="gerenteSelecionadoParaEdicao"
+		[modo]="modalModo"
+		(fechar)="fecharCadastro($event)"
+	></app-gerente-form-modal>
 	<app-gerente-remover-modal
 		[aberto]="confirmacaoRemocaoAberta"
 		[gerenteNome]="gerenteSelecionadoParaRemocao?.nome ?? ''"
