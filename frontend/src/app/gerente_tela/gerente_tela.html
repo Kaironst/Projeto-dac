@@ -1,0 +1,55 @@
+<div class="container">
+
+  <header>
+    <h1>Tela do Gerente</h1>
+  </header>
+
+  <div class="card">
+    <h2>Pedidos de Autocadastro</h2>
+
+    <div class="grid">
+
+      <div class="grid-header">
+        <div>CPF</div>
+        <div>Nome</div>
+        <div>Salário</div>
+        <div>Ações</div>
+      </div>
+
+      @for (p of pedidos; track p.cpf) {
+        <div class="grid-row">
+          <div>{{ p.cpf }}</div>
+          <div>{{ p.nome }}</div>
+          <div class="positivo">
+            {{ p.salario | currency:'BRL' }}
+          </div>
+
+          <div class="acoes-botoes">
+
+            <button (click)="aprovar(p)">
+              Aprovar
+            </button>
+
+            <div class="rejeicao">
+              <input
+                type="text"
+                placeholder="Motivo"
+                [(ngModel)]="motivoRejeicao[p.cpf]"
+              />
+
+              <button class="btn-recusar" (click)="recusar(p)">
+                Recusar
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      } @empty {
+        <div>Nenhum pedido pendente.</div>
+      }
+
+    </div>
+  </div>
+
+</div>

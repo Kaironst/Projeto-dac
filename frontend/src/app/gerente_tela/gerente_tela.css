@@ -1,0 +1,95 @@
+.container {
+  max-width: 70%;
+  margin: auto;
+  padding: 40px;
+  padding-top: 0%;
+  line-height: 1.6;
+  background-color: aliceblue;
+  border-radius: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+  background-color: green;
+  border-radius: 0 0 50px 50px;
+  color: aliceblue;
+  padding-bottom: 10px;
+}
+
+.card {
+  padding: 15px;
+  border-radius: 10px;
+  background: #cfd9cc;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.grid {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.grid-header,
+.grid-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr 2fr;
+  padding: 10px;
+  border-radius: 5px;
+  align-items: center;
+}
+
+.grid-header {
+  font-weight: bold;
+  background: #b8cbb5;
+}
+
+.grid-row {
+  border-bottom: 1px solid #ccc;
+}
+
+.grid-row:hover {
+  background: #e6eee3;
+}
+
+button {
+  padding: 8px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0d47a1;
+}
+
+.btn-recusar {
+  background: red;
+}
+
+.btn-recusar:hover {
+  background: darkred;
+}
+
+.acoes-botoes {
+  display: flex;
+  flex-direction:column;
+  gap: 5px;
+}
+
+.rejeicao {
+  display: flex;
+  gap: 5px;
+}
+
+.rejeicao input {
+  padding: 5px;
+}
+
+/* Cor salário */
+.positivo {
+  color: blue;
+}
