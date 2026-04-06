@@ -6,7 +6,37 @@
     </mat-card-header>
 
     <mat-card-content class="card-content">
-      <form [formGroup]="formGroup" (ngSubmit)="consultar()" class="consulta-form">
+      <div class="funcionalidades-container">
+        <button
+          type="button"
+          mat-flat-button
+          [color]="funcionalidadeAtiva === 'cpf' ? 'primary' : undefined"
+          class="funcionalidade-button"
+          (click)="selecionarFuncionalidade('cpf')"
+        >
+          Pesquisar por CPF
+        </button>
+        <button
+          type="button"
+          mat-flat-button
+          [color]="funcionalidadeAtiva === 'top3' ? 'primary' : undefined"
+          class="funcionalidade-button"
+          (click)="selecionarFuncionalidade('top3')"
+        >
+          3 Melhores Clientes
+        </button>
+        <button
+          type="button"
+          mat-flat-button
+          [color]="funcionalidadeAtiva === 'todos' ? 'primary' : undefined"
+          class="funcionalidade-button"
+          (click)="selecionarFuncionalidade('todos')"
+        >
+          Todos os Clientes
+        </button>
+      </div>
+
+      <form *ngIf="funcionalidadeAtiva === 'cpf'" [formGroup]="formGroup" (ngSubmit)="consultar()" class="consulta-form">
         <div class="form-row">
           <div class="input-section">
             <mat-form-field appearance="outline" class="cpf-field">
@@ -28,7 +58,7 @@
         </div>
       </form>
 
-      <div *ngIf="pesquisado && clienteConsultado" class="resultados-container">
+      <div *ngIf="funcionalidadeAtiva === 'cpf' && pesquisado && clienteConsultado" class="resultados-container">
         
         <ng-container>
           <h3 class="section-subtitle">Dados Pessoais</h3>
@@ -49,6 +79,107 @@
           <p><strong>Limite:</strong> {{ clienteConsultado.conta.limite | currency:'BRL':'symbol' }}</p>
         </ng-container>
 
+      </div>
+
+      <div *ngIf="funcionalidadeAtiva === 'top3'" class="resultados-container melhores-container">
+        <h3 class="section-subtitle">3 Clientes com Maiores Saldos</h3>
+
+        <div class="melhores-lista" *ngFor="let cliente of melhoresClientes; index as i">
+          <p><strong>{{ i + 1 }}.</strong> {{ cliente.nome }}</p>
+          <p><strong>CPF:</strong> {{ cliente.cpf | mask: '000.000.000-00' }}</p>
+          <p><strong>Cidade:</strong> {{ cliente.endereco.cidade }}</p>
+          <p><strong>Estado:</strong> {{ cliente.endereco.estado }}</p>
+          <p><strong>Saldo:</strong> {{ cliente.conta.saldo | currency:'BRL':'symbol' }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="funcionalidadeAtiva === 'todos'" class="resultados-container todos-container">
+        <h3 class="section-subtitle">Todos os Clientes</h3>
+
+        <div *ngIf="!clienteDetalhes">
+          <div class="filtros-todos">
+            <mat-form-field appearance="outline" class="filtro-field">
+              <mat-label>Pesquisar por CPF</mat-label>
+              <input
+                matInput
+                [(ngModel)]="filtroCpfTodos"
+                name="filtroCpfTodos"
+                placeholder="Digite o CPF completo ou parcial"
+              >
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filtro-field">
+              <mat-label>Pesquisar por Nome</mat-label>
+              <input
+                matInput
+                [(ngModel)]="filtroNomeTodos"
+                name="filtroNomeTodos"
+                placeholder="Digite o nome completo ou parcial"
+              >
+            </mat-form-field>
+          </div>
+
+          <div class="table-wrapper" *ngIf="clientesOrdenadosFiltrados.length; else semClientes">
+            <table class="clientes-table">
+              <thead>
+                <tr>
+                  <th>CPF</th>
+                  <th>Nome</th>
+                  <th>Cidade</th>
+                  <th>Estado</th>
+                  <th>Saldo da conta</th>
+                  <th>Limite da conta</th>
+                  <th>Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cliente of clientesOrdenadosFiltrados">
+                  <td>{{ cliente.cpf | mask: '000.000.000-00' }}</td>
+                  <td>{{ cliente.nome }}</td>
+                  <td>{{ cliente.endereco.cidade }}</td>
+                  <td>{{ cliente.endereco.estado }}</td>
+                  <td>{{ cliente.conta.saldo | currency:'BRL':'symbol' }}</td>
+                  <td>{{ cliente.conta.limite | currency:'BRL':'symbol' }}</td>
+                  <td>
+                    <a href="#" class="detalhes-link" (click)="$event.preventDefault(); abrirDetalhesCliente(cliente)">
+                      Ver dados completos
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ng-template #semClientes>
+            <p class="sem-resultados">Nenhum cliente encontrado com os filtros informados.</p>
+          </ng-template>
+        </div>
+
+        <div *ngIf="clienteDetalhes" class="detalhes-container">
+          <div class="detalhes-header">
+            <h4>Dados Completos do Cliente</h4>
+            <button type="button" mat-stroked-button color="primary" (click)="fecharDetalhesCliente()">
+              Voltar para tabela
+            </button>
+          </div>
+
+          <h3 class="section-subtitle">Dados de Cliente</h3>
+          <p><strong>Nome:</strong> {{ clienteDetalhes.nome }}</p>
+          <p><strong>E-mail:</strong> {{ clienteDetalhes.email }}</p>
+          <p><strong>CPF:</strong> {{ clienteDetalhes.cpf | mask: '000.000.000-00' }}</p>
+          <p><strong>Endereco:</strong> {{ clienteDetalhes.endereco.logradouro }}, {{ clienteDetalhes.endereco.numero }}</p>
+          <p><strong>Estado:</strong> {{ clienteDetalhes.endereco.estado }}</p>
+          <p><strong>Telefone:</strong> {{ clienteDetalhes.telefone | mask: '(00) 00000-0000' }}</p>
+          <p><strong>Salario:</strong> {{ clienteDetalhes.salario | currency:'BRL':'symbol' }}</p>
+
+          <h3 class="section-subtitle">Endereco de Cliente</h3>
+          <p><strong>Logradouro:</strong> {{ clienteDetalhes.endereco.logradouro }}</p>
+          <p><strong>Numero:</strong> {{ clienteDetalhes.endereco.numero }}</p>
+          <p><strong>Complemento:</strong> {{ clienteDetalhes.endereco.complemento || 'N/A' }}</p>
+          <p><strong>CEP:</strong> {{ clienteDetalhes.endereco.cep | mask: '00000-000' }}</p>
+          <p><strong>Cidade:</strong> {{ clienteDetalhes.endereco.cidade }}</p>
+          <p><strong>Estado:</strong> {{ clienteDetalhes.endereco.estado }}</p>
+        </div>
       </div>
     </mat-card-content>
 
