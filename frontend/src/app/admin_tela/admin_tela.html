@@ -1,0 +1,28 @@
+<div class="container">
+    <header>
+    <h1>Tela do Administrador</h1>
+    </header>
+
+  <div class="cards">
+    @for (gerente of resumoGerentes; track gerente.nome) {
+      <div class="card">
+        <h2>{{ gerente.nome }}</h2>
+
+        <div><strong>Clientes:</strong> {{ gerente.totalClientes }}</div>
+
+        <div class="positivo">
+          <strong>Total Positivo:</strong>
+          {{ gerente.totalPositivo.toFixed(2)}}
+        </div>
+
+        <div class="negativo">
+          <strong>Total Negativo:</strong>
+          {{ gerente.totalNegativo.toFixed(2)}}
+        </div>
+      </div>
+    } @empty {
+      <div>Nenhum gerente encontrado.</div>
+    }
+  </div>
+
+</div>

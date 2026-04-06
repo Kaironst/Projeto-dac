@@ -6,6 +6,7 @@ import { Login } from './login/login';
 import { CrudGerente } from './crud-gerente/crud-gerente';
 import { ClienteTela } from './cliente_tela/cliente_tela';
 import { ConsultarCliente } from './consultar-cliente/consultar-cliente';
+import { AdminTela } from './admin_tela/admin_tela';
 
 export const routes: Routes = [
     { path:'tela-principal', component:TelaPrincipal},
@@ -14,5 +15,6 @@ export const routes: Routes = [
     { path: 'login', component: Login },
     { path: 'gerentes', component: CrudGerente },
     { path: 'cliente-tela', component: ClienteTela },
-    { path: 'consultar-cliente', component: ConsultarCliente }
+    { path: 'consultar-cliente', component: ConsultarCliente },
+    {path:'admin-tela', component: AdminTela}
 ];
