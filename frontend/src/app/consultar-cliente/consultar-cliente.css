@@ -8,7 +8,19 @@
 
 .consulta-card {
   width: 100%;
-  max-width: 600px;
+  max-width: 760px;
+}
+
+.funcionalidades-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.funcionalidade-button {
+  flex: 1;
+  min-width: 170px;
 }
 
 .cpf-field {
@@ -91,6 +103,18 @@
   padding: 1rem;
   background-color: #fafafa;
   border-radius: 4px;
+}
+
+.melhores-container {
+  margin-top: 0;
+}
+
+.melhores-lista {
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .resultados-container p {
