@@ -55,6 +55,9 @@ export class ConsultarCliente {
   public clienteConsultado: ClienteMock | null = null;
   public pesquisado: boolean = false;
   public funcionalidadeAtiva: FuncionalidadeConsulta = null as any;
+  public filtroCpfTodos: string = '';
+  public filtroNomeTodos: string = '';
+  public clienteDetalhes: ClienteMock | null = null;
 
   // dados mockados para teste
   private mockDatabase: ClienteMock[] = [
@@ -153,12 +156,35 @@ export class ConsultarCliente {
   selecionarFuncionalidade(funcionalidade: FuncionalidadeConsulta) {
     this.funcionalidadeAtiva = funcionalidade;
     this.limparConsultaCpf();
+    this.fecharDetalhesCliente();
   }
 
   get melhoresClientes(): ClienteMock[] {
     return [...this.mockDatabase]
       .sort((a, b) => b.conta.saldo - a.conta.saldo)
       .slice(0, 3);
+  }
+
+  get clientesOrdenadosFiltrados(): ClienteMock[] {
+    const cpfFiltro = this.normalizarCpf(this.filtroCpfTodos);
+    const nomeFiltro = this.filtroNomeTodos.trim().toLowerCase();
+
+    return [...this.mockDatabase]
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      .filter((cliente) => {
+        const cpfOk = !cpfFiltro || cliente.cpf.includes(cpfFiltro);
+        const nomeOk = !nomeFiltro || cliente.nome.toLowerCase().includes(nomeFiltro);
+
+        return cpfOk && nomeOk;
+      });
+  }
+
+  abrirDetalhesCliente(cliente: ClienteMock) {
+    this.clienteDetalhes = cliente;
+  }
+
+  fecharDetalhesCliente() {
+    this.clienteDetalhes = null;
   }
 
   private limparConsultaCpf() {
