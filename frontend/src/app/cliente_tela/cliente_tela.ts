@@ -21,11 +21,12 @@ export class ClienteTela {
 
   perfilForm: FormGroup;
 
-  cpf: string = '123.456.789-00';
-  gerente: string = 'Carlos Souza';
+  numConta: string = '';
+  cpf: string = '12912861012';
+  gerente: string = '';
 
-  saldo: number = -500;
-  limite: number = 1000;
+  saldo: number = 0;
+  limite: number = 0;
 
   valorDeposito = 0;
   valorSaque = 0;
@@ -33,61 +34,129 @@ export class ClienteTela {
   contaDestino: any = '';
 
   extrato: Transacao[] = [];
+  extratoFiltrado: Transacao[] = [];
 
   dataInicio: string = '';
   dataFim: string = '';
 
-  extratoFiltrado: Transacao[] = [];
-
   constructor(private fb: FormBuilder) {
     this.perfilForm = this.fb.group({
-      nome: ['João Silva'],
-      email: ['joaosilva@gmail.com'],
-      telefone: ['41998765432'],
-      salario: [2000]
+      nome: [''],
+      email: [''],
+      telefone: [''],
+      salario: [0]
     });
+
+    this.carregarDadosCliente();
+  }
+
+  carregarDadosCliente() {
+
+    const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+    const contas = JSON.parse(localStorage.getItem('contas') || '[]');
+    const transacoes = JSON.parse(localStorage.getItem('transacoes') || '[]');
+
+    const cliente = clientes.find((c: any) => c.cpf === this.cpf);
+    if (!cliente) return;
+
+    this.perfilForm.patchValue({
+      nome: cliente.nome,
+      email: cliente.email,
+      telefone: cliente.telefone || '',
+      salario: cliente.salario
+    });
+
+    const conta = contas.find((c: any) => c.clienteCpf === this.cpf);
+
+    if (conta) {
+      this.numConta = conta.numero;
+      this.saldo = conta.saldo;
+      this.limite = conta.limite;
+      this.gerente = conta.gerente;
+    }
+
+    this.extrato = transacoes
+      .filter((t: any) => t.clienteOrigem === this.cpf)
+      .map((t: any) => {
+        let descricao = '';
+
+        if (t.tipo === 'Transferência') {
+          const contaDestino = contas.find((c: any) => c.clienteCpf === t.clienteDestino);
+          const clienteDestino = clientes.find((c: any) => c.cpf === t.clienteDestino);
+
+          descricao = clienteDestino
+            ? `Para ${clienteDestino.nome} (${contaDestino?.numero})`
+            : 'Transferência';
+        } else if (t.tipo === 'Depósito') {
+          descricao = 'Depósito em conta';
+        } else {
+          descricao = 'Saque realizado';
+        }
+
+        return {
+          tipo: t.tipo,
+          valor: t.tipo === 'Saque' ? -Math.abs(t.valor) : t.valor,
+          descricao,
+          data: new Date(t.data)
+        };
+      })
+    .sort((a: Transacao, b: Transacao) => b.data.getTime() - a.data.getTime());
 
     this.extratoFiltrado = this.extrato;
   }
 
   depositar() {
-    if (this.valorDeposito > 0) {
-      this.saldo += this.valorDeposito;
+    if (this.valorDeposito <= 0) return;
 
-      this.extrato.unshift({
-        tipo: 'Depósito',
-        valor: this.valorDeposito,
-        descricao: 'Depósito em conta',
-        data: new Date()
-      });
+    this.saldo += this.valorDeposito;
 
-      this.valorDeposito = 0;
-      this.atualizarFiltro();
-    }
+    const transacoes = JSON.parse(localStorage.getItem('transacoes') || '[]');
+
+    transacoes.push({
+      tipo: 'Depósito',
+      valor: this.valorDeposito,
+      clienteOrigem: this.perfilForm.value.nome,
+      clienteDestino: null,
+      data: new Date()
+    });
+
+    localStorage.setItem('transacoes', JSON.stringify(transacoes));
+
+    this.atualizarConta();
+    this.carregarDadosCliente();
+
+    this.valorDeposito = 0;
   }
 
   sacar() {
     if (this.valorSaque <= 0) {
-      alert('Informe um valor válido para saque!');
+      alert('Informe um valor válido!');
       return;
     }
 
     if (this.valorSaque > this.saldo) {
-      alert('Saldo insuficiente para saque!');
+      alert('Saldo insuficiente!');
       return;
     }
 
     this.saldo -= this.valorSaque;
 
-    this.extrato.unshift({
+    const transacoes = JSON.parse(localStorage.getItem('transacoes') || '[]');
+
+    transacoes.push({
       tipo: 'Saque',
       valor: -this.valorSaque,
-      descricao: 'Saque realizado',
+      clienteOrigem: this.perfilForm.value.nome,
+      clienteDestino: null,
       data: new Date()
     });
 
+    localStorage.setItem('transacoes', JSON.stringify(transacoes));
+
+    this.atualizarConta();
+    this.carregarDadosCliente();
+
     this.valorSaque = 0;
-    this.atualizarFiltro();
   }
 
   transferir() {
@@ -96,28 +165,74 @@ export class ClienteTela {
       return;
     }
 
-    if (!this.contaDestino) {
-      alert('Informe a conta de destino!');
-      return;
-    }
+  if (!this.contaDestino) {
+    alert('Informe a conta de destino!');
+    return;
+  }
+
+  const contas = JSON.parse(localStorage.getItem('contas') || '[]');
+  const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+
+  const contaDestino = contas.find((c: any) => c.numero === this.contaDestino);
+
+  if (!contaDestino) {
+    alert('Conta de destino não encontrada!');
+    return;
+  }
+
+  const clienteDestino = clientes.find((c: any) => c.cpf === contaDestino.clienteCpf);
+
+  if (!clienteDestino) {
+    alert('Cliente de destino não encontrado!');
+    return;
+  }
 
     if (this.valorTransferencia > this.saldo) {
       alert('Saldo insuficiente para transferência!');
       return;
     }
 
-    this.saldo -= this.valorTransferencia;
+  this.saldo -= this.valorTransferencia;
 
-    this.extrato.unshift({
-      tipo: 'Transferência',
-      valor: -this.valorTransferencia,
-      descricao: `Para conta ${this.contaDestino}`,
-      data: new Date()
-    });
+  contaDestino.saldo += this.valorTransferencia;
 
-    this.valorTransferencia = 0;
-    this.contaDestino = '';
-    this.atualizarFiltro();
+  localStorage.setItem('contas', JSON.stringify(contas));
+
+  this.extrato.unshift({
+    tipo: 'Transferência',
+    valor: -this.valorTransferencia,
+    descricao: `Para ${clienteDestino.nome} (${contaDestino.numero})`,
+    data: new Date()
+  });
+
+  const transacoes = JSON.parse(localStorage.getItem('transacoes') || '[]');
+
+  transacoes.push({
+    tipo: 'Transferência',
+    valor: this.valorTransferencia,
+    clienteOrigem: this.cpf,
+    clienteDestino: clienteDestino.cpf,
+    descricao: `De ${this.perfilForm.value.nome} (${this.numConta})`,
+    data: new Date()
+  });
+
+  localStorage.setItem('transacoes', JSON.stringify(transacoes));
+
+  this.valorTransferencia = 0;
+  this.contaDestino = '';
+
+  this.atualizarFiltro();
+}
+
+  atualizarConta() {
+    const contas = JSON.parse(localStorage.getItem('contas') || '[]');
+
+    const conta = contas.find((c: any) => c.clienteCpf === this.cpf);
+    if (conta) {
+      conta.saldo = this.saldo;
+    }
+
+    localStorage.setItem('contas', JSON.stringify(contas));
   }
 
   calcularLimite(salario: number): number {
@@ -132,17 +247,21 @@ export class ClienteTela {
       return;
     }
 
-    let novoLimite = this.calcularLimite(salario);
+    const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
 
-    if (this.saldo < 0 && Math.abs(this.saldo) > novoLimite) {
-      this.limite = Math.abs(this.saldo);
-    } else {
-      this.limite = novoLimite;
+    const cliente = clientes.find((c: any) => c.cpf === this.cpf);
+    if (cliente) {
+      cliente.nome = nome;
+      cliente.email = email;
+      cliente.telefone = telefone;
+      cliente.salario = salario;
     }
 
-    alert(
-      `Perfil atualizado!\n\nNome: ${nome}\nEmail: ${email}\nTelefone: ${telefone}\nSalário: R$ ${salario.toFixed(2)}\nLimite: R$ ${this.limite.toFixed(2)}\nSaldo: R$ ${this.saldo.toFixed(2)}\nGerente: ${this.gerente}`
-    );
+    localStorage.setItem('clientes', JSON.stringify(clientes));
+
+    this.limite = this.calcularLimite(salario);
+
+    alert('Perfil atualizado com sucesso!');
   }
 
   filtrarExtrato() {

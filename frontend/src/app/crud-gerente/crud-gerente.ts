@@ -15,6 +15,7 @@ interface GerenteCadastro {
 }
 
 const CHAVE_GERENTES = 'gerentes';
+const CHAVE_USUARIOS = 'usuarios';
 
 @Component({
   selector: 'app-crud-gerente',
@@ -38,8 +39,8 @@ export class CrudGerente implements OnInit {
   }
 
   protected get gerentesOrdenados(): GerenteCadastro[] {
-    return [...this.gerentes].sort((primeiro, segundo) =>
-      primeiro.nome.localeCompare(segundo.nome, 'pt-BR', { sensitivity: 'base' })
+    return [...this.gerentes].sort((a, b) =>
+      a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
     );
   }
 
@@ -71,42 +72,74 @@ export class CrudGerente implements OnInit {
   }
 
   protected removerGerenteSelecionado(): void {
-    if (!this.gerenteSelecionadoParaRemocao) {
-      return;
-    }
+    if (!this.gerenteSelecionadoParaRemocao) return;
 
-    const nomeRemovido = this.gerenteSelecionadoParaRemocao.nome;
-    const cpfRemovido = this.gerenteSelecionadoParaRemocao.cpf;
+    const cpf = this.gerenteSelecionadoParaRemocao.cpf;
 
-    this.gerentes = this.gerentes.filter((gerente) => gerente.cpf !== cpfRemovido);
+    this.gerentes = this.gerentes.filter(g => g.cpf !== cpf);
+
+    const usuarios = JSON.parse(localStorage.getItem(CHAVE_USUARIOS) || '[]');
+    const novosUsuarios = usuarios.filter((u: any) => u.cpf !== cpf);
+
+    localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(novosUsuarios));
+
     this.salvarGerentes();
-    this.carregarGerentes();
-    this.mensagemStatus = `Gerente ${nomeRemovido} removido com sucesso.`;
+
+    this.mensagemStatus = `Gerente ${this.gerenteSelecionadoParaRemocao.nome} removido com sucesso.`;
     this.cancelarRemocao();
   }
 
   protected fecharCadastro(gerente?: GerenteCadastro): void {
     this.modalAberto = false;
 
-    if (!gerente) {
-      this.modalModo = 'novo';
-      this.gerenteSelecionadoParaEdicao = null;
-      this.cpfOriginalParaEdicao = null;
+    if (!gerente) return;
+
+    const usuarios = JSON.parse(localStorage.getItem(CHAVE_USUARIOS) || '[]');
+
+    const cpfJaExiste = this.gerentes.some(g =>
+      g.cpf === gerente.cpf && g.cpf !== this.cpfOriginalParaEdicao
+    );
+
+    if (cpfJaExiste) {
+      alert('CPF já cadastrado!');
       return;
     }
 
     if (this.modalModo === 'editar' && this.cpfOriginalParaEdicao) {
-      this.gerentes = this.gerentes.map((item) =>
-        item.cpf === this.cpfOriginalParaEdicao ? gerente : item
+
+      this.gerentes = this.gerentes.map(g =>
+        g.cpf === this.cpfOriginalParaEdicao ? gerente : g
       );
+
+      const novosUsuarios = usuarios.map((u: any) =>
+        u.cpf === this.cpfOriginalParaEdicao
+          ? { ...u, nome: gerente.nome, email: gerente.email, senha: gerente.senha }
+          : u
+      );
+
+      localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(novosUsuarios));
+
       this.mensagemStatus = `Gerente ${gerente.nome} atualizado com sucesso.`;
+
     } else {
-      this.gerentes = [...this.gerentes, gerente];
+
+      this.gerentes.push(gerente);
+
+      usuarios.push({
+        cpf: gerente.cpf,
+        nome: gerente.nome,
+        email: gerente.email,
+        senha: gerente.senha,
+        tipo: 'gerente'
+      });
+
+      localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(usuarios));
+
       this.mensagemStatus = `Gerente ${gerente.nome} cadastrado com sucesso.`;
     }
 
     this.salvarGerentes();
-    this.carregarGerentes();
+
     this.modalModo = 'novo';
     this.gerenteSelecionadoParaEdicao = null;
     this.cpfOriginalParaEdicao = null;
@@ -116,12 +149,38 @@ export class CrudGerente implements OnInit {
     const gerentesSalvos = localStorage.getItem(CHAVE_GERENTES);
 
     if (!gerentesSalvos) {
-      this.gerentes = [];
+
+      this.gerentes = [
+        {
+          cpf: '98574307084',
+          nome: 'Geniéve',
+          email: 'ger1@bantads.com.br',
+          telefone: '',
+          senha: 'tads'
+        },
+        {
+          cpf: '64065268052',
+          nome: 'Godophredo',
+          email: 'ger2@bantads.com.br',
+          telefone: '',
+          senha: 'tads'
+        },
+        {
+          cpf: '23862179060',
+          nome: 'Gyândula',
+          email: 'ger3@bantads.com.br',
+          telefone: '',
+          senha: 'tads'
+        }
+      ];
+
+      this.salvarGerentes();
+      this.sincronizarUsuarios();
       return;
     }
 
     try {
-      const gerentes = JSON.parse(gerentesSalvos) as GerenteCadastro[];
+      const gerentes = JSON.parse(gerentesSalvos);
       this.gerentes = Array.isArray(gerentes) ? gerentes : [];
     } catch {
       this.gerentes = [];
@@ -130,5 +189,25 @@ export class CrudGerente implements OnInit {
 
   private salvarGerentes(): void {
     localStorage.setItem(CHAVE_GERENTES, JSON.stringify(this.gerentes));
+  }
+
+  private sincronizarUsuarios() {
+    const usuarios = JSON.parse(localStorage.getItem(CHAVE_USUARIOS) || '[]');
+
+    this.gerentes.forEach(g => {
+      const existe = usuarios.some((u: any) => u.cpf === g.cpf);
+
+      if (!existe) {
+        usuarios.push({
+          cpf: g.cpf,
+          nome: g.nome,
+          email: g.email,
+          senha: g.senha,
+          tipo: 'gerente'
+        });
+      }
+    });
+
+    localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(usuarios));
   }
 }

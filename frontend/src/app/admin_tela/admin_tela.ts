@@ -36,37 +36,31 @@ export class AdminTela {
   }
 
   carregarDados() {
-    this.gerentes = [
-      {
-        nome: 'Gerente A',
-        clientes: [
-          { nome: 'Cliente 1', saldo: 1000 },
-          { nome: 'Cliente 2', saldo: -200 },
-          { nome: 'Cliente 3', saldo: 0 }
-        ]
-      },
-      {
-        nome: 'Gerente B',
-        clientes: [
-          { nome: 'Cliente 4', saldo: 5000 },
-          { nome: 'Cliente 5', saldo: -1000 }
-        ]
-      },
-      {
-        nome: 'Gerente C',
-        clientes: [
-          { nome: 'Cliente 6', saldo: -300 },
-          { nome: 'Cliente 7', saldo: -200 }
-        ]
-      },
-      {
-        nome: 'Gerente D',
-        clientes: [
-          { nome: 'Cliente 8', saldo: -300 },
-          { nome: 'Cliente 9', saldo: -200 }
-        ]
-      }
-    ];
+
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+    const contas = JSON.parse(localStorage.getItem('contas') || '[]');
+
+    const gerentesUsuarios = usuarios.filter((u: any) => u.tipo === 'gerente');
+
+    this.gerentes = gerentesUsuarios.map((g: any) => {
+
+      const contasDoGerente = contas.filter((c: any) => c.gerente === g.nome);
+
+      const clientesDoGerente: Cliente[] = contasDoGerente.map((conta: any) => {
+        const cliente = clientes.find((c: any) => c.cpf === conta.clienteCpf);
+
+        return {
+          nome: cliente ? cliente.nome : 'Desconhecido',
+          saldo: conta.saldo
+        };
+      });
+
+      return {
+        nome: g.nome,
+        clientes: clientesDoGerente
+      };
+    });
   }
 
   processarDados() {

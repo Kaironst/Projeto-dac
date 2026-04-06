@@ -50,6 +50,39 @@ export class Autocadastro {
       return;
     }
 
+    const form = this.formGroup.value;
+
+    const pedidos = JSON.parse(localStorage.getItem('pedidosCadastro') || '[]');
+
+    const cpfExiste = pedidos.some((p: any) => p.cpf === this.normalizarCpf(form.cpf));
+
+    if (cpfExiste) {
+      alert('Já existe um pedido com esse CPF!');
+      return;
+    }
+
+    const novoPedido = {
+      nome: form.nome,
+      email: form.email,
+      cpf: this.normalizarCpf(form.cpf),
+      telefone: form.telefone,
+      salario: Number(form.salario),
+      endereco: {
+        cep: form.cep,
+        logradouro: form.logradouro,
+        numero: form.numero,
+        complemento: form.complemento,
+        cidade: form.cidade,
+        estado: form.estado
+      },
+      dataSolicitacao: new Date(),
+      status: 'pendente'
+    };
+
+    pedidos.push(novoPedido);
+
+    localStorage.setItem('pedidosCadastro', JSON.stringify(pedidos));
+
     this.mostrarMensagemSucesso = true;
   }
 
@@ -60,5 +93,9 @@ export class Autocadastro {
 
   voltar() {
     this.router.navigate(['/tela-principal']);
+  }
+
+  private normalizarCpf(cpf: string): string {
+    return cpf.replace(/\D/g, '');
   }
 }

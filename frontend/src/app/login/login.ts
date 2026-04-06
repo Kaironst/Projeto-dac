@@ -45,7 +45,7 @@ export class Login {
 
   fecharMensagemSucesso() {
     this.mostrarMensagemSucesso = false;
-    this.router.navigate(['/tela-principal']);
+    this.router.navigate(['/cliente-tela']);
   }
 
   voltar() {
