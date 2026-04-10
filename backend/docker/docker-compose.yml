@@ -26,52 +26,43 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  webpage-service:
-    build:
-      context: ..
-      dockerfile: docker/spring-boot-service.dockerfile
-      args:
-        JAR_FILE: ./webpageService/build/libs/webpageService-0.0.1-SNAPSHOT.jar
-    ports:
-      - "8080:8080"
-
   api-gateway-service:
     build:
       context: ..
       dockerfile: docker/spring-boot-service.dockerfile
       args:
-        JAR_FILE: ../apiGatewayService/build/libs/apiGatewayService-0.0.1-SNAPSHOT.jar
+        PROJECT_DIR: apiGatewayService
     depends_on:
       rabbitmq:
         condition: service_started
     ports:
-      - "8081:8080"
+      - "8080:8080"
 
   orchestrator-service:
     build:
       context: ..
       dockerfile: docker/spring-boot-service.dockerfile
       args:
-        JAR_FILE: ./orchestratorService/build/libs/orchestratorService-0.0.1-SNAPSHOT.jar
+        PROJECT_DIR: orchestratorService
     depends_on:
       rabbitmq:
         condition: service_started
     ports:
-      - "8082:8080"
+      - "8081:8080"
 
   users-service:
     build:
       context: ..
       dockerfile: docker/spring-boot-service.dockerfile
       args:
-        JAR_FILE: ./usersService/build/libs/usersService-0.0.1-SNAPSHOT.jar
+        PROJECT_DIR: usersService
     depends_on:
       rabbitmq:
         condition: service_started
       users-database:
         condition: service_started
     ports:
-      - "8083:8080"
+      - "8082:8080"
 
 volumes:
   pgdata:

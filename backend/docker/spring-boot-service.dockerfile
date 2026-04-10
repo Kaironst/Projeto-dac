@@ -1,6 +1,14 @@
+FROM gradle:9-jdk25-alpine as build
+WORKDIR /app/
+ARG PROJECT_DIR
+COPY . .
+WORKDIR /app/${PROJECT_DIR}
+RUN chmod +x gradlew
+RUN ./gradlew clean build -x test --no-daemon
+
 FROM eclipse-temurin:25-alpine
 RUN addgroup spring && adduser spring -D spring -G spring
 USER spring:spring
-ARG JAR_FILE
-COPY ${JAR_FILE} app.jar
+ARG PROJECT_DIR
+COPY --from=build /app/${PROJECT_DIR}/build/libs/*SNAPSHOT.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]

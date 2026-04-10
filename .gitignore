@@ -4,12 +4,12 @@
 HELP.md
 .gradle
 build/
-!**/gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+**/gradle/wrapper/gradle-wrapper.jar
+**/src/main/**/build/
+**/src/test/**/build/
 
 **/resources/static
-**/dist
+**/dist/
 **/tmp
 **/out-tsc
 **/bazel-out
