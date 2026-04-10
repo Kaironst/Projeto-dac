@@ -5,6 +5,7 @@ import { usersProducerRpc } from "./messaging/UsersProducerRPC";
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
+export const rabbitmqUrl = "amqp://usuario:admin@rabbitmq";
 
 //passei um tempo enorme tentando entender por que o orquestrator tava mandando como se a menssagem fosse null
 //era por causa dessa linha aq

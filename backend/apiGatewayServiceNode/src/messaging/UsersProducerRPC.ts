@@ -1,5 +1,6 @@
 import amqp from "amqplib";
 import { UsersDtoCliente, UsersDtoMessage } from "../dto/UsersDto";
+import { rabbitmqUrl } from "../server";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
@@ -20,7 +21,7 @@ class UsersProducerRPC {
   //inicializa a conexão com o rabbitmq e o consumer
   async init() {
     if (this.connection !== null && this.channel !== null) return;
-    this.connection = await amqp.connect('amqp://usuario:admin@localhost');
+    this.connection = await amqp.connect(rabbitmqUrl);
     this.channel = await this.connection.createChannel();
 
     await this.channel.assertExchange(this.APP_EXCHANGE, "direct", {});
