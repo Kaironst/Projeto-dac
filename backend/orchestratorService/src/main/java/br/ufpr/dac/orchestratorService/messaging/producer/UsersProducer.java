@@ -31,6 +31,7 @@ public class UsersProducer {
   }
 
   public UsersDto.Message createCliente(UsersDto.Cliente cliente) {
+    System.out.println(cliente);
     return enviarMenssagem("CREATE", List.of(cliente));
   }
 

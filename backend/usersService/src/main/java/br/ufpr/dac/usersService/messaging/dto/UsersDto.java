@@ -23,13 +23,13 @@ public class UsersDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Cliente {
-    private long id;
+    private Long id;
     private String nome;
     private String email;
     private String cpf;
-    private int estado;
+    private Integer estado;
     private String telefone;
-    private int salario;
+    private Integer salario;
     private List<Endereco> enderecos;
   }
 
@@ -38,10 +38,10 @@ public class UsersDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Endereco {
-    private long id;
+    private Long id;
 
     private String logradouro;
-    private int numero;
+    private Integer numero;
     private String complemento;
     private String cep;
     private String cidade;

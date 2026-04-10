@@ -1,4 +1,4 @@
-FROM gradle:9-jdk25-alpine as build
+FROM gradle:9-jdk25-alpine AS build
 WORKDIR /app/
 ARG PROJECT_DIR
 COPY . .

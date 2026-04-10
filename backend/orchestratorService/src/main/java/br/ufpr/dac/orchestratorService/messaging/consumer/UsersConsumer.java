@@ -17,6 +17,7 @@ public class UsersConsumer {
   @RabbitListener(queues = RabbitMQConfig.ORCHESTRATOR_QUEUE)
   public UsersDto.Message recieveMessage(UsersDto.Message message) {
     try {
+      System.out.println(message);
       UsersDto.Message response = switch (message.getOperation()) {
         case "CREATE" -> producer.createCliente(message.getData().getFirst());
         case "READ" -> producer.readCliente(message.getData().getFirst().getId());

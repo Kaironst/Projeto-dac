@@ -24,15 +24,15 @@ public class Cliente {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id;
+  private Long id;
 
   private String nome;
   @Column(unique = true)
   private String email;
   private String cpf;
-  private int estado;
+  private Integer estado;
   private String telefone;
-  private int salario;
+  private Integer salario;
 
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Endereco> enderecos;

@@ -1,7 +1,7 @@
 
 export interface UsersDtoMessage {
   operation: null | string;
-  data: null | UsersDtoCliente;
+  data: null | UsersDtoCliente[];
 }
 
 export interface UsersDtoCliente {

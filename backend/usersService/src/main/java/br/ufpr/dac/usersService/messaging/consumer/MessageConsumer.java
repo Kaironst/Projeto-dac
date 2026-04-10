@@ -57,6 +57,7 @@ public class MessageConsumer {
 
     clientes.forEach(cliente -> {
       var novoClienteDto = UsersDto.Cliente.builder()
+          .id(cliente.getId())
           .salario(cliente.getSalario())
           .nome(cliente.getNome())
           .email(cliente.getEmail())
@@ -68,6 +69,7 @@ public class MessageConsumer {
       if (cliente.getEnderecos() != null)
         cliente.getEnderecos().forEach(endereco -> {
           var novoEndereco = UsersDto.Endereco.builder()
+              .id(endereco.getId())
               .logradouro(endereco.getLogradouro())
               .numero(endereco.getNumero())
               .cidade(endereco.getCidade())
@@ -90,6 +92,7 @@ public class MessageConsumer {
 
     clientesDto.forEach(clienteDto -> {
       var novoCliente = Cliente.builder()
+          .id(clienteDto.getId())
           .salario(clienteDto.getSalario())
           .nome(clienteDto.getNome())
           .email(clienteDto.getEmail())
@@ -101,6 +104,7 @@ public class MessageConsumer {
       if (clienteDto.getEnderecos() != null)
         clienteDto.getEnderecos().forEach(endereco -> {
           var novoEndereco = Endereco.builder()
+              .id(endereco.getId())
               .logradouro(endereco.getLogradouro())
               .numero(endereco.getNumero())
               .cidade(endereco.getCidade())
@@ -145,7 +149,9 @@ public class MessageConsumer {
   @Transactional
   private UsersDto.Message handleUpdate(List<UsersDto.Cliente> clientes) {
     List<Cliente> clientesAtualizados = new ArrayList<>();
-    clientes.forEach(cliente -> {
+    dtoToClientes(clientes).forEach(cliente -> {
+
+      System.out.println(cliente);
 
       var clienteAtual = repo.findById(cliente.getId()).orElseThrow();
 
@@ -155,56 +161,9 @@ public class MessageConsumer {
       clienteAtual.setEstado(cliente.getEstado());
       clienteAtual.setTelefone(cliente.getTelefone());
       clienteAtual.setSalario(cliente.getSalario());
+      clienteAtual.setEnderecos(cliente.getEnderecos());
 
-      // atualiza endereços
-      Map<Long, Endereco> enderecosExistentes = clienteAtual.getEnderecos()
-          .stream()
-          .collect(Collectors.toMap(e -> e.getId(), e -> e));
-
-      List<Endereco> enderecosAtualizados = new ArrayList<>();
-
-      if (cliente.getEnderecos() != null)
-        cliente.getEnderecos().forEach(endereco -> {
-          // atualiza endereco existente
-          if (endereco.getId() != 0 && enderecosExistentes.containsKey(endereco.getId())) {
-            var enderecoAtual = enderecosExistentes.get(endereco.getId());
-
-            enderecoAtual.setLogradouro(endereco.getLogradouro());
-            enderecoAtual.setNumero(endereco.getNumero());
-            enderecoAtual.setComplemento(endereco.getComplemento());
-            enderecoAtual.setCep(endereco.getCep());
-            enderecoAtual.setCidade(endereco.getCidade());
-            enderecoAtual.setEstado(endereco.getEstado());
-
-            enderecosAtualizados.add(enderecoAtual);
-            enderecosExistentes.remove(endereco.getId());
-          }
-          // cria novo endereco
-          else {
-            var enderecoNovo = new Endereco();
-
-            enderecoNovo.setLogradouro(endereco.getLogradouro());
-            enderecoNovo.setNumero(endereco.getNumero());
-            enderecoNovo.setComplemento(endereco.getComplemento());
-            enderecoNovo.setCep(endereco.getCep());
-            enderecoNovo.setCidade(endereco.getCidade());
-            enderecoNovo.setEstado(endereco.getEstado());
-            enderecoNovo.setCliente(clienteAtual);
-
-            enderecosAtualizados.add(enderecoNovo);
-          }
-        });
-
-      // remove enderecos desligados manualmente
-      enderecosExistentes.values().forEach(enderecoRemovido -> {
-        clienteAtual.getEnderecos().remove(enderecoRemovido);
-      });
-
-      // troca a lista
-      clienteAtual.getEnderecos().clear();
-      clienteAtual.getEnderecos().addAll(enderecosAtualizados);
-
-      clientesAtualizados.add(clienteAtual);
+      clientesAtualizados.add(repo.save(clienteAtual));
 
     });
     return new UsersDto.Message("RESULT", clientesToDto(clientesAtualizados));

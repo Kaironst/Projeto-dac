@@ -49,7 +49,7 @@ class UsersProducerRPC {
     );
   }
 
-  public async requestOrchestratorService(operation: string, data: UsersDtoCliente | null): Promise<UsersDtoMessage> {
+  public async requestOrchestratorService(operation: string, data: UsersDtoCliente[] | null): Promise<UsersDtoMessage> {
 
     const correlationId = this.generateUUID();
     const message: UsersDtoMessage = { operation, data };
