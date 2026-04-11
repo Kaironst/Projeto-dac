@@ -21,6 +21,6 @@ jobs:
           java-version: 25
 
       - name: publish shared depencency
-        run: ./gradlew publish
+        run: ./backend/shared/gradlew publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
