@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
-import br.ufpr.dac.orchestratorService.config.RabbitMQConfig;
 import br.ufpr.dac.shared.dto.UsersDto;
+import br.ufpr.dac.shared.dto.keys.RabbitmqConsts;
 
 @Service
 public class UsersProducer {
@@ -18,8 +18,8 @@ public class UsersProducer {
 
   public UsersDto.Message enviarMenssagem(String operacao, List<UsersDto.Cliente> clientes) {
     var response = (UsersDto.Message) template.convertSendAndReceiveAsType(
-        RabbitMQConfig.APP_EXCHANGE,
-        RabbitMQConfig.USERS_KEY,
+        RabbitmqConsts.APP_EXCHANGE,
+        RabbitmqConsts.USERS_KEY,
         new UsersDto.Message(operacao, clientes),
         new ParameterizedTypeReference<UsersDto.Message>() {
         });

@@ -12,33 +12,26 @@ import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import br.ufpr.dac.shared.dto.keys.RabbitmqConsts;
+
 @Configuration
 public class RabbitMQConfig {
 
-  // exchange do orquestrador
-  public static final String APP_EXCHANGE = "app.exchange";
-  // queue para receber menssagens
-  public static final String USERS_QUEUE = "users.queue";
-  // chave para enviar menssagens
-  public static final String ORCHESTRATOR_KEY = "orchestrator.key";
-  // chave para receber menssagens
-  public static final String USERS_KEY = "users.key";
-
   @Bean
   public Queue queue() {
-    return new Queue(USERS_QUEUE);
+    return new Queue(RabbitmqConsts.USERS_QUEUE);
   }
 
   @Bean
   public Exchange exchange() {
-    return new DirectExchange(APP_EXCHANGE);
+    return new DirectExchange(RabbitmqConsts.APP_EXCHANGE);
   }
 
   @Bean
   public Binding binding(Queue queue, Exchange exchange) {
     return BindingBuilder.bind(queue)
         .to(exchange)
-        .with(USERS_KEY)
+        .with(RabbitmqConsts.USERS_KEY)
         .noargs();
   }
 

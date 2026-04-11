@@ -4,9 +4,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import br.ufpr.dac.orchestratorService.config.RabbitMQConfig;
 import br.ufpr.dac.orchestratorService.messaging.producer.UsersProducer;
 import br.ufpr.dac.shared.dto.UsersDto;
+import br.ufpr.dac.shared.dto.keys.RabbitmqConsts;
 
 @Component
 public class UsersConsumer {
@@ -14,7 +14,7 @@ public class UsersConsumer {
   @Autowired
   UsersProducer producer;
 
-  @RabbitListener(queues = RabbitMQConfig.ORCHESTRATOR_QUEUE)
+  @RabbitListener(queues = RabbitmqConsts.ORCHESTRATOR_QUEUE)
   public UsersDto.Message recieveMessage(UsersDto.Message message) {
     try {
       System.out.println(message);

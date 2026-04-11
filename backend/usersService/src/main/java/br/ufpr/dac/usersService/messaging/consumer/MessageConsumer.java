@@ -7,8 +7,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.ufpr.dac.usersService.config.RabbitMQConfig;
 import br.ufpr.dac.shared.dto.UsersDto;
+import br.ufpr.dac.shared.dto.keys.RabbitmqConsts;
 import br.ufpr.dac.usersService.entity.Cliente;
 import br.ufpr.dac.usersService.entity.Endereco;
 import br.ufpr.dac.usersService.repository.ClienteRepository;
@@ -20,7 +20,7 @@ public class MessageConsumer {
 
   private final ClienteRepository repo;
 
-  @RabbitListener(queues = RabbitMQConfig.USERS_QUEUE)
+  @RabbitListener(queues = RabbitmqConsts.USERS_QUEUE)
   public UsersDto.Message recieve(UsersDto.Message message) {
     try {
       switch (message.getOperation()) {
