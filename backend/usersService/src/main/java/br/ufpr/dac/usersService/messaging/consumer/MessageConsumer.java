@@ -2,17 +2,15 @@ package br.ufpr.dac.usersService.messaging.consumer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.ufpr.dac.usersService.config.RabbitMQConfig;
+import br.ufpr.dac.shared.dto.UsersDto;
 import br.ufpr.dac.usersService.entity.Cliente;
 import br.ufpr.dac.usersService.entity.Endereco;
-import br.ufpr.dac.usersService.messaging.dto.UsersDto;
 import br.ufpr.dac.usersService.repository.ClienteRepository;
 import lombok.AllArgsConstructor;
 

@@ -5,6 +5,9 @@ WORKDIR /app/
 ARG PROJECT_DIR
 
 COPY . .
+
+RUN ./shared/gradlew publishToMavenLocal
+
 WORKDIR /app/${PROJECT_DIR}
 
 RUN chmod +x gradlew
@@ -19,5 +22,6 @@ USER spring:spring
 ARG PROJECT_DIR
 
 COPY --from=build /app/${PROJECT_DIR}/build/libs/*SNAPSHOT.jar app.jar
+COPY --from=build /home/gradle/.m2 /home/spring/.m2
 
 ENTRYPOINT ["java","-jar","/app.jar"]

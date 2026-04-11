@@ -20,10 +20,12 @@ configurations {
 }
 
 repositories {
+  mavenLocal()
 	mavenCentral()
 }
 
 dependencies {
+  implementation("br.ufpr.dac:shared:1.0.0")
 	implementation("org.springframework.boot:spring-boot-starter-amqp")
 	implementation("org.springframework.boot:spring-boot-starter-hateoas")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")

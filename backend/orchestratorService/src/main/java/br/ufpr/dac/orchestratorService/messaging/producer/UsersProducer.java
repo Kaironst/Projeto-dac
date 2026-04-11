@@ -8,7 +8,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import br.ufpr.dac.orchestratorService.config.RabbitMQConfig;
-import br.ufpr.dac.orchestratorService.messaging.dto.UsersDto;
+import br.ufpr.dac.shared.dto.UsersDto;
 
 @Service
 public class UsersProducer {

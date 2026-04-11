@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import br.ufpr.dac.orchestratorService.config.RabbitMQConfig;
-import br.ufpr.dac.orchestratorService.messaging.dto.UsersDto;
 import br.ufpr.dac.orchestratorService.messaging.producer.UsersProducer;
+import br.ufpr.dac.shared.dto.UsersDto;
 
 @Component
 public class UsersConsumer {
