@@ -50,6 +50,9 @@ services:
       dockerfile: docker/spring-boot-service.dockerfile
       args:
         PROJECT_DIR: orchestratorService
+    volumes:
+      - gradle-caches:/home/gradle/.gradle/caches
+      - gradle-wrapper:/home/gradle/.gradle/wrapper
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -62,6 +65,9 @@ services:
       dockerfile: docker/spring-boot-service.dockerfile
       args:
         PROJECT_DIR: usersService
+    volumes:
+      - gradle-caches:/home/gradle/.gradle/caches
+      - gradle-wrapper:/home/gradle/.gradle/wrapper
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -73,3 +79,5 @@ services:
 volumes:
   pgdata:
   rabbitmq_data:
+  gradle-caches:
+  gradle-wrapper:

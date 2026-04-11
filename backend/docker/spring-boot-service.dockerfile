@@ -6,12 +6,13 @@ ARG PROJECT_DIR
 
 COPY . .
 
-RUN ./shared/gradlew publishToMavenLocal
+WORKDIR /app/shared
+RUN chmod +x ./gradlew
+RUN ./gradlew publishToMavenLocal
 
 WORKDIR /app/${PROJECT_DIR}
-
 RUN chmod +x gradlew
-RUN ./gradlew clean build -x test --no-daemon
+RUN ./gradlew clean build -x test
 
 FROM eclipse-temurin:25-alpine
 
@@ -22,6 +23,5 @@ USER spring:spring
 ARG PROJECT_DIR
 
 COPY --from=build /app/${PROJECT_DIR}/build/libs/*SNAPSHOT.jar app.jar
-COPY --from=build /home/gradle/.m2 /home/spring/.m2
 
 ENTRYPOINT ["java","-jar","/app.jar"]
