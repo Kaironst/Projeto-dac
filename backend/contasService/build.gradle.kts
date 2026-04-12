@@ -1,12 +1,11 @@
 plugins {
 	java
-	id("org.springframework.boot") version "4.0.3"
+	id("org.springframework.boot") version "4.0.5"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "br.ufpr.dac"
 version = "0.0.1-SNAPSHOT"
-description = "sistema de banco de dados para os usuários"
 
 java {
 	toolchain {
@@ -14,15 +13,9 @@ java {
 	}
 }
 
-configurations {
-	compileOnly {
-		extendsFrom(configurations.annotationProcessor.get())
-	}
-}
-
 repositories {
-    mavenLocal()
-    mavenCentral()
+  mavenLocal()
+	mavenCentral()
 }
 
 dependencies {

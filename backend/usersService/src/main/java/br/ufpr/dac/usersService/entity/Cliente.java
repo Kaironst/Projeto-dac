@@ -32,7 +32,7 @@ public class Cliente {
   private String cpf;
   private Integer estado;
   private String telefone;
-  private Integer salario;
+  private Double salario;
 
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Endereco> enderecos;

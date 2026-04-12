@@ -1,4 +1,4 @@
-package br.ufpr.dac.shared.dto.keys;
+package br.ufpr.dac.shared.keys;
 
 public class RabbitmqConsts {
 

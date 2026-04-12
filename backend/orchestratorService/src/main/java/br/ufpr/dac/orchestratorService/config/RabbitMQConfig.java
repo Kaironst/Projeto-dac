@@ -13,7 +13,7 @@ import org.springframework.amqp.support.converter.JacksonJavaTypeMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import br.ufpr.dac.shared.dto.keys.RabbitmqConsts;
+import br.ufpr.dac.shared.keys.RabbitmqConsts;
 
 @Configuration
 public class RabbitMQConfig {

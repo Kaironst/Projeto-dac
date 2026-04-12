@@ -8,7 +8,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import br.ufpr.dac.shared.dto.UsersDto;
-import br.ufpr.dac.shared.dto.keys.RabbitmqConsts;
+import br.ufpr.dac.shared.keys.RabbitmqConsts;
 
 @Service
 public class UsersProducer {

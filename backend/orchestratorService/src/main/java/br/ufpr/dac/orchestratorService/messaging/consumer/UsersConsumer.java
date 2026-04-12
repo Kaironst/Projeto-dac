@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import br.ufpr.dac.orchestratorService.messaging.producer.UsersProducer;
 import br.ufpr.dac.shared.dto.UsersDto;
-import br.ufpr.dac.shared.dto.keys.RabbitmqConsts;
+import br.ufpr.dac.shared.keys.RabbitmqConsts;
 
 @Component
 public class UsersConsumer {

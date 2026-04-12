@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.ufpr.dac.shared.dto.UsersDto;
-import br.ufpr.dac.shared.dto.keys.RabbitmqConsts;
+import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import br.ufpr.dac.usersService.entity.Cliente;
 import br.ufpr.dac.usersService.entity.Endereco;
 import br.ufpr.dac.usersService.repository.ClienteRepository;

@@ -29,7 +29,7 @@ public class UsersDto {
     private String cpf;
     private Integer estado;
     private String telefone;
-    private Integer salario;
+    private Double salario;
     private List<Endereco> enderecos;
   }
 
