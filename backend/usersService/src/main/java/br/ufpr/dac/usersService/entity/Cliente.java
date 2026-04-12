@@ -29,6 +29,7 @@ public class Cliente {
   private String nome;
   @Column(unique = true)
   private String email;
+  @Column(unique = true)
   private String cpf;
   private Integer estado;
   private String telefone;
