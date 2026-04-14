@@ -3,17 +3,23 @@ import { ContatoComBanco } from "./contato-com-banco";
 import { HttpClient } from "@angular/common/http";
 
 export interface Cliente {
-  id?: number | null;
-  nome?: string | null;
-  email?: string | null;
-  cpf?: string | null;
-  telefone?: string | null;
-  estado?: number | null;
-  salario?: number | null;
+  id?: number;
+  nome?: string;
+  email?: string;
+  cpf?: string;
+  telefone?: string;
+  estado?: number;
+  salario?: number;
+  enderecos?: Endereco[];
+}
 
-  // a ser implementado
-  //endereco?: Endereco|null;
-
+export interface Endereco {
+  id?: number;
+  rua?: string;
+  numero?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
 }
 
 @Injectable({
