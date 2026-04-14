@@ -25,6 +25,8 @@ const CHAVE_USUARIOS = 'usuarios';
   styleUrl: './crud-gerente.css',
 })
 export class CrudGerente implements OnInit {
+  private readonly gerentesApiUrl = 'http://localhost:3000/gerentes';
+
   protected gerentes: GerenteCadastro[] = [];
   protected modalAberto = false;
   protected modalModo: 'novo' | 'editar' = 'novo';
@@ -35,7 +37,7 @@ export class CrudGerente implements OnInit {
   protected mensagemStatus = '';
 
   ngOnInit(): void {
-    this.carregarGerentes();
+    void this.carregarGerentes();
   }
 
   protected get gerentesOrdenados(): GerenteCadastro[] {
@@ -145,7 +147,16 @@ export class CrudGerente implements OnInit {
     this.cpfOriginalParaEdicao = null;
   }
 
-  private carregarGerentes(): void {
+  private async carregarGerentes(): Promise<void> {
+    const gerentesDaApi = await this.buscarGerentesNaApi();
+
+    if (gerentesDaApi) {
+      this.gerentes = gerentesDaApi;
+      this.salvarGerentes();
+      this.sincronizarUsuarios();
+      return;
+    }
+
     const gerentesSalvos = localStorage.getItem(CHAVE_GERENTES);
 
     if (!gerentesSalvos) {
@@ -176,6 +187,8 @@ export class CrudGerente implements OnInit {
 
       this.salvarGerentes();
       this.sincronizarUsuarios();
+
+      this.mensagemStatus = 'api desabilitada, exibindo base local.';
       return;
     }
 
@@ -184,6 +197,33 @@ export class CrudGerente implements OnInit {
       this.gerentes = Array.isArray(gerentes) ? gerentes : [];
     } catch {
       this.gerentes = [];
+    }
+
+    this.mensagemStatus = 'api desabilitada, exibindo base local.';
+  }
+
+  private async buscarGerentesNaApi(): Promise<GerenteCadastro[] | null> {
+    try {
+      const response = await fetch(this.gerentesApiUrl);
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const payload = await response.json();
+      if (!Array.isArray(payload)) {
+        return null;
+      }
+
+      return payload.map((gerente: Partial<GerenteCadastro>) => ({
+        nome: gerente.nome ?? '',
+        cpf: gerente.cpf ?? '',
+        email: gerente.email ?? '',
+        telefone: gerente.telefone ?? '',
+        senha: gerente.senha ?? ''
+      }));
+    } catch {
+      return null;
     }
   }
 

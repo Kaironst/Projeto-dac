@@ -1,6 +1,7 @@
 import express from 'express';
 import { Express, Request, Response } from "express";
 import ClienteController from "./controller/ClienteController";
+import GerenteController from "./controller/GerenteController";
 import { usersProducerRpc } from "./messaging/UsersProducerRPC";
 
 const app: Express = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/clientes", ClienteController);
+app.use("/gerentes", GerenteController);
 usersProducerRpc.init();
 
 app.listen(port, () => {
