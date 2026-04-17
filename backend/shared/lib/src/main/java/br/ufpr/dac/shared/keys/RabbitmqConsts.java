@@ -15,6 +15,11 @@ public class RabbitmqConsts {
   // key do usersService
   public static final String USERS_KEY = "users.key";
 
+  // queue do gerentesService
+  public static final String GERENTES_QUEUE = "gerentes.queue";
+  // key do gerentesService
+  public static final String GERENTES_KEY = "gerentes.key";
+
   // queue do contasService
   public static final String CONTAS_QUEUE = "contas.queue";
   // key do contas service

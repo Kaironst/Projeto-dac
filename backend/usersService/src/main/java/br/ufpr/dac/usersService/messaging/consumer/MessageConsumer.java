@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.ufpr.dac.shared.dto.UsersDto;
+import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import br.ufpr.dac.usersService.entity.Cliente;
 import br.ufpr.dac.usersService.entity.Endereco;
@@ -24,19 +25,19 @@ public class MessageConsumer {
   public UsersDto.Message recieve(UsersDto.Message message) {
     try {
       switch (message.getOperation()) {
-        case "CREATE" -> {
+        case MessageOperations.CREATE -> {
           return handleCreate(message.getData());
         }
-        case "READ" -> {
+        case MessageOperations.READ -> {
           return handleRead(message.getData());
         }
-        case "READ_ALL" -> {
+        case MessageOperations.READ_ALL -> {
           return handleReadAll();
         }
-        case "UPDATE" -> {
+        case MessageOperations.UPDATE -> {
           return handleUpdate(message.getData());
         }
-        case "DELETE" -> {
+        case MessageOperations.DELETE -> {
           return handleDelete(message.getData());
         }
         default -> {
@@ -46,7 +47,7 @@ public class MessageConsumer {
     } catch (Exception e) {
       System.out.println("error on message consumer listener");
       e.printStackTrace();
-      return new UsersDto.Message("ERROR", null);
+      return new UsersDto.Message(MessageOperations.ERROR_GENERIC, null);
     }
   }
 
@@ -124,7 +125,7 @@ public class MessageConsumer {
   @Transactional
   private UsersDto.Message handleCreate(List<UsersDto.Cliente> clientes) {
     List<Cliente> qResult = repo.saveAll(dtoToClientes(clientes));
-    return new UsersDto.Message("RESULT", clientesToDto(qResult));
+    return new UsersDto.Message(MessageOperations.RESULT, clientesToDto(qResult));
   }
 
   @Transactional(readOnly = true)
@@ -133,14 +134,14 @@ public class MessageConsumer {
     clientes.forEach(c -> idList.add(c.getId()));
 
     List<Cliente> clientesEncontrados = repo.findAllById(idList);
-    return new UsersDto.Message("RESULT", clientesToDto(clientesEncontrados));
+    return new UsersDto.Message(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
   }
 
   @Transactional(readOnly = true)
   private UsersDto.Message handleReadAll() {
     var clientesEncontrados = repo.findAll();
 
-    return new UsersDto.Message("RESULT", clientesToDto(clientesEncontrados));
+    return new UsersDto.Message(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
 
   }
 
@@ -164,7 +165,7 @@ public class MessageConsumer {
       clientesAtualizados.add(repo.save(clienteAtual));
 
     });
-    return new UsersDto.Message("RESULT", clientesToDto(clientesAtualizados));
+    return new UsersDto.Message(MessageOperations.RESULT, clientesToDto(clientesAtualizados));
   }
 
   @Transactional
@@ -172,7 +173,7 @@ public class MessageConsumer {
     clientes.forEach(cliente -> {
       repo.deleteById(cliente.getId());
     });
-    return new UsersDto.Message("RESULT", null);
+    return new UsersDto.Message(MessageOperations.RESULT, null);
   }
 
 }

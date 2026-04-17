@@ -8,6 +8,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import br.ufpr.dac.shared.dto.UsersDto;
+import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 
 @Service
@@ -26,31 +27,31 @@ public class UsersProducer {
 
     if (response == null)
       System.out.println("error on enviarMenssagem from usersService");
-    return response == null ? new UsersDto.Message("ERROR", null) : response;
+    return response == null ? new UsersDto.Message(MessageOperations.ERROR_GENERIC, null) : response;
 
   }
 
   public UsersDto.Message createCliente(UsersDto.Cliente cliente) {
     System.out.println(cliente);
-    return enviarMenssagem("CREATE", List.of(cliente));
+    return enviarMenssagem(MessageOperations.CREATE, List.of(cliente));
   }
 
   public UsersDto.Message readCliente(long id) {
     var clienteId = UsersDto.Cliente.builder().id(id).build();
-    return enviarMenssagem("READ", List.of(clienteId));
+    return enviarMenssagem(MessageOperations.READ, List.of(clienteId));
   }
 
   public UsersDto.Message readAllClientes() {
-    return enviarMenssagem("READ_ALL", null);
+    return enviarMenssagem(MessageOperations.READ_ALL, null);
   }
 
   public UsersDto.Message updateCliente(UsersDto.Cliente cliente) {
-    return enviarMenssagem("UPDATE", List.of(cliente));
+    return enviarMenssagem(MessageOperations.UPDATE, List.of(cliente));
   }
 
   public UsersDto.Message deleteCliente(Long id) {
     var clienteId = UsersDto.Cliente.builder().id(id).build();
-    return enviarMenssagem("DELETE", List.of(clienteId));
+    return enviarMenssagem(MessageOperations.DELETE, List.of(clienteId));
   }
 
 };
