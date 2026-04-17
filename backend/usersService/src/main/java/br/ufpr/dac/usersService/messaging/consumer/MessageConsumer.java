@@ -170,9 +170,9 @@ public class MessageConsumer {
 
   @Transactional
   private UsersDto.Message handleDelete(List<UsersDto.Cliente> clientes) {
-    clientes.forEach(cliente -> {
-      repo.deleteById(cliente.getId());
-    });
+    final var idList = new ArrayList<Long>();
+    clientes.forEach(cliente -> idList.add(cliente.getId()));
+    repo.deleteAllById(idList);
     return new UsersDto.Message(MessageOperations.RESULT, null);
   }
 

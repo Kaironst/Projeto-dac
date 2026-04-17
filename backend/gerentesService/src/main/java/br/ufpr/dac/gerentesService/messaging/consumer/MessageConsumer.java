@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.ufpr.dac.gerentesService.entity.Gerente;
 import br.ufpr.dac.gerentesService.repository.GerenteRepository;
@@ -80,25 +81,49 @@ public class MessageConsumer {
     return gerentes;
   }
 
+  @Transactional
   private GerentesDto.Message handleCreate(List<GerentesDto.Gerente> gerentes) {
     List<Gerente> queryResult = repo.saveAll(dtoToGerentes(gerentes));
     return new GerentesDto.Message(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 
-  private GerentesDto.Message handleDelete(List<GerentesDto.Gerente> gerentes) {
-    throw new UnsupportedOperationException("Unimplemented method 'handleDelete'");
+  @Transactional(readOnly = true)
+  private GerentesDto.Message handleRead(List<GerentesDto.Gerente> gerentes) {
+    final var idList = new ArrayList<Long>();
+    gerentes.forEach(gerente -> idList.add(gerente.getId()));
+    List<Gerente> queryResult = repo.findAllById(idList);
+    return new GerentesDto.Message(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 
-  private GerentesDto.Message handleUpdate(List<GerentesDto.Gerente> data) {
-    throw new UnsupportedOperationException("Unimplemented method 'handleUpdate'");
-  }
-
+  @Transactional(readOnly = true)
   private GerentesDto.Message handleReadAll() {
-    throw new UnsupportedOperationException("Unimplemented method 'handleReadAll'");
+    List<Gerente> queryResult = repo.findAll();
+    return new GerentesDto.Message(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 
-  private GerentesDto.Message handleRead(List<GerentesDto.Gerente> data) {
-    throw new UnsupportedOperationException("Unimplemented method 'handleRead'");
+  @Transactional
+  private GerentesDto.Message handleUpdate(List<GerentesDto.Gerente> gerentes) {
+    var gerentesAtualizados = new ArrayList<Gerente>();
+
+    gerentes.forEach(gerente -> {
+      Gerente gerenteAtual = repo.findById(gerente.getId()).orElseThrow();
+
+      gerenteAtual.setNome(gerente.getNome());
+      gerenteAtual.setEmail(gerente.getEmail());
+      gerenteAtual.setTelefone(gerente.getTelefone());
+      gerenteAtual.setCpf(gerente.getCpf());
+
+      gerentesAtualizados.add(repo.save(gerenteAtual));
+    });
+    return new GerentesDto.Message(MessageOperations.RESULT, gerentesToDto(gerentesAtualizados));
+  }
+
+  @Transactional
+  private GerentesDto.Message handleDelete(List<GerentesDto.Gerente> gerentes) {
+    final var idList = new ArrayList<Long>();
+    gerentes.forEach(gerente -> idList.add(gerente.getId()));
+    repo.deleteAllById(idList);
+    return new GerentesDto.Message(MessageOperations.RESULT, null);
   }
 
 }
