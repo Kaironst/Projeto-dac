@@ -19,23 +19,16 @@ public class UsersConsumer {
   public UsersDto.Message recieveMessage(UsersDto.Message message) {
     try {
       System.out.println(message);
-      UsersDto.Message response = switch (message.getOperation()) {
-        case MessageOperations.CREATE -> producer.createCliente(message.getData().getFirst());
-        case MessageOperations.READ -> producer.readCliente(message.getData().getFirst().getId());
-        case MessageOperations.READ_ALL -> producer.readAllClientes();
-        case MessageOperations.UPDATE -> producer.updateCliente(message.getData().getFirst());
-        case MessageOperations.DELETE -> producer.deleteCliente(message.getData().getFirst().getId());
-        default -> throw new UnsupportedOperationException();
-      };
+      UsersDto.Message response = producer.enviarMenssagem(message);
 
       if (response == null)
         System.out.println("error on usersConsumer");
-      return response == null ? new UsersDto.Message("ERROR", null) : response;
+      return response == null ? new UsersDto.Message(MessageOperations.ERROR_GENERIC, null) : response;
 
     } catch (Exception e) {
       System.out.println("error on usersConsumer");
       e.printStackTrace();
-      return new UsersDto.Message("ERROR", null);
+      return new UsersDto.Message(MessageOperations.ERROR_GENERIC, null);
     }
 
   }

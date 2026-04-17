@@ -1,7 +1,5 @@
 package br.ufpr.dac.orchestratorService.messaging.producer;
 
-import java.util.List;
-
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -17,11 +15,11 @@ public class UsersProducer {
   @Autowired
   private RabbitTemplate template;
 
-  public UsersDto.Message enviarMenssagem(String operacao, List<UsersDto.Cliente> clientes) {
+  public UsersDto.Message enviarMenssagem(UsersDto.Message message) {
     var response = (UsersDto.Message) template.convertSendAndReceiveAsType(
         RabbitmqConsts.APP_EXCHANGE,
         RabbitmqConsts.USERS_KEY,
-        new UsersDto.Message(operacao, clientes),
+        message,
         new ParameterizedTypeReference<UsersDto.Message>() {
         });
 
@@ -29,29 +27,6 @@ public class UsersProducer {
       System.out.println("error on enviarMenssagem from usersService");
     return response == null ? new UsersDto.Message(MessageOperations.ERROR_GENERIC, null) : response;
 
-  }
-
-  public UsersDto.Message createCliente(UsersDto.Cliente cliente) {
-    System.out.println(cliente);
-    return enviarMenssagem(MessageOperations.CREATE, List.of(cliente));
-  }
-
-  public UsersDto.Message readCliente(long id) {
-    var clienteId = UsersDto.Cliente.builder().id(id).build();
-    return enviarMenssagem(MessageOperations.READ, List.of(clienteId));
-  }
-
-  public UsersDto.Message readAllClientes() {
-    return enviarMenssagem(MessageOperations.READ_ALL, null);
-  }
-
-  public UsersDto.Message updateCliente(UsersDto.Cliente cliente) {
-    return enviarMenssagem(MessageOperations.UPDATE, List.of(cliente));
-  }
-
-  public UsersDto.Message deleteCliente(Long id) {
-    var clienteId = UsersDto.Cliente.builder().id(id).build();
-    return enviarMenssagem(MessageOperations.DELETE, List.of(clienteId));
   }
 
 };
