@@ -10,13 +10,11 @@ COPY ./shared ./shared
 
 #publica a dependência /shared no repositório maven local para tornar instalável
 WORKDIR /app/shared
-RUN chmod +x ./gradlew
-RUN ./gradlew publishToMavenLocal --no-daemon
+RUN gradle publishToMavenLocal --no-daemon
 
 WORKDIR /app/${PROJECT_DIR}
-RUN chmod +x gradlew
 #rodando sem testes para o build não falhar caso o banco ou rabbitmq ainda não estejam rodando
-RUN ./gradlew build -x test --no-daemon
+RUN gradle build -x test --no-daemon
 
 FROM eclipse-temurin:25-alpine
 

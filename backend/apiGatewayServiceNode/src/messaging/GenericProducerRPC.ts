@@ -1,56 +1,60 @@
 import amqp from "amqplib";
-import { UsersDtoCliente, UsersDtoMessage } from "../dto/UsersDto";
 import { rabbitmqUrl } from "../server";
 import { randomUUID } from "crypto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
-class UsersProducerRPC {
-  private ORCHESTRATOR_USERS_KEY = "orchestrator.users.key"
-  private APP_EXCHANGE = "app.exchange";
+class GenericProducerRPC<MessageType> {
 
   private connection: amqp.ChannelModel | null = null;
   private channel: amqp.Channel | null = null;
-  private pending = new Map<string, (msg: UsersDtoMessage) => void>();
+  private pending = new Map<string, (msg: any) => void>();
+
+  constructor(
+    private exchange: string,
+    private routingKey: string,
+  ) { }
 
   //inicializa a conexão com o rabbitmq e o consumer
   async init() {
-    if (this.connection !== null && this.channel !== null) return;
+    if (this.connection && this.channel) return;
+
     this.connection = await amqp.connect(rabbitmqUrl);
     this.channel = await this.connection.createChannel();
 
-    await this.channel.assertExchange(this.APP_EXCHANGE, "direct", {});
+    await this.channel.assertExchange(this.exchange, "direct", {});
 
     //usa o pseudo_queue reply-to (usado no spring no convertSendAndRecieve)
     await this.channel.consume(
       "amq.rabbitmq.reply-to",
       (msg) => {
+
         if (!msg) return;
 
         const correlationId = msg.properties.correlationId;
         const handler = this.pending.get(correlationId);
 
-        if (handler) {
-          try {
-            const parsed = JSON.parse(msg.content.toString()) as UsersDtoMessage;
-            handler(parsed);
-          } catch (err) {
-            console.error("invalid json")
-          }
+        if (!handler) return;
 
-          this.pending.delete(correlationId);
+        try {
+          const parsed = JSON.parse(msg.content.toString()) as MessageType;
+          handler(parsed);
+        } catch (err) {
+          console.error("invalid json", err);
         }
+
+        this.pending.delete(correlationId);
       },
       { noAck: true }
     );
   }
 
-  public async requestOrchestratorService(operation: string, data: UsersDtoCliente[] | null): Promise<UsersDtoMessage> {
+  public async requestService(message: MessageType): Promise<MessageType> {
 
     const correlationId = randomUUID();
-    const message: UsersDtoMessage = { operation, data };
 
-    const result = await new Promise<UsersDtoMessage>((resolve, reject) => {
+
+    const result = await new Promise<MessageType>((resolve, reject) => {
 
       const timeout = setTimeout(() => {
         this.pending.delete(correlationId);
@@ -63,8 +67,8 @@ class UsersProducerRPC {
       })
 
       this.channel!.publish(
-        this.APP_EXCHANGE,
-        this.ORCHESTRATOR_USERS_KEY,
+        this.exchange,
+        this.routingKey,
         Buffer.from(JSON.stringify(message)),
         {
           correlationId: correlationId,
@@ -79,4 +83,4 @@ class UsersProducerRPC {
   }
 }
 
-export const usersProducerRpc = new UsersProducerRPC();
+export default GenericProducerRPC;
