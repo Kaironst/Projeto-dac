@@ -19,8 +19,13 @@ import br.ufpr.dac.shared.keys.RabbitmqConsts;
 public class RabbitMQConfig {
 
   @Bean
-  public Queue queue() {
-    return new Queue(RabbitmqConsts.ORCHESTRATOR_QUEUE);
+  public Queue usersQueue() {
+    return new Queue(RabbitmqConsts.ORCHESTRATOR_USERS_QUEUE);
+  }
+
+  @Bean
+  public Queue gerentesQueue() {
+    return new Queue(RabbitmqConsts.ORCHESTRATOR_GERENTES_QUEUE);
   }
 
   @Bean
@@ -29,10 +34,18 @@ public class RabbitMQConfig {
   }
 
   @Bean
-  public Binding binding(Queue queue, Exchange exchange) {
-    return BindingBuilder.bind(queue)
+  public Binding usersBinding(Queue usersQueue, Exchange exchange) {
+    return BindingBuilder.bind(usersQueue)
         .to(exchange)
-        .with(RabbitmqConsts.ORCHESTRATOR_KEY)
+        .with(RabbitmqConsts.ORCHESTRATOR_USERS_KEY)
+        .noargs();
+  }
+
+  @Bean
+  public Binding gerentesBinding(Queue gerentesQueue, Exchange exchange) {
+    return BindingBuilder.bind(gerentesQueue)
+        .to(exchange)
+        .with(RabbitmqConsts.ORCHESTRATOR_GERENTES_KEY)
         .noargs();
   }
 

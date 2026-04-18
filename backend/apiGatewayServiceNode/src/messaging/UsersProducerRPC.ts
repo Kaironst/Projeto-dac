@@ -5,7 +5,7 @@ import { rabbitmqUrl } from "../server";
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
 class UsersProducerRPC {
-  private ORCHESTRATOR_KEY = "orchestrator.key"
+  private ORCHESTRATOR_USERS_KEY = "orchestrator.users.key"
   private APP_EXCHANGE = "app.exchange";
 
   private connection: amqp.ChannelModel | null = null;
@@ -69,7 +69,7 @@ class UsersProducerRPC {
 
       this.channel!.publish(
         this.APP_EXCHANGE,
-        this.ORCHESTRATOR_KEY,
+        this.ORCHESTRATOR_USERS_KEY,
         Buffer.from(JSON.stringify(message)),
         {
           correlationId: correlationId,

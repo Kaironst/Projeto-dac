@@ -15,7 +15,7 @@ public class UsersConsumer {
   @Autowired
   UsersProducer producer;
 
-  @RabbitListener(queues = RabbitmqConsts.ORCHESTRATOR_QUEUE)
+  @RabbitListener(queues = RabbitmqConsts.ORCHESTRATOR_USERS_QUEUE)
   public UsersDto.Message recieveMessage(UsersDto.Message message) {
     try {
       System.out.println(message);
