@@ -1,6 +1,8 @@
 import amqp from "amqplib";
 import { rabbitmqUrl } from "../server";
 import { randomUUID } from "crypto";
+import { UsersDtoMessage } from "../dto/UsersDto";
+import { GerentesDtoMessage } from "../dto/GerentesDto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
@@ -84,3 +86,5 @@ class GenericProducerRPC<MessageType> {
 }
 
 export default GenericProducerRPC;
+export const usersProducer = new GenericProducerRPC<UsersDtoMessage>("app.exchange", "orchestrator.users.key");
+export const GerentesProducer = new GenericProducerRPC<GerentesDtoMessage>("app.exchange", "orchestrator.gerentes.key");

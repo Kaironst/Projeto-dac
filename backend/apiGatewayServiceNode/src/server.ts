@@ -2,7 +2,7 @@ import express from 'express';
 import { Express, Request, Response } from "express";
 import ClienteController from "./controller/ClienteController";
 import GerenteController from "./controller/GerenteController";
-import { usersProducerRpc } from "./messaging/UsersProducerRPC";
+import { GerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
@@ -15,7 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/clientes", ClienteController);
 app.use("/gerentes", GerenteController);
-usersProducerRpc.init();
+usersProducer.init();
+GerentesProducer.init();
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
