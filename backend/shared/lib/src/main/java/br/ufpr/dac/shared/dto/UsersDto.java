@@ -17,8 +17,13 @@ public class UsersDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Message extends MessageWrapper {
-    private String operation;
     private List<Cliente> data;
+
+    public Message(String operation, List<Cliente> data) {
+      super(operation);
+      this.data = data;
+    }
+
   }
 
   @Data

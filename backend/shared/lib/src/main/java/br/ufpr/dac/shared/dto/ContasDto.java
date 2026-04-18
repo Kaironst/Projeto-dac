@@ -18,8 +18,13 @@ public class ContasDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Message extends MessageWrapper {
-    private String Operation;
     private List<Conta> data;
+
+    public Message(String operation, List<Conta> data) {
+      super(operation);
+      this.data = data;
+    }
+
   }
 
   @Data

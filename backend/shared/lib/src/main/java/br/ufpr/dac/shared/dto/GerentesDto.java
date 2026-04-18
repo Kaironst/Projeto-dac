@@ -17,8 +17,13 @@ public class GerentesDto {
   @AllArgsConstructor
   @NoArgsConstructor
   public static class Message extends MessageWrapper {
-    private String operation;
     private List<Gerente> data;
+
+    public Message(String operation, List<Gerente> data) {
+      super(operation);
+      this.data = data;
+    }
+
   }
 
   @Data

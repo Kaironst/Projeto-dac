@@ -18,8 +18,13 @@ public class ItemHistoricoDto {
   @NoArgsConstructor
   @AllArgsConstructor
   public static class Message extends MessageWrapper {
-    private String operation;
     private List<ItemHistorico> data;
+
+    public Message(String operation, List<ItemHistorico> data) {
+      super(operation);
+      this.data = data;
+    }
+
   }
 
   @Data
