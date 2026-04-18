@@ -46,7 +46,7 @@ public class MessageConsumer {
     } catch (Exception e) {
       System.out.println("error on message consumer listener");
       e.printStackTrace();
-      return new GerentesDto.Message("ERROR", null);
+      return new GerentesDto.Message(MessageOperations.ERROR_GENERIC, null);
     }
 
   }

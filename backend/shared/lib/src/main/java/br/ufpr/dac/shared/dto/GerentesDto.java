@@ -5,15 +5,18 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 public class GerentesDto {
 
   @Data
-  @Builder
+  @EqualsAndHashCode(callSuper = false)
+  @SuperBuilder
   @AllArgsConstructor
   @NoArgsConstructor
-  public static class Message {
+  public static class Message extends MessageWrapper {
     private String operation;
     private List<Gerente> data;
   }
