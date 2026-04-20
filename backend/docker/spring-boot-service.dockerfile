@@ -1,20 +1,23 @@
 FROM gradle:9-jdk25-alpine AS build
 
-WORKDIR /app/
-
 #project dir é a pasta a ser acessada e é passada pela dockerfile
 ARG PROJECT_DIR
 
-COPY ./${PROJECT_DIR} ./${PROJECT_DIR}
+WORKDIR /app/
 COPY ./shared ./shared
 
 #publica a dependência /shared no repositório maven local para tornar instalável
 WORKDIR /app/shared
-RUN gradle publishToMavenLocal --no-daemon
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+  gradle publishToMavenLocal --no-daemon
+
+WORKDIR /app/
+COPY ./${PROJECT_DIR} ./${PROJECT_DIR}
 
 WORKDIR /app/${PROJECT_DIR}
 #rodando sem testes para o build não falhar caso o banco ou rabbitmq ainda não estejam rodando
-RUN gradle build -x test --no-daemon
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+  gradle build -x test --no-daemon
 
 FROM eclipse-temurin:25-alpine
 
