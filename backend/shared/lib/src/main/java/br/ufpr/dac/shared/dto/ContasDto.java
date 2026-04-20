@@ -3,6 +3,7 @@ package br.ufpr.dac.shared.dto;
 import java.time.LocalDate;
 import java.util.List;
 
+import br.ufpr.dac.shared.dto.GerentesDto.Gerente;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,8 +35,7 @@ public class ContasDto {
   public static class Conta {
     private Long id;
     private UsersDto.Cliente cliente;
-    // adicionar quando gerente estiver pronto
-    // private Gerente gerente;
+    private Gerente gerente;
     private Double saldo;
     private Double limite;
     private LocalDate dataCriacao;

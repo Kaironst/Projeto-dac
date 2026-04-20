@@ -5,7 +5,6 @@ import java.util.List;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,13 +31,14 @@ public class Conta {
   private Long cliente;
   // deve ser o id do cliente em GerentesService
   private Long gerente;
+
   private Double saldo;
   private Double limite;
   private LocalDate dataCriacao;
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "contaOrigem", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "contaOrigem", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ItemHistorico> historicoOrigem;
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "contaDestino", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "contaDestino", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ItemHistorico> historicoDestino;
 
 }
