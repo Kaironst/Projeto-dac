@@ -43,6 +43,38 @@
         <input type="text" [value]="gerente" disabled />
       </div>
 
+      <h3>Endereço</h3>
+
+      <div class="form-row">
+        <label>CEP:</label>
+        <input type="text" formControlName="cep" mask="00000-000" />
+      </div>
+
+      <div class="form-row">
+        <label>Logradouro:</label>
+        <input type="text" formControlName="logradouro" />
+      </div>
+
+      <div class="form-row">
+        <label>Número:</label>
+        <input type="text" formControlName="numero" />
+      </div>
+
+      <div class="form-row">
+        <label>Complemento:</label>
+        <input type="text" formControlName="complemento" />
+      </div>
+
+      <div class="form-row">
+        <label>Cidade:</label>
+        <input type="text" formControlName="cidade" />
+      </div>
+
+      <div class="form-row">
+        <label>Estado:</label>
+        <input type="text" formControlName="estado" />
+      </div>
+
       <button type="submit">Atualizar Perfil</button>
     </div>
 
