@@ -28,6 +28,7 @@ export class GerenteFormModal implements OnChanges {
   @Input() gerente: GerenteCadastro | null = null;
   @Input() modo: ModoFormulario = 'novo';
   @Output() fechar = new EventEmitter<GerenteCadastro | undefined>();
+  protected esconderSenha = true;
 
   protected readonly formGroup = new FormGroup({
     nome: new FormControl('', [Validators.required]),
@@ -38,14 +39,21 @@ export class GerenteFormModal implements OnChanges {
   });
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['modo']) {
+      this.atualizarValidacaoSenha();
+      this.atualizarCamposEditaveis();
+    }
+
     if (changes['aberto']?.currentValue || changes['gerente']) {
+      this.esconderSenha = true;
+
       if (this.gerente) {
         this.formGroup.reset({
           nome: this.gerente.nome,
           cpf: this.gerente.cpf,
           email: this.gerente.email,
           telefone: this.gerente.telefone,
-          senha: this.gerente.senha,
+          senha: this.modo === 'editar' ? '' : this.gerente.senha,
         });
         return;
       }
@@ -57,6 +65,31 @@ export class GerenteFormModal implements OnChanges {
         telefone: '',
         senha: '',
       });
+    }
+  }
+
+  private atualizarValidacaoSenha(): void {
+    const senhaControl = this.formGroup.controls.senha;
+
+    if (this.modo === 'editar') {
+      senhaControl.clearValidators();
+    } else {
+      senhaControl.setValidators([Validators.required]);
+    }
+
+    senhaControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private atualizarCamposEditaveis(): void {
+    const cpfControl = this.formGroup.controls.cpf;
+    const telefoneControl = this.formGroup.controls.telefone;
+
+    if (this.modo === 'editar') {
+      cpfControl.disable({ emitEvent: false });
+      telefoneControl.disable({ emitEvent: false });
+    } else {
+      cpfControl.enable({ emitEvent: false });
+      telefoneControl.enable({ emitEvent: false });
     }
   }
 
@@ -83,5 +116,9 @@ export class GerenteFormModal implements OnChanges {
 
   protected impedirFechamento(evento: MouseEvent): void {
     evento.stopPropagation();
+  }
+
+  protected alternarVisibilidadeSenha(): void {
+    this.esconderSenha = !this.esconderSenha;
   }
 }

@@ -1,5 +1,6 @@
 import express from 'express';
 import { Express, Request, Response } from "express";
+import cors from "cors";
 import ClienteController from "./controller/ClienteController";
 import GerenteController from "./controller/GerenteController";
 import { GerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
@@ -12,6 +13,7 @@ export const rabbitmqUrl = "amqp://usuario:admin@rabbitmq";
 //era por causa dessa linha aq
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 app.use("/clientes", ClienteController);
 app.use("/gerentes", GerenteController);

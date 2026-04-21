@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -7,6 +7,7 @@ import { GerenteFormModal } from './gerente-form-modal/gerente-form-modal';
 import { GerenteRemoverModal } from './gerente-remover-modal/gerente-remover-modal';
 
 interface GerenteCadastro {
+  id?: number;
   nome: string;
   cpf: string;
   email: string;
@@ -14,8 +15,14 @@ interface GerenteCadastro {
   senha: string;
 }
 
-const CHAVE_GERENTES = 'gerentes';
-const CHAVE_USUARIOS = 'usuarios';
+interface GerenteApiPayload {
+  nome: string;
+  cpf: string;
+  email: string;
+  telefone: string;
+  senha?: string;
+  tipo?: string;
+}
 
 @Component({
   selector: 'app-crud-gerente',
@@ -25,7 +32,8 @@ const CHAVE_USUARIOS = 'usuarios';
   styleUrl: './crud-gerente.css',
 })
 export class CrudGerente implements OnInit {
-  private readonly gerentesApiUrl = 'http://localhost:3000/gerentes';
+  private readonly gerentesApiUrl = 'http://localhost:8080/gerentes';
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   protected gerentes: GerenteCadastro[] = [];
   protected modalAberto = false;
@@ -35,6 +43,15 @@ export class CrudGerente implements OnInit {
   protected confirmacaoRemocaoAberta = false;
   protected gerenteSelecionadoParaRemocao: GerenteCadastro | null = null;
   protected mensagemStatus = '';
+
+  private normalizarCpf(cpf: string): string {
+    return cpf.replace(/\D/g, '');
+  }
+
+  private atualizarMensagemStatus(mensagem: string): void {
+    this.mensagemStatus = mensagem;
+    this.changeDetectorRef.detectChanges();
+  }
 
   ngOnInit(): void {
     void this.carregarGerentes();
@@ -73,33 +90,37 @@ export class CrudGerente implements OnInit {
     this.gerenteSelecionadoParaRemocao = null;
   }
 
-  protected removerGerenteSelecionado(): void {
+  protected async removerGerenteSelecionado(): Promise<void> {
     if (!this.gerenteSelecionadoParaRemocao) return;
 
-    const cpf = this.gerenteSelecionadoParaRemocao.cpf;
+    const gerenteRemovido = this.gerenteSelecionadoParaRemocao;
+    this.cancelarRemocao();
 
-    this.gerentes = this.gerentes.filter(g => g.cpf !== cpf);
+    const remocaoConcluida = await this.removerGerenteNaApi(gerenteRemovido);
 
-    const usuarios = JSON.parse(localStorage.getItem(CHAVE_USUARIOS) || '[]');
-    const novosUsuarios = usuarios.filter((u: any) => u.cpf !== cpf);
+    if (!remocaoConcluida) {
+      this.atualizarMensagemStatus('Nao foi possivel remover gerente no backend.');
+      return;
+    }
 
-    localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(novosUsuarios));
+    const listagemAtualizada = await this.carregarGerentes();
+    this.atualizarMensagemStatus(listagemAtualizada
+      ? 'Gerente excluido com sucesso.'
+      : 'Gerente removido, mas nao foi possivel atualizar a listagem.');
 
-    this.salvarGerentes();
-
-    this.mensagemStatus = `Gerente ${this.gerenteSelecionadoParaRemocao.nome} removido com sucesso.`;
     this.cancelarRemocao();
   }
 
-  protected fecharCadastro(gerente?: GerenteCadastro): void {
+  protected async fecharCadastro(gerente?: GerenteCadastro): Promise<void> {
     this.modalAberto = false;
 
     if (!gerente) return;
 
-    const usuarios = JSON.parse(localStorage.getItem(CHAVE_USUARIOS) || '[]');
+    const cpfNovo = this.normalizarCpf(gerente.cpf);
+    const cpfOriginalEdicao = this.cpfOriginalParaEdicao ? this.normalizarCpf(this.cpfOriginalParaEdicao) : null;
 
     const cpfJaExiste = this.gerentes.some(g =>
-      g.cpf === gerente.cpf && g.cpf !== this.cpfOriginalParaEdicao
+      this.normalizarCpf(g.cpf) === cpfNovo && this.normalizarCpf(g.cpf) !== cpfOriginalEdicao
     );
 
     if (cpfJaExiste) {
@@ -108,98 +129,127 @@ export class CrudGerente implements OnInit {
     }
 
     if (this.modalModo === 'editar' && this.cpfOriginalParaEdicao) {
+      const gerenteOriginal = this.gerentes.find(g => this.normalizarCpf(g.cpf) === cpfOriginalEdicao);
 
-      this.gerentes = this.gerentes.map(g =>
-        g.cpf === this.cpfOriginalParaEdicao ? gerente : g
-      );
+      if (!gerenteOriginal) {
+        this.atualizarMensagemStatus('Gerente selecionado para edicao nao foi encontrado na listagem.');
+      } else {
+        const atualizacaoConcluida = await this.atualizarGerenteNaApi(gerenteOriginal, gerente);
 
-      const novosUsuarios = usuarios.map((u: any) =>
-        u.cpf === this.cpfOriginalParaEdicao
-          ? { ...u, nome: gerente.nome, email: gerente.email, senha: gerente.senha }
-          : u
-      );
+        if (!atualizacaoConcluida) {
+          this.atualizarMensagemStatus('Nao foi possivel atualizar gerente no backend.');
+          return;
+        }
 
-      localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(novosUsuarios));
-
-      this.mensagemStatus = `Gerente ${gerente.nome} atualizado com sucesso.`;
+        const listagemAtualizada = await this.carregarGerentes();
+        this.atualizarMensagemStatus(listagemAtualizada
+          ? 'Gerente alterado com sucesso.'
+          : 'Gerente atualizado, mas nao foi possivel atualizar a listagem.');
+      }
 
     } else {
+      const cadastroCriado = await this.inserirGerenteNaApi(gerente);
 
-      this.gerentes.push(gerente);
+      if (!cadastroCriado) {
+        this.atualizarMensagemStatus('Nao foi possivel inserir gerente no banco (RF17).');
+        return;
+      }
 
-      usuarios.push({
-        cpf: gerente.cpf,
-        nome: gerente.nome,
-        email: gerente.email,
-        senha: gerente.senha,
-        tipo: 'gerente'
-      });
-
-      localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(usuarios));
-
-      this.mensagemStatus = `Gerente ${gerente.nome} cadastrado com sucesso.`;
+      const listagemAtualizada = await this.carregarGerentes();
+      this.atualizarMensagemStatus(listagemAtualizada
+        ? 'Gerente criado com sucesso.'
+        : 'Gerente inserido, mas nao foi possivel atualizar a listagem.');
     }
-
-    this.salvarGerentes();
 
     this.modalModo = 'novo';
     this.gerenteSelecionadoParaEdicao = null;
     this.cpfOriginalParaEdicao = null;
   }
 
-  private async carregarGerentes(): Promise<void> {
+  private async carregarGerentes(): Promise<boolean> {
     const gerentesDaApi = await this.buscarGerentesNaApi();
 
     if (gerentesDaApi) {
       this.gerentes = gerentesDaApi;
-      this.salvarGerentes();
-      this.sincronizarUsuarios();
-      return;
+      this.changeDetectorRef.detectChanges();
+      return true;
     }
 
-    const gerentesSalvos = localStorage.getItem(CHAVE_GERENTES);
+    this.gerentes = [];
+    this.atualizarMensagemStatus('Nao foi possivel carregar gerentes no backend.');
+    return false;
+  }
 
-    if (!gerentesSalvos) {
+  private async inserirGerenteNaApi(gerente: GerenteCadastro): Promise<boolean> {
+    const payload: GerenteApiPayload = {
+      nome: gerente.nome,
+      cpf: this.normalizarCpf(gerente.cpf),
+      email: gerente.email,
+      telefone: gerente.telefone,
+      senha: gerente.senha,
+      tipo: 'GERENTE'
+    };
 
-      this.gerentes = [
-        {
-          cpf: '98574307084',
-          nome: 'Geniéve',
-          email: 'ger1@bantads.com.br',
-          telefone: '',
-          senha: 'tads'
+    try {
+      const response = await fetch(this.gerentesApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         },
-        {
-          cpf: '64065268052',
-          nome: 'Godophredo',
-          email: 'ger2@bantads.com.br',
-          telefone: '',
-          senha: 'tads'
-        },
-        {
-          cpf: '23862179060',
-          nome: 'Gyândula',
-          email: 'ger3@bantads.com.br',
-          telefone: '',
-          senha: 'tads'
-        }
-      ];
+        body: JSON.stringify(payload)
+      });
 
-      this.salvarGerentes();
-      this.sincronizarUsuarios();
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
 
-      this.mensagemStatus = 'api desabilitada, exibindo base local.';
-      return;
+  private async atualizarGerenteNaApi(gerenteOriginal: GerenteCadastro, gerenteAtualizado: GerenteCadastro): Promise<boolean> {
+    if (gerenteOriginal.id === undefined || gerenteOriginal.id === null) {
+      return false;
+    }
+
+    const payload: GerenteApiPayload = {
+      nome: gerenteAtualizado.nome,
+      cpf: this.normalizarCpf(gerenteOriginal.cpf),
+      email: gerenteAtualizado.email,
+      telefone: gerenteOriginal.telefone
+    };
+
+    if (gerenteAtualizado.senha?.trim()) {
+      payload.senha = gerenteAtualizado.senha;
     }
 
     try {
-      const gerentes = JSON.parse(gerentesSalvos);
-      this.gerentes = Array.isArray(gerentes) ? gerentes : [];
+      const response = await fetch(`${this.gerentesApiUrl}/${gerenteOriginal.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      return response.ok;
     } catch {
-      this.gerentes = [];
+      return false;
+    }
+  }
+
+  private async removerGerenteNaApi(gerente: GerenteCadastro): Promise<boolean> {
+    if (gerente.id === undefined || gerente.id === null) {
+      return false;
     }
 
-    this.mensagemStatus = 'api desabilitada, exibindo base local.';
+    try {
+      const response = await fetch(`${this.gerentesApiUrl}/${gerente.id}`, {
+        method: 'DELETE'
+      });
+
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
   private async buscarGerentesNaApi(): Promise<GerenteCadastro[] | null> {
@@ -216,6 +266,7 @@ export class CrudGerente implements OnInit {
       }
 
       return payload.map((gerente: Partial<GerenteCadastro>) => ({
+        id: gerente.id,
         nome: gerente.nome ?? '',
         cpf: gerente.cpf ?? '',
         email: gerente.email ?? '',
@@ -225,29 +276,5 @@ export class CrudGerente implements OnInit {
     } catch {
       return null;
     }
-  }
-
-  private salvarGerentes(): void {
-    localStorage.setItem(CHAVE_GERENTES, JSON.stringify(this.gerentes));
-  }
-
-  private sincronizarUsuarios() {
-    const usuarios = JSON.parse(localStorage.getItem(CHAVE_USUARIOS) || '[]');
-
-    this.gerentes.forEach(g => {
-      const existe = usuarios.some((u: any) => u.cpf === g.cpf);
-
-      if (!existe) {
-        usuarios.push({
-          cpf: g.cpf,
-          nome: g.nome,
-          email: g.email,
-          senha: g.senha,
-          tipo: 'gerente'
-        });
-      }
-    });
-
-    localStorage.setItem(CHAVE_USUARIOS, JSON.stringify(usuarios));
   }
 }
