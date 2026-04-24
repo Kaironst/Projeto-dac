@@ -13,6 +13,7 @@ import br.ufpr.dac.contasService.entity.Conta;
 import br.ufpr.dac.contasService.repository.ContaRepository;
 import br.ufpr.dac.shared.dto.ContasDto;
 import br.ufpr.dac.shared.dto.GerentesDto;
+import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.dto.UsersDto;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
@@ -25,7 +26,7 @@ public class MessageConsumer {
   private final ContaRepository repo;
 
   @RabbitListener(queues = RabbitmqConsts.CONTAS_QUEUE)
-  public ContasDto.Message recieve(ContasDto.Message message) {
+  public MessageWrapper<ContasDto.Conta> recieve(MessageWrapper<ContasDto.Conta> message) {
     try {
       switch (message.getOperation()) {
         case MessageOperations.CREATE -> {
@@ -50,7 +51,7 @@ public class MessageConsumer {
     } catch (Exception e) {
       System.out.println("error on message consumer listener");
       e.printStackTrace();
-      return new ContasDto.Message(MessageOperations.ERROR_GENERIC, null);
+      return new MessageWrapper<ContasDto.Conta>(MessageOperations.ERROR_GENERIC, null);
     }
 
   }
@@ -90,27 +91,27 @@ public class MessageConsumer {
   }
 
   @Transactional
-  private ContasDto.Message handleCreate(List<ContasDto.Conta> contas) {
+  private MessageWrapper<ContasDto.Conta> handleCreate(List<ContasDto.Conta> contas) {
     List<Conta> queryResult = repo.saveAll(dtoToContas(contas));
-    return new ContasDto.Message(MessageOperations.RESULT, contasToDto(queryResult));
+    return new MessageWrapper<ContasDto.Conta>(MessageOperations.RESULT, contasToDto(queryResult));
   }
 
   @Transactional(readOnly = true)
-  private ContasDto.Message handleRead(List<ContasDto.Conta> contas) {
+  private MessageWrapper<ContasDto.Conta> handleRead(List<ContasDto.Conta> contas) {
     final var idList = new ArrayList<Long>();
     contas.forEach(conta -> idList.add(conta.getId()));
     List<Conta> queryResult = repo.findAllById(idList);
-    return new ContasDto.Message(MessageOperations.RESULT, contasToDto(queryResult));
+    return new MessageWrapper<ContasDto.Conta>(MessageOperations.RESULT, contasToDto(queryResult));
   }
 
   @Transactional(readOnly = true)
-  private ContasDto.Message handleReadAll() {
+  private MessageWrapper<ContasDto.Conta> handleReadAll() {
     List<Conta> queryResult = repo.findAll();
-    return new ContasDto.Message(MessageOperations.RESULT, contasToDto(queryResult));
+    return new MessageWrapper<ContasDto.Conta>(MessageOperations.RESULT, contasToDto(queryResult));
   }
 
   @Transactional
-  private ContasDto.Message handleUpdate(List<ContasDto.Conta> contas) {
+  private MessageWrapper<ContasDto.Conta> handleUpdate(List<ContasDto.Conta> contas) {
     var ContasAtualizadas = new ArrayList<Conta>();
 
     dtoToContas(contas).forEach(conta -> {
@@ -123,15 +124,15 @@ public class MessageConsumer {
 
       ContasAtualizadas.add(repo.save(contaAtual));
     });
-    return new ContasDto.Message(MessageOperations.RESULT, contasToDto(ContasAtualizadas));
+    return new MessageWrapper<ContasDto.Conta>(MessageOperations.RESULT, contasToDto(ContasAtualizadas));
   }
 
   @Transactional
-  private ContasDto.Message handleDelete(List<ContasDto.Conta> contas) {
+  private MessageWrapper<ContasDto.Conta> handleDelete(List<ContasDto.Conta> contas) {
     final var idList = new ArrayList<Long>();
     contas.forEach(conta -> idList.add(conta.getId()));
     repo.deleteAllById(idList);
-    return new ContasDto.Message(MessageOperations.RESULT, null);
+    return new MessageWrapper<ContasDto.Conta>(MessageOperations.RESULT, null);
   }
 
 }

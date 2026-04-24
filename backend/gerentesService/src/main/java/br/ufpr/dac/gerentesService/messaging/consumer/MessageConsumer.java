@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.ufpr.dac.gerentesService.entity.Gerente;
 import br.ufpr.dac.gerentesService.repository.GerenteRepository;
 import br.ufpr.dac.shared.dto.GerentesDto;
+import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ public class MessageConsumer {
   private final GerenteRepository repo;
 
   @RabbitListener(queues = RabbitmqConsts.GERENTES_QUEUE)
-  public GerentesDto.Message recieve(GerentesDto.Message message) {
+  public MessageWrapper<GerentesDto.Gerente> recieve(MessageWrapper<GerentesDto.Gerente> message) {
     try {
       switch (message.getOperation()) {
         case MessageOperations.CREATE -> {
@@ -46,7 +47,7 @@ public class MessageConsumer {
     } catch (Exception e) {
       System.out.println("error on message consumer listener");
       e.printStackTrace();
-      return new GerentesDto.Message(MessageOperations.ERROR_GENERIC, null);
+      return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.ERROR_GENERIC, null);
     }
 
   }
@@ -82,27 +83,27 @@ public class MessageConsumer {
   }
 
   @Transactional
-  private GerentesDto.Message handleCreate(List<GerentesDto.Gerente> gerentes) {
+  private MessageWrapper<GerentesDto.Gerente> handleCreate(List<GerentesDto.Gerente> gerentes) {
     List<Gerente> queryResult = repo.saveAll(dtoToGerentes(gerentes));
-    return new GerentesDto.Message(MessageOperations.RESULT, gerentesToDto(queryResult));
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 
   @Transactional(readOnly = true)
-  private GerentesDto.Message handleRead(List<GerentesDto.Gerente> gerentes) {
+  private MessageWrapper<GerentesDto.Gerente> handleRead(List<GerentesDto.Gerente> gerentes) {
     final var idList = new ArrayList<Long>();
     gerentes.forEach(gerente -> idList.add(gerente.getId()));
     List<Gerente> queryResult = repo.findAllById(idList);
-    return new GerentesDto.Message(MessageOperations.RESULT, gerentesToDto(queryResult));
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 
   @Transactional(readOnly = true)
-  private GerentesDto.Message handleReadAll() {
+  private MessageWrapper<GerentesDto.Gerente> handleReadAll() {
     List<Gerente> queryResult = repo.findAll();
-    return new GerentesDto.Message(MessageOperations.RESULT, gerentesToDto(queryResult));
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 
   @Transactional
-  private GerentesDto.Message handleUpdate(List<GerentesDto.Gerente> gerentes) {
+  private MessageWrapper<GerentesDto.Gerente> handleUpdate(List<GerentesDto.Gerente> gerentes) {
     var gerentesAtualizados = new ArrayList<Gerente>();
 
     gerentes.forEach(gerente -> {
@@ -115,15 +116,15 @@ public class MessageConsumer {
 
       gerentesAtualizados.add(repo.save(gerenteAtual));
     });
-    return new GerentesDto.Message(MessageOperations.RESULT, gerentesToDto(gerentesAtualizados));
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(gerentesAtualizados));
   }
 
   @Transactional
-  private GerentesDto.Message handleDelete(List<GerentesDto.Gerente> gerentes) {
+  private MessageWrapper<GerentesDto.Gerente> handleDelete(List<GerentesDto.Gerente> gerentes) {
     final var idList = new ArrayList<Long>();
     gerentes.forEach(gerente -> idList.add(gerente.getId()));
     repo.deleteAllById(idList);
-    return new GerentesDto.Message(MessageOperations.RESULT, null);
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, null);
   }
 
 }

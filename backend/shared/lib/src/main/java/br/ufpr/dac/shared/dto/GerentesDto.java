@@ -1,30 +1,11 @@
 package br.ufpr.dac.shared.dto;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 public class GerentesDto {
-
-  @Data
-  @EqualsAndHashCode(callSuper = false)
-  @SuperBuilder
-  @AllArgsConstructor
-  @NoArgsConstructor
-  public static class Message extends MessageWrapper {
-    private List<Gerente> data;
-
-    public Message(String operation, List<Gerente> data) {
-      super(operation);
-      this.data = data;
-    }
-
-  }
 
   @Data
   @Builder

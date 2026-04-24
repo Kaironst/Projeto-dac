@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import br.ufpr.dac.orchestratorService.messaging.producer.GerentesProducer;
 import br.ufpr.dac.shared.dto.GerentesDto;
+import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 
@@ -16,19 +17,20 @@ public class GerentesConsumer {
   GerentesProducer producer;
 
   @RabbitListener(queues = RabbitmqConsts.ORCHESTRATOR_GERENTES_QUEUE)
-  public GerentesDto.Message recieveMessage(GerentesDto.Message message) {
+  public MessageWrapper<GerentesDto.Gerente> recieveMessage(MessageWrapper<GerentesDto.Gerente> message) {
     try {
       System.out.println(message);
-      GerentesDto.Message response = producer.enviarMenssagem(message);
+      MessageWrapper<GerentesDto.Gerente> response = producer.enviarMenssagem(message);
 
       if (response == null)
         System.out.println("error on gerentesConsumer");
-      return response == null ? new GerentesDto.Message(MessageOperations.ERROR_GENERIC, null) : response;
+      return response == null ? new MessageWrapper<GerentesDto.Gerente>(MessageOperations.ERROR_GENERIC, null)
+          : response;
 
     } catch (Exception e) {
       System.out.println("error on gerentesConsumer");
       e.printStackTrace();
-      return new GerentesDto.Message(MessageOperations.ERROR_GENERIC, null);
+      return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.ERROR_GENERIC, null);
     }
   }
 

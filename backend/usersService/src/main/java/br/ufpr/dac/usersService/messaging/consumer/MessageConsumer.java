@@ -7,6 +7,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.dto.UsersDto;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
@@ -22,7 +23,7 @@ public class MessageConsumer {
   private final ClienteRepository repo;
 
   @RabbitListener(queues = RabbitmqConsts.USERS_QUEUE)
-  public UsersDto.Message recieve(UsersDto.Message message) {
+  public MessageWrapper<UsersDto.Cliente> recieve(MessageWrapper<UsersDto.Cliente> message) {
     try {
       switch (message.getOperation()) {
         case MessageOperations.CREATE -> {
@@ -47,7 +48,7 @@ public class MessageConsumer {
     } catch (Exception e) {
       System.out.println("error on message consumer listener");
       e.printStackTrace();
-      return new UsersDto.Message(MessageOperations.ERROR_GENERIC, null);
+      return new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_GENERIC, null);
     }
   }
 
@@ -123,30 +124,30 @@ public class MessageConsumer {
   }
 
   @Transactional
-  private UsersDto.Message handleCreate(List<UsersDto.Cliente> clientes) {
+  private MessageWrapper<UsersDto.Cliente> handleCreate(List<UsersDto.Cliente> clientes) {
     List<Cliente> qResult = repo.saveAll(dtoToClientes(clientes));
-    return new UsersDto.Message(MessageOperations.RESULT, clientesToDto(qResult));
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(qResult));
   }
 
   @Transactional(readOnly = true)
-  private UsersDto.Message handleRead(List<UsersDto.Cliente> clientes) {
+  private MessageWrapper<UsersDto.Cliente> handleRead(List<UsersDto.Cliente> clientes) {
     var idList = new ArrayList<Long>();
     clientes.forEach(c -> idList.add(c.getId()));
 
     List<Cliente> clientesEncontrados = repo.findAllById(idList);
-    return new UsersDto.Message(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
   }
 
   @Transactional(readOnly = true)
-  private UsersDto.Message handleReadAll() {
+  private MessageWrapper<UsersDto.Cliente> handleReadAll() {
     var clientesEncontrados = repo.findAll();
 
-    return new UsersDto.Message(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
 
   }
 
   @Transactional
-  private UsersDto.Message handleUpdate(List<UsersDto.Cliente> clientes) {
+  private MessageWrapper<UsersDto.Cliente> handleUpdate(List<UsersDto.Cliente> clientes) {
     List<Cliente> clientesAtualizados = new ArrayList<>();
     dtoToClientes(clientes).forEach(cliente -> {
 
@@ -165,15 +166,15 @@ public class MessageConsumer {
       clientesAtualizados.add(repo.save(clienteAtual));
 
     });
-    return new UsersDto.Message(MessageOperations.RESULT, clientesToDto(clientesAtualizados));
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesAtualizados));
   }
 
   @Transactional
-  private UsersDto.Message handleDelete(List<UsersDto.Cliente> clientes) {
+  private MessageWrapper<UsersDto.Cliente> handleDelete(List<UsersDto.Cliente> clientes) {
     final var idList = new ArrayList<Long>();
     clientes.forEach(cliente -> idList.add(cliente.getId()));
     repo.deleteAllById(idList);
-    return new UsersDto.Message(MessageOperations.RESULT, null);
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, null);
   }
 
 }

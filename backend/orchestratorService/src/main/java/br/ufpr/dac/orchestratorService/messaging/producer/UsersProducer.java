@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
+import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.dto.UsersDto;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
@@ -15,17 +16,17 @@ public class UsersProducer {
   @Autowired
   private RabbitTemplate template;
 
-  public UsersDto.Message enviarMenssagem(UsersDto.Message message) {
-    var response = (UsersDto.Message) template.convertSendAndReceiveAsType(
+  public MessageWrapper<UsersDto.Cliente> enviarMenssagem(MessageWrapper<UsersDto.Cliente> message) {
+    var response = (MessageWrapper<UsersDto.Cliente>) template.convertSendAndReceiveAsType(
         RabbitmqConsts.APP_EXCHANGE,
         RabbitmqConsts.USERS_KEY,
         message,
-        new ParameterizedTypeReference<UsersDto.Message>() {
+        new ParameterizedTypeReference<MessageWrapper<UsersDto.Cliente>>() {
         });
 
     if (response == null)
       System.out.println("error on enviarMenssagem from usersService");
-    return response == null ? new UsersDto.Message(MessageOperations.ERROR_GENERIC, null) : response;
+    return response == null ? new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_GENERIC, null) : response;
 
   }
 

@@ -1,9 +1,11 @@
 package br.ufpr.dac.shared.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * Message wrapper genérico torna mais fácil adicionar propriedades
@@ -11,9 +13,10 @@ import lombok.experimental.SuperBuilder;
  *
  */
 @Data
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MessageWrapper {
+public class MessageWrapper<T> {
   private String operation;
+  private List<T> data;
 }

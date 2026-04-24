@@ -6,6 +6,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import br.ufpr.dac.shared.dto.GerentesDto;
+import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 
@@ -15,17 +16,17 @@ public class GerentesProducer {
   @Autowired
   private RabbitTemplate template;
 
-  public GerentesDto.Message enviarMenssagem(GerentesDto.Message message) {
-    var response = (GerentesDto.Message) template.convertSendAndReceiveAsType(
+  public MessageWrapper<GerentesDto.Gerente> enviarMenssagem(MessageWrapper<GerentesDto.Gerente> message) {
+    var response = (MessageWrapper<GerentesDto.Gerente>) template.convertSendAndReceiveAsType(
         RabbitmqConsts.APP_EXCHANGE,
         RabbitmqConsts.GERENTES_KEY,
         message,
-        new ParameterizedTypeReference<GerentesDto.Message>() {
+        new ParameterizedTypeReference<MessageWrapper<GerentesDto.Gerente>>() {
         });
 
     if (response == null)
       System.out.println("error on enviarMenssagem from gerentesService");
-    return response == null ? new GerentesDto.Message(MessageOperations.ERROR_GENERIC, null) : response;
+    return response == null ? new MessageWrapper<GerentesDto.Gerente>(MessageOperations.ERROR_GENERIC, null) : response;
 
   }
 
