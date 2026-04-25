@@ -8,4 +8,6 @@ public interface ContaRepository extends JpaRepository<Conta, Long> {
 
   Conta findByCliente(Long idCliente);
 
+  Conta findByGerente(Long idGerente);
+
 }

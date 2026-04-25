@@ -18,13 +18,13 @@ import br.ufpr.dac.shared.keys.RabbitmqConsts;
 public class RabbitMQConfig {
 
   @Bean
-  public Queue queue() {
-    return new Queue(RabbitmqConsts.CONTAS_QUEUE);
+  public Exchange exchange() {
+    return new DirectExchange(RabbitmqConsts.APP_EXCHANGE);
   }
 
   @Bean
-  public Exchange exchange() {
-    return new DirectExchange(RabbitmqConsts.APP_EXCHANGE);
+  public Queue queue() {
+    return new Queue(RabbitmqConsts.CONTAS_QUEUE);
   }
 
   @Bean
@@ -32,6 +32,19 @@ public class RabbitMQConfig {
     return BindingBuilder.bind(queue)
         .to(exchange)
         .with(RabbitmqConsts.CONTAS_KEY)
+        .noargs();
+  }
+
+  @Bean
+  public Queue sagaQueue() {
+    return new Queue(RabbitmqConsts.CONTAS_SAGA_QUEUE);
+  }
+
+  @Bean
+  public Binding sagaBinding(Queue sagaQueue, Exchange exchange) {
+    return BindingBuilder.bind(sagaQueue)
+        .to(exchange)
+        .with(RabbitmqConsts.CONTAS_SAGA_KEY)
         .noargs();
   }
 
