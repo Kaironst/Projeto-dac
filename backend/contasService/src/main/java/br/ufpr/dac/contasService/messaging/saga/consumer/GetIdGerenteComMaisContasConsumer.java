@@ -18,6 +18,7 @@ import br.ufpr.dac.contasService.repository.ContaRepository;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
+import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -30,7 +31,7 @@ public class GetIdGerenteComMaisContasConsumer {
   @RabbitListener(queues = RabbitmqConsts.CONTAS_SAGA_QUEUE)
   public void recieveMessage(SagaMessageWrapper<Long> message) {
 
-    if (message.getOperation() != MessageOperations.GET_GERENTES_C_MAIS_CONTAS) {
+    if (message.getOperation() != SagaOperations.InsertGerente.GET_COM_MAIS_CONTAS) {
       producer.enviarMenssagem(
           new SagaMessageWrapper<Long>(
               MessageOperations.ERROR_GENERIC,

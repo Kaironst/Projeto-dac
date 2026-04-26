@@ -11,8 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SagaState {
+public class SagaState<T> {
   private UUID correlationId;
   private sagaStep step;
   private SagaStatus status;
+  private T sagaData;
 }

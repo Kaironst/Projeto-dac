@@ -8,6 +8,5 @@ public enum InsertGerentesPasso implements sagaStep {
   GERENTE_INSERIDO,
   CONTA_DADA_AO_NOVO_GERENTE,
   CONCLUIDO,
-  FALLHO,
   ROLLED_BACK
 }
