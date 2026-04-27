@@ -50,12 +50,15 @@ services:
       dockerfile: docker/spring-boot-service.dockerfile
       args:
         PROJECT_DIR: orchestratorService
+    restart: always
     volumes:
       - gradle-caches:/home/gradle/.gradle/caches
       - gradle-wrapper:/home/gradle/.gradle/wrapper
     depends_on:
       rabbitmq:
         condition: service_healthy
+      contas-service:
+        condition: service_started
     ports:
       - "8081:8080"
 
@@ -90,8 +93,28 @@ services:
         condition: service_healthy
       users-database:
         condition: service_started
+      contas-service:
+        condition: service_started
     ports:
       - "8083:8080"
+
+  contas-service:
+    build:
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
+      args:
+        PROJECT_DIR: contasService
+    restart: always
+    volumes:
+      - gradle-caches:/home/gradle/.gradle/caches
+      - gradle-wrapper:/home/gradle/.gradle/wrapper
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      users-database:
+        condition: service_started
+    ports:
+      - "8084:8080"
 
 volumes:
   pgdata:

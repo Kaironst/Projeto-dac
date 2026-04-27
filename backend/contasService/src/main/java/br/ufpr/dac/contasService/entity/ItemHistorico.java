@@ -24,10 +24,10 @@ public class ItemHistorico {
   private Long id;
 
   @ManyToOne
-  private Conta ContaOrigem;
+  private Conta contaOrigem;
   // destino apenas não é null quando é transferência
   @ManyToOne
-  private Conta ContaDestino;
+  private Conta contaDestino;
 
   private LocalDateTime dataHora;
   private Integer tipo;

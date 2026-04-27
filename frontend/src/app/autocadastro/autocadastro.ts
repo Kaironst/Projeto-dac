@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { NgxMaskDirective } from 'ngx-mask';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ClienteUtil } from '../services/DBUtil/cliente-util';
 
 @Component({
   selector: 'app-autocadastro',
@@ -25,6 +27,7 @@ import { NgxMaskDirective } from 'ngx-mask';
 })
 export class Autocadastro {
   private router = inject(Router);
+  private clienteUtil = inject(ClienteUtil);
   public formGroup: FormGroup;
   public mostrarMensagemSucesso = false;
 
@@ -52,38 +55,39 @@ export class Autocadastro {
 
     const form = this.formGroup.value;
 
-    const pedidos = JSON.parse(localStorage.getItem('pedidosCadastro') || '[]');
-
-    const cpfExiste = pedidos.some((p: any) => p.cpf === this.normalizarCpf(form.cpf));
-
-    if (cpfExiste) {
-      alert('Já existe um pedido com esse CPF!');
-      return;
-    }
-
-    const novoPedido = {
+    const novoCliente = {
       nome: form.nome,
       email: form.email,
       cpf: this.normalizarCpf(form.cpf),
-      telefone: form.telefone,
+      telefone: this.normalizarTelefone(form.telefone),
       salario: Number(form.salario),
-      endereco: {
-        cep: form.cep,
-        logradouro: form.logradouro,
-        numero: form.numero,
-        complemento: form.complemento,
-        cidade: form.cidade,
-        estado: form.estado
-      },
-      dataSolicitacao: new Date(),
-      status: 'pendente'
+      enderecos: [
+        {
+          cep: form.cep,
+          logradouro: form.logradouro,
+          numero: String(form.numero),
+          complemento: form.complemento || null,
+          cidade: form.cidade,
+          estado: form.estado
+        }
+      ]
     };
 
-    pedidos.push(novoPedido);
+    this.clienteUtil.create(novoCliente).subscribe({
+      next: () => {
+        this.mostrarMensagemSucesso = true;
+      },
+      error: (erro: HttpErrorResponse) => {
+        console.error('Erro detalhado do backend:', erro);
 
-    localStorage.setItem('pedidosCadastro', JSON.stringify(pedidos));
+        if (erro.status === 0) {
+          alert('Nao foi possivel conectar com o backend. Verifique se a API gateway esta rodando na porta 8080.');
+          return;
+        }
 
-    this.mostrarMensagemSucesso = true;
+        alert('Erro ao realizar autocadastro. Verifique os logs do backend para mais detalhes.');
+      }
+    });
   }
 
   fecharMensagemSucesso() {
@@ -97,5 +101,9 @@ export class Autocadastro {
 
   private normalizarCpf(cpf: string): string {
     return cpf.replace(/\D/g, '');
+  }
+
+  private normalizarTelefone(telefone: string): string {
+    return telefone.replace(/\D/g, '');
   }
 }

@@ -15,9 +15,10 @@ export interface Cliente {
 
 export interface Endereco {
   id?: number;
-  rua?: string;
+  cep?: string;
+  logradouro?: string;
   numero?: string;
-  bairro?: string;
+  complemento?: string;
   cidade?: string;
   estado?: string;
 }
@@ -27,7 +28,7 @@ export interface Endereco {
 })
 export class ClienteUtil extends ContatoComBanco {
 
-  protected requestUrl = "http://localhost8081/api/clientes";
+  protected requestUrl = "/clientes";
 
   protected http = inject(HttpClient);
 
@@ -40,7 +41,7 @@ export class ClienteUtil extends ContatoComBanco {
   }
 
   override create(cliente: Cliente) {
-    return this.http.post<Cliente>(this.requestUrl, cliente);
+    return this.http.post(this.requestUrl, cliente, { responseType: 'text' });
   }
 
   override update(id: number, cliente: Cliente) {
