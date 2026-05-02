@@ -1,10 +1,9 @@
-package br.ufpr.dac.gerentesService.messaging.saga.consumer;
+package br.ufpr.dac.gerentesService.messaging.saga;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.ufpr.dac.gerentesService.messaging.saga.producer.InsertGerenteHandler;
 import br.ufpr.dac.gerentesService.repository.GerenteRepository;
 import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
@@ -14,7 +13,7 @@ import lombok.AllArgsConstructor;
 
 @Component
 @AllArgsConstructor
-public class InsertGerenteConsumer {
+public class SagaConsumer {
 
   GerenteRepository repo;
   InsertGerenteHandler insertGerenteHandler;

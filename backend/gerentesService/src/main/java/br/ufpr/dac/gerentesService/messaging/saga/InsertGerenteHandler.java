@@ -1,4 +1,4 @@
-package br.ufpr.dac.gerentesService.messaging.saga.producer;
+package br.ufpr.dac.gerentesService.messaging.saga;
 
 import java.util.List;
 

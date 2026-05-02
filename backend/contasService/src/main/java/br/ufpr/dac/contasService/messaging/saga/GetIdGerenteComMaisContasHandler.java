@@ -1,4 +1,4 @@
-package br.ufpr.dac.contasService.messaging.saga.producer;
+package br.ufpr.dac.contasService.messaging.saga;
 
 import java.util.ArrayList;
 import java.util.Comparator;
