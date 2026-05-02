@@ -1,4 +1,4 @@
-package br.ufpr.dac.contasService.messaging.saga.consumer;
+package br.ufpr.dac.contasService.messaging.saga.producer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,36 +9,24 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Component;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Service;
 
 import br.ufpr.dac.contasService.entity.Conta;
-import br.ufpr.dac.contasService.messaging.saga.producer.GetIdGerenteComMaisContasProducer;
 import br.ufpr.dac.contasService.repository.ContaRepository;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
-import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
 import lombok.AllArgsConstructor;
 
+@Service
 @AllArgsConstructor
-@Component
-public class GetIdGerenteComMaisContasConsumer {
+public class GetIdGerenteComMaisContasHandler {
 
-  private GetIdGerenteComMaisContasProducer producer;
+  private RabbitTemplate template;
   private ContaRepository repo;
 
-  @RabbitListener(queues = RabbitmqConsts.CONTAS_SAGA_QUEUE)
-  public void recieveMessage(SagaMessageWrapper<Long> message) {
-
-    if (message.getOperation() != SagaOperations.InsertGerente.GET_COM_MAIS_CONTAS) {
-      producer.enviarMenssagem(
-          new SagaMessageWrapper<Long>(
-              MessageOperations.ERROR_GENERIC,
-              List.of((Long) null),
-              message.getCorrelationId()));
-      return;
-    }
+  public void HandleGetIdGerenteComMaisContas(SagaMessageWrapper<Long> message) {
 
     // organiza contas em mapa com seu gerente
     var contasPorGerente = new HashMap<Long, List<Conta>>();
@@ -64,7 +52,7 @@ public class GetIdGerenteComMaisContasConsumer {
 
     Long gerenteEscolhido = gerentesComMaisContas.get(new Random().nextInt(gerentesComMaisContas.size()));
 
-    producer.enviarMenssagem(
+    this.enviarMenssagem(
         new SagaMessageWrapper<Long>(
             MessageOperations.RESULT,
             List.of(gerenteEscolhido),
@@ -72,4 +60,11 @@ public class GetIdGerenteComMaisContasConsumer {
 
   }
 
-}
+  public void enviarMenssagem(SagaMessageWrapper<Long> message) {
+    template.convertAndSend(
+        RabbitmqConsts.APP_EXCHANGE,
+        RabbitmqConsts.ORCHESTRATOR_SAGA_QUEUE,
+        message);
+  }
+
+};
