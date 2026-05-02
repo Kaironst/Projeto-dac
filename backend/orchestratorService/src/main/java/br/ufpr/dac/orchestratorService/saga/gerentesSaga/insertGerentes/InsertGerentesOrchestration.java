@@ -26,7 +26,7 @@ public class InsertGerentesOrchestration {
   private final Map<UUID, SagaState<InsertGerentesData>> sagas = new ConcurrentHashMap<>();
   private final SagaProducerFactory producerFactory;
 
-  public UUID StartSaga(SagaMessageWrapper<GerentesDto.Gerente> message) {
+  public void StartSaga(SagaMessageWrapper<GerentesDto.Gerente> message) {
     UUID correlationId = UUID.randomUUID();
     message.setCorrelationId(correlationId);
 
@@ -48,36 +48,43 @@ public class InsertGerentesOrchestration {
             correlationId),
         RabbitmqConsts.CONTAS_SAGA_KEY);
 
-    return correlationId;
-
   }
 
   // PASSO 2, INSERIR GERENTE NO BANCO DE DADOS
-  public void handleInserirGerente(UUID correlationId) {
-    var state = sagas.get(correlationId);
+  public void handleInserirGerente(SagaMessageWrapper<Long> message) {
+
+    var state = sagas.get(message.getCorrelationId());
+    state.setStep(InsertGerentesPasso.GERENTE_COM_MAIS_CLIENTES_BUSCADO);
+    state.getSagaData().setIdGerenteAntigo(message.getData().getFirst());
 
     SagaProducer<GerentesDto.Gerente> gerenteMessageProducer = producerFactory.create();
     gerenteMessageProducer.enviarMenssagem(new SagaMessageWrapper<GerentesDto.Gerente>(
         SagaOperations.InsertGerente.INSERIR_NOVO,
         List.of(state.getSagaData().getGerenteAInserir()),
-        correlationId),
+        message.getCorrelationId()),
         RabbitmqConsts.GERENTES_SAGA_KEY);
   }
 
   // PASSSO 3, MOVER CONTA DO GERENTE ANTIGO AO NOVO
-  public void handleMoverContas(UUID correlationId) {
-    var state = sagas.get(correlationId);
+  public void handleMoverContas(SagaMessageWrapper<Object> message) {
+    var state = sagas.get(message.getCorrelationId());
+
+    state.setStep(InsertGerentesPasso.GERENTE_INSERIDO);
 
     SagaProducer<Long> gerenteMessageProducer = producerFactory.create();
     gerenteMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
         SagaOperations.InsertGerente.MOVER_CONTAS,
         List.of(state.getSagaData().getIdGerenteAntigo(), state.getSagaData().getGerenteAInserir().getId()),
-        correlationId),
+        message.getCorrelationId()),
         RabbitmqConsts.GERENTES_SAGA_KEY);
 
   }
 
-  public void handleFinalizar(UUID correlationId) {
+  public void handleFinalizar(SagaMessageWrapper<Object> message) {
+    var state = sagas.get(message.getCorrelationId());
+    state.setStep(InsertGerentesPasso.CONTA_DADA_AO_NOVO_GERENTE);
+    state.setStatus(SagaStatus.SUCCESS);
+
     // TODO: decidir oq fazer aqui
   }
 
