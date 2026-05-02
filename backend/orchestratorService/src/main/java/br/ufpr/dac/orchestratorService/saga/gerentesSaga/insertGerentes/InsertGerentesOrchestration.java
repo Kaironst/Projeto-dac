@@ -32,7 +32,7 @@ public class InsertGerentesOrchestration {
 
     var state = new SagaState<InsertGerentesData>(
         correlationId,
-        InsertGerentesPasso.INICIO,
+        InsertGerentesPasso.BUSCANDO_GERENTE_COM_MAIS_CONTAS,
         SagaStatus.RUNNING,
         new InsertGerentesData());
 
@@ -54,7 +54,7 @@ public class InsertGerentesOrchestration {
   public void handleInserirGerente(SagaMessageWrapper<Long> message) {
 
     var state = sagas.get(message.getCorrelationId());
-    state.setStep(InsertGerentesPasso.GERENTE_COM_MAIS_CLIENTES_BUSCADO);
+    state.setStep(InsertGerentesPasso.INSERINDO_GERENTE);
     state.getSagaData().setIdGerenteAntigo(message.getData().getFirst());
 
     SagaProducer<GerentesDto.Gerente> gerenteMessageProducer = producerFactory.create();
@@ -69,7 +69,7 @@ public class InsertGerentesOrchestration {
   public void handleMoverContas(SagaMessageWrapper<Object> message) {
     var state = sagas.get(message.getCorrelationId());
 
-    state.setStep(InsertGerentesPasso.GERENTE_INSERIDO);
+    state.setStep(InsertGerentesPasso.DANDO_CONTA_AO_NOVO_GERENTE);
 
     SagaProducer<Long> gerenteMessageProducer = producerFactory.create();
     gerenteMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
@@ -82,7 +82,7 @@ public class InsertGerentesOrchestration {
 
   public void handleFinalizar(SagaMessageWrapper<Object> message) {
     var state = sagas.get(message.getCorrelationId());
-    state.setStep(InsertGerentesPasso.CONTA_DADA_AO_NOVO_GERENTE);
+    state.setStep(InsertGerentesPasso.CONCLUINDO);
     state.setStatus(SagaStatus.SUCCESS);
 
     // TODO: decidir oq fazer aqui
