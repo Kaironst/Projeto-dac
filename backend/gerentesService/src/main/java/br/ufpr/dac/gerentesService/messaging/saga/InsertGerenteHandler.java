@@ -11,6 +11,7 @@ import br.ufpr.dac.gerentesService.repository.GerenteRepository;
 import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
+import jakarta.transaction.Transactional;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import lombok.AllArgsConstructor;
 
@@ -21,11 +22,21 @@ public class InsertGerenteHandler {
   private RabbitTemplate template;
   GerenteRepository repo;
 
+  @Transactional
   public void handleInsertGerente(SagaMessageWrapper<GerentesDto.Gerente> message) {
-    List<Gerente> queryResult = repo.saveAll(MessageConsumer.dtoToGerentes(message.getData()));
+
+    List<Gerente> queryResult = null;
+    boolean sucesso = true;
+    try {
+      queryResult = repo.saveAll(MessageConsumer.dtoToGerentes(message.getData()));
+    } catch (Exception e) {
+      e.printStackTrace();
+      sucesso = false;
+    }
     this.enviarMenssagem(
         new SagaMessageWrapper<Long>(
-            SagaOperations.InsertGerente.INSERIR_NOVO_RESULT,
+            sucesso ? SagaOperations.InsertGerente.INSERIR_NOVO_RESULT
+                : SagaOperations.InsertGerente.INSERIR_NOVO_ERROR,
             List.of(MessageConsumer.gerentesToDto(queryResult).getFirst().getId()),
             message.getCorrelationId()));
   }

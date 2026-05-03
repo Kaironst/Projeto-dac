@@ -7,7 +7,7 @@ import br.ufpr.dac.orchestratorService.saga.gerentesSaga.insertGerentes.InsertGe
 import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
-import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
+import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations.InsertGerente;
 import lombok.AllArgsConstructor;
 
 @Component
@@ -24,16 +24,16 @@ public class SagaConsumer {
 
         // para a saga inserir gerente
         // ====================================================================
-        case SagaOperations.InsertGerente.START -> {
+        case InsertGerente.START -> {
           insertGerentesOrchestration.StartSaga(SagaMessageWrapper.convertWrapper(message, GerentesDto.Gerente.class));
         }
-        case SagaOperations.InsertGerente.GET_COM_MAIS_CONTAS_RESULT -> {
+        case InsertGerente.GET_COM_MAIS_CONTAS_RESULT, InsertGerente.GET_COM_MAIS_CONTAS_ERROR -> {
           insertGerentesOrchestration.handleInserirGerente(SagaMessageWrapper.convertWrapper(message, Long.class));
         }
-        case SagaOperations.InsertGerente.INSERIR_NOVO_RESULT -> {
+        case InsertGerente.INSERIR_NOVO_RESULT, InsertGerente.INSERIR_NOVO_ERROR -> {
           insertGerentesOrchestration.handleMoverContas(message);
         }
-        case SagaOperations.InsertGerente.MOVER_CONTAS_RESULT -> {
+        case InsertGerente.MOVER_CONTAS_RESULT, InsertGerente.MOVER_CONTAS_ERROR -> {
           insertGerentesOrchestration.handleFinalizar(message);
         }
         // ===================================================================

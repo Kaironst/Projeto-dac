@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import br.ufpr.dac.contasService.entity.Conta;
 import br.ufpr.dac.contasService.repository.ContaRepository;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
-import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
+import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -23,15 +23,23 @@ public class MoverContasHandler {
   @Transactional
   public void handleMoverContas(SagaMessageWrapper<Long> message) {
 
-    List<Conta> contasGerenteAntigo = repo.findAllByGerente(message.getData().getFirst());
-    Conta contaEscolhida = contasGerenteAntigo.get(new Random().nextInt(contasGerenteAntigo.size()));
+    Conta contaEscolhida = null;
+    boolean sucesso = true;
+    try {
+      List<Conta> contasGerenteAntigo = repo.findAllByGerente(message.getData().getFirst());
+      contaEscolhida = contasGerenteAntigo.get(new Random().nextInt(contasGerenteAntigo.size()));
 
-    contaEscolhida.setGerente(message.getData().getLast());
-    repo.save(contaEscolhida);
+      contaEscolhida.setGerente(message.getData().getLast());
+      repo.save(contaEscolhida);
+    } catch (Exception e) {
+      e.printStackTrace();
+      sucesso = false;
+    }
 
     this.enviarMenssagem(
         new SagaMessageWrapper<Long>(
-            MessageOperations.RESULT,
+            sucesso ? SagaOperations.InsertGerente.MOVER_CONTAS_RESULT
+                : SagaOperations.InsertGerente.MOVER_CONTAS_ERROR,
             List.of(contaEscolhida.getId()),
             message.getCorrelationId()));
 
