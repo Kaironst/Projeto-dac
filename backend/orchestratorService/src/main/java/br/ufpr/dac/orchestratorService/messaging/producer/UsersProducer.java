@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.dto.UsersDto;
-import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 
 @Service
@@ -26,7 +25,7 @@ public class UsersProducer {
 
     if (response == null)
       System.out.println("error on enviarMenssagem from usersService");
-    return response == null ? new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_GENERIC, null) : response;
+    return response;
 
   }
 

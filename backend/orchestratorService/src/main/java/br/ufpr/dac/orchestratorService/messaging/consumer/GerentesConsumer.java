@@ -24,8 +24,7 @@ public class GerentesConsumer {
 
       if (response == null)
         System.out.println("error on gerentesConsumer");
-      return response == null ? new MessageWrapper<GerentesDto.Gerente>(MessageOperations.ERROR_GENERIC, null)
-          : response;
+      return response;
 
     } catch (Exception e) {
       System.out.println("error on gerentesConsumer");

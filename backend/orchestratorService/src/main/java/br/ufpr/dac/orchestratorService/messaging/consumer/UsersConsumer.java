@@ -24,7 +24,7 @@ public class UsersConsumer {
 
       if (response == null)
         System.out.println("error on usersConsumer");
-      return response == null ? new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_GENERIC, null) : response;
+      return response;
 
     } catch (Exception e) {
       System.out.println("error on usersConsumer");
