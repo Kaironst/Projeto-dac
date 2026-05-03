@@ -17,6 +17,7 @@ public class SagaConsumer {
 
   GerenteRepository repo;
   InsertGerenteHandler insertGerenteHandler;
+  RollbackRemoveGerenteHandler removeGerenteHandler;
 
   @Transactional
   @RabbitListener(queues = RabbitmqConsts.CONTAS_SAGA_QUEUE)
@@ -26,6 +27,10 @@ public class SagaConsumer {
       case SagaOperations.InsertGerente.INSERIR_NOVO -> {
         insertGerenteHandler.handleInsertGerente(
             SagaMessageWrapper.convertWrapper(message, GerentesDto.Gerente.class));
+      }
+      case SagaOperations.InsertGerente.ROLLBACK_REMOVER_GERENTE -> {
+        removeGerenteHandler.handleRemoveGerente(
+            SagaMessageWrapper.convertWrapper(message, Long.class));
       }
     }
 

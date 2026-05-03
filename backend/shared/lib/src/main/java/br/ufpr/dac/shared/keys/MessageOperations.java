@@ -22,17 +22,20 @@ public class MessageOperations {
 
     public static class InsertGerente {
       // InsertGerente
-      public static final String START = "START_INSERIR_GERENTE_SAGA";
-      public static final String GET_COM_MAIS_CONTAS = "GET_GERENTES_COM_MAIS_CONTAS_SAGA";
-      public static final String INSERIR_NOVO = "INSERT_GERENTE_NOVO_SAGA";
-      public static final String MOVER_CONTAS = "MOVER_CONTAS_GERENTE_SAGA";
+      public static final String START = "INSERT_GERENTE_START_INSERIR_GERENTE";
+      public static final String GET_COM_MAIS_CONTAS = "INSERT_GERENTE_GET_COM_MAIS_CONTAS";
+      public static final String INSERIR_NOVO = "INSERT_GERENTE_INSERT_NOVO";
+      public static final String MOVER_CONTAS = "INSERT_GERENTE_MOVER_CONTAS";
+      public static final String ROLLBACK_REMOVER_GERENTE = "INSERT_GERENTE_ROLLBACK_REMOVER_GERENTE";
       // InsertGerente - Resultado de operações
-      public static final String GET_COM_MAIS_CONTAS_RESULT = "GET_GERENTES_COM_MAIS_CONTAS_RESULT";
-      public static final String INSERIR_NOVO_RESULT = "INSERT_GERENTE_NOVO_RESULT";
-      public static final String MOVER_CONTAS_RESULT = "MOVER_CONTAS_GERENTE_RESULT";
-      public static final String GET_COM_MAIS_CONTAS_ERROR = "GET_GERENTES_COM_MAIS_CONTAS_ERROR";
-      public static final String INSERIR_NOVO_ERROR = "INSERT_GERENTE_NOVO_ERROR";
-      public static final String MOVER_CONTAS_ERROR = "MOVER_CONTAS_GERENTE_ERROR";
+      public static final String GET_COM_MAIS_CONTAS_RESULT = "INSERT_GERENTE_GET_COM_MAIS_CONTAS_RESULT";
+      public static final String GET_COM_MAIS_CONTAS_ERROR = "INSERT_GERENTE_GET_COM_MAIS_CONTAS_ERROR";
+      public static final String INSERIR_NOVO_RESULT = "INSERT_GERENTE_INSERT_NOVO_RESULT";
+      public static final String INSERIR_NOVO_ERROR = "INSERT_GERENTE_INSERT_NOVO_ERROR";
+      public static final String MOVER_CONTAS_RESULT = "INSERT_GERENTE_MOVER_CONTAS_RESULT";
+      public static final String MOVER_CONTAS_ERROR = "INSERT_GERENTE_MOVER_CONTAS_ERROR";
+      public static final String ROLLBACK_REMOVER_GERENTE_RESULT = "INSERT_GERENTE_ROLLBACK_REMOVER_GERENTE_RESULT";
+      public static final String ROLLBACK_REMOVER_GERENTE_ERROR = "INSERT_GERENTE_ROLLBACK_REMOVER_GERENTE_ERROR";
     }
 
   }
