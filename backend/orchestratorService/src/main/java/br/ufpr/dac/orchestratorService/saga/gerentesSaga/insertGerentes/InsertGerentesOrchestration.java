@@ -128,7 +128,7 @@ public class InsertGerentesOrchestration {
       gerenteMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
           SagaOperations.InsertGerente.ROLLBACK_REMOVER_GERENTE,
           List.of(state.getSagaData().getGerenteAInserir().getId()),
-          message.getCorrelationId()),
+          correlationId),
           RabbitmqConsts.GERENTES_SAGA_KEY);
     }
     state.setStep(InsertGerentesPasso.FINALIZADO);
