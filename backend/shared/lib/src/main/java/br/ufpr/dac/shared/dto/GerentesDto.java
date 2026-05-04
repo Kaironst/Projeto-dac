@@ -17,6 +17,7 @@ public class GerentesDto {
     private String email;
     private String cpf;
     private String telefone;
+    private Boolean administrador;
   }
 
 }

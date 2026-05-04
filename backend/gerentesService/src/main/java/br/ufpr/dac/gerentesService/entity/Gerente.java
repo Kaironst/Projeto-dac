@@ -27,5 +27,6 @@ public class Gerente {
   @Column(unique = true)
   private String cpf;
   private String telefone;
+  private Boolean administrador;
 
 }

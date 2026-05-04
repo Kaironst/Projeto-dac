@@ -61,6 +61,7 @@ public class MessageConsumer {
           .email(gerente.getEmail())
           .telefone(gerente.getTelefone())
           .cpf(gerente.getCpf())
+          .administrador(gerente.getAdministrador())
           .build();
       gerentesDto.add(gerenteDto);
     });
@@ -76,6 +77,7 @@ public class MessageConsumer {
           .email(gerenteDto.getEmail())
           .telefone(gerenteDto.getTelefone())
           .cpf(gerenteDto.getCpf())
+          .administrador(gerenteDto.getAdministrador())
           .build();
       gerentes.add(gerente);
     });
@@ -113,6 +115,7 @@ public class MessageConsumer {
       gerenteAtual.setEmail(gerente.getEmail());
       gerenteAtual.setTelefone(gerente.getTelefone());
       gerenteAtual.setCpf(gerente.getCpf());
+      gerenteAtual.setAdministrador(gerente.getAdministrador());
 
       gerentesAtualizados.add(repo.save(gerenteAtual));
     });
