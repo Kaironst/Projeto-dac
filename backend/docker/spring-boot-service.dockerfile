@@ -3,13 +3,16 @@ FROM gradle:9-jdk25-alpine AS build
 #project dir é a pasta a ser acessada e é passada pela dockerfile
 ARG PROJECT_DIR
 
+ENV GRADLE_OPTS="-Xmx512m -Xms256m -XX:+HeapDumpOnOutOfMemoryError" \
+    GRADLE_USER_HOME="/home/gradle"
+
 WORKDIR /app/
 COPY ./shared ./shared
 
 #publica a dependência /shared no repositório maven local para tornar instalável
 WORKDIR /app/shared
 RUN --mount=type=cache,target=/home/gradle/.gradle \
-  gradle publishToMavenLocal --no-daemon
+  gradle publishToMavenLocal --no-daemon --parallel --build-cache
 
 WORKDIR /app/
 COPY ./${PROJECT_DIR} ./${PROJECT_DIR}
@@ -17,7 +20,7 @@ COPY ./${PROJECT_DIR} ./${PROJECT_DIR}
 WORKDIR /app/${PROJECT_DIR}
 #rodando sem testes para o build não falhar caso o banco ou rabbitmq ainda não estejam rodando
 RUN --mount=type=cache,target=/home/gradle/.gradle \
-  gradle build -x test --no-daemon
+  gradle build -x test --no-daemon --parallel --build-cache
 
 FROM eclipse-temurin:25-alpine
 
