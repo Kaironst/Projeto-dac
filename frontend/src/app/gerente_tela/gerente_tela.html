@@ -1,55 +1,64 @@
-<div class="container">
-
-  <header>
-    <h1>Tela do Gerente</h1>
-  </header>
-
-  <div class="card">
-    <h2>Pedidos de Autocadastro</h2>
-
-    <div class="grid">
-
-      <div class="grid-header">
-        <div>CPF</div>
-        <div>Nome</div>
-        <div>Salário</div>
-        <div>Ações</div>
-      </div>
-
-      @for (p of pedidos; track p.cpf) {
-        <div class="grid-row">
-          <div>{{ p.cpf }}</div>
-          <div>{{ p.nome }}</div>
-          <div class="positivo">
-            {{ p.salario | currency:'BRL' }}
-          </div>
-
-          <div class="acoes-botoes">
-
-            <button (click)="aprovar(p)">
-              Aprovar
-            </button>
-
-            <div class="rejeicao">
-              <input
-                type="text"
-                placeholder="Motivo"
-                [(ngModel)]="motivoRejeicao[p.cpf]"
-              />
-
-              <button class="btn-recusar" (click)="recusar(p)">
-                Recusar
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-      } @empty {
-        <div>Nenhum pedido pendente.</div>
-      }
-
-    </div>
+<div class="gerente-container">
+  <div class="header">
+    <h1>Tela do Gerente - Aprovação de Clientes</h1>
+    <p>Requisito R9, R10 e R11 - Gerenciar solicitações de cadastro</p>
   </div>
 
+  <!-- Mensagem de Status -->
+  <div *ngIf="mensagem" class="mensagem" [ngClass]="{'erro': mensagem.includes('Erro')}">
+    {{ mensagem }}
+    <button (click)="limparMensagem()" class="btn-fechar">×</button>
+  </div>
+
+  <!-- Carregando -->
+  <div *ngIf="carregando" class="carregando">
+    <p>Carregando pedidos...</p>
+  </div>
+
+  <!-- Tabela de Pedidos -->
+  <div *ngIf="!carregando && pedidos.length > 0" class="pedidos-container">
+    <table class="tabela-pedidos">
+      <thead>
+        <tr>
+          <th>CPF</th>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Salário</th>
+          <th>Telefone</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let pedido of pedidos" class="pedido-row">
+          <td>{{ pedido.cpf }}</td>
+          <td>{{ pedido.nome }}</td>
+          <td>{{ pedido.email }}</td>
+          <td>R$ {{ pedido.salario | number: '1.2-2' }}</td>
+          <td>{{ pedido.telefone }}</td>
+          <td class="acoes">
+            <button (click)="aprovar(pedido)" class="btn btn-aprovar" [disabled]="carregando">
+              ✓ Aprovar
+            </button>
+            <div class="rejeicao-container">
+              <input
+                type="text"
+                [(ngModel)]="motivoRejeicao[pedido.cpf]"
+                placeholder="Motivo da recusa"
+                class="input-motivo"
+                [disabled]="carregando"
+              />
+              <button (click)="rejeitar(pedido)" class="btn btn-rejeitar" [disabled]="carregando">
+                ✗ Rejeitar
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sem Pedidos -->
+  <div *ngIf="!carregando && pedidos.length === 0" class="sem-pedidos">
+    <p>✓ Nenhum pedido de cadastro pendente de aprovação</p>
+  </div>
 </div>

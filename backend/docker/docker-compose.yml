@@ -43,24 +43,22 @@ services:
         condition: service_healthy
     ports:
       - "8080:3000"
+    environment:
+      - PORT=3000
+      - EMAIL_SERVICE_URL=http://email-service:3005
 
-  orchestrator-service:
+  email-service:
     build:
       context: ..
-      dockerfile: docker/spring-boot-service.dockerfile
+      dockerfile: docker/email-service.dockerfile
       args:
-        PROJECT_DIR: orchestratorService
-    restart: always
-    volumes:
-      - gradle-caches:/home/gradle/.gradle/caches
-      - gradle-wrapper:/home/gradle/.gradle/wrapper
+        PROJECT_DIR: emailService
     depends_on:
-      rabbitmq:
-        condition: service_healthy
-      contas-service:
-        condition: service_started
+      - rabbitmq
     ports:
-      - "8081:8080"
+      - "3006:3005"
+    environment:
+      - PORT=3005
 
   users-service:
     build:
@@ -68,6 +66,7 @@ services:
       dockerfile: docker/spring-boot-service.dockerfile
       args:
         PROJECT_DIR: usersService
+    restart: always
     volumes:
       - gradle-caches:/home/gradle/.gradle/caches
       - gradle-wrapper:/home/gradle/.gradle/wrapper
@@ -78,25 +77,8 @@ services:
         condition: service_started
     ports:
       - "8082:8080"
-
-  gerentes-service:
-    build:
-      context: ..
-      dockerfile: docker/spring-boot-service.dockerfile
-      args:
-        PROJECT_DIR: gerentesService
-    volumes:
-      - gradle-caches:/home/gradle/.gradle/caches
-      - gradle-wrapper:/home/gradle/.gradle/wrapper
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      users-database:
-        condition: service_started
-      contas-service:
-        condition: service_started
-    ports:
-      - "8083:8080"
+    environment:
+      - GRADLE_OPTS=-Xmx512m -Xms256m -XX:+HeapDumpOnOutOfMemoryError
 
   contas-service:
     build:
@@ -109,12 +91,54 @@ services:
       - gradle-caches:/home/gradle/.gradle/caches
       - gradle-wrapper:/home/gradle/.gradle/wrapper
     depends_on:
+      users-service:
+        condition: service_started
       rabbitmq:
         condition: service_healthy
-      users-database:
-        condition: service_started
     ports:
       - "8084:8080"
+    environment:
+      - GRADLE_OPTS=-Xmx512m -Xms256m -XX:+HeapDumpOnOutOfMemoryError
+
+  gerentes-service:
+    build:
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
+      args:
+        PROJECT_DIR: gerentesService
+    restart: always
+    volumes:
+      - gradle-caches:/home/gradle/.gradle/caches
+      - gradle-wrapper:/home/gradle/.gradle/wrapper
+    depends_on:
+      contas-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8083:8080"
+    environment:
+      - GRADLE_OPTS=-Xmx512m -Xms256m -XX:+HeapDumpOnOutOfMemoryError
+
+  orchestrator-service:
+    build:
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
+      args:
+        PROJECT_DIR: orchestratorService
+    restart: always
+    volumes:
+      - gradle-caches:/home/gradle/.gradle/caches
+      - gradle-wrapper:/home/gradle/.gradle/wrapper
+    depends_on:
+      contas-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      - GRADLE_OPTS=-Xmx512m -Xms256m -XX:+HeapDumpOnOutOfMemoryError
 
 volumes:
   pgdata:
