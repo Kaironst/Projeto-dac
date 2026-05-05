@@ -1,7 +1,6 @@
 import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { NgxMaskDirective } from 'ngx-mask';
+import { FormsModule} from '@angular/forms';
 
 interface Cliente {
   id?: number;
@@ -22,7 +21,7 @@ interface Transacao {
 @Component({
   selector: 'app-cliente-tela',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgxMaskDirective],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cliente_tela.html',
   styleUrls: ['./cliente_tela.css']
 })
@@ -30,8 +29,6 @@ export class ClienteTela {
 
   private readonly apiUrl = 'http://localhost:8080/clientes';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
-
-  perfilForm: FormGroup;
 
   cpf: string = '12912861012';
   clienteAtual: Cliente | null = null;
@@ -53,20 +50,7 @@ export class ClienteTela {
   dataInicio: string = '';
   dataFim: string = '';
 
-  constructor(private fb: FormBuilder) {
-    this.perfilForm = this.fb.group({
-      nome: [''],
-      email: [''],
-      telefone: [''],
-      salario: [0],
-
-      cep: [''],
-      logradouro: [''],
-      numero: [''],
-      complemento: [''],
-      cidade: [''],
-      estado: ['']
-    });
+  constructor() {
 
     this.carregarDadosCliente();
   }
@@ -106,28 +90,21 @@ export class ClienteTela {
   }
 
   async carregarDadosCliente() {
-    const cliente = await this.buscarClienteNaApi();
+  const cliente = await this.buscarClienteNaApi();
 
-    if (!cliente) return;
+  if (!cliente) return;
 
-    this.clienteAtual = cliente;
+  this.clienteAtual = cliente;
 
-    this.perfilForm.patchValue({
-      nome: cliente.nome,
-      email: cliente.email,
-      telefone: cliente.telefone,
-      salario: cliente.salario
-    });
+  this.limite = this.calcularLimite(cliente.salario);
 
-    this.limite = this.calcularLimite(cliente.salario);
+  // Mock enquanto não integra contas
+  this.numConta = '0001';
+  this.gerente = 'Gerente Padrão';
+  this.saldo = 0;
 
-    // Mock enquanto não integra contas
-    this.numConta = '0001';
-    this.gerente = 'Gerente Padrão';
-    this.saldo = 0;
-
-    this.changeDetectorRef.detectChanges();
-  }
+  this.changeDetectorRef.detectChanges();
+}
 
 
   depositar() {
@@ -195,39 +172,6 @@ export class ClienteTela {
 
     this.atualizarFiltro();
   }
-
-
-  async atualizarPerfil() {
-    if (!this.clienteAtual) return;
-
-    const { nome, email, telefone, salario } = this.perfilForm.value;
-
-    if (salario <= 0) {
-      alert('Salário inválido!');
-      return;
-    }
-
-    const atualizado: Cliente = {
-      ...this.clienteAtual,
-      nome,
-      email,
-      telefone,
-      salario
-    };
-
-    const sucesso = await this.atualizarClienteNaApi(atualizado);
-
-    if (!sucesso) {
-      alert('Erro ao atualizar!');
-      return;
-    }
-
-    this.clienteAtual = atualizado;
-    this.limite = this.calcularLimite(salario);
-
-    alert('Perfil atualizado!');
-  }
-
 
   filtrarExtrato() {
     const inicio = this.dataInicio ? new Date(this.dataInicio) : null;

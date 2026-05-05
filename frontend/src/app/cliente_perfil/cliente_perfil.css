@@ -1,0 +1,38 @@
+.container {
+  max-width: 70%;
+  margin: auto;
+  padding: 40px;
+  padding-top: 0%;
+  line-height: 1.6;
+  background-color: aliceblue;
+  border-radius: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+  background-color: green;
+  border-radius: 0 0 50px 50px;
+  color: aliceblue;
+  padding-bottom: 10px;
+}
+
+input {
+  width:100%;
+  padding: 8px 0px;
+  margin: 5px 0px 5px 0px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0d47a1;
+}
