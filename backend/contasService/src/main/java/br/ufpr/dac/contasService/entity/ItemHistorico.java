@@ -31,6 +31,6 @@ public class ItemHistorico {
 
   private LocalDateTime dataHora;
   private Integer tipo;
-  private Double valorMovimentação;
+  private Double valorMovimentacao;
 
 }

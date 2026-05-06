@@ -20,6 +20,13 @@ public class ItemHistoricoDto {
     private LocalDateTime dataHora;
     private Integer tipo;
     private Double valorMovimentacao;
+
+  }
+
+  public static class TipoTransacao {
+    public static final int DEPOSITO = 0;
+    public static final int SAQUE = 1;
+    public static final int TRANSACAO = 2;
   }
 
 }

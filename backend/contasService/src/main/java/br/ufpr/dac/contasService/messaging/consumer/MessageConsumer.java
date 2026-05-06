@@ -61,6 +61,7 @@ public class MessageConsumer {
     contas.forEach(conta -> {
       var contaDto = ContasDto.Conta.builder()
           .id(conta.getId())
+          .numero(conta.getNumero())
           .saldo(conta.getSaldo())
           .limite(conta.getLimite())
           .cliente(UsersDto.Cliente.builder().id(conta.getCliente()).build())
@@ -78,6 +79,7 @@ public class MessageConsumer {
     contasDto.forEach(contaDto -> {
       var conta = Conta.builder()
           .id(contaDto.getId())
+          .numero(contaDto.getNumero())
           .saldo(contaDto.getSaldo())
           .limite(contaDto.getLimite())
           .cliente(contaDto.getCliente().getId())
@@ -117,6 +119,7 @@ public class MessageConsumer {
     dtoToContas(contas).forEach(conta -> {
       Conta contaAtual = repo.findById(conta.getId()).orElseThrow();
 
+      contaAtual.setNumero(conta.getNumero());
       contaAtual.setSaldo(conta.getSaldo());
       contaAtual.setLimite(conta.getLimite());
       contaAtual.setCliente(conta.getCliente());
