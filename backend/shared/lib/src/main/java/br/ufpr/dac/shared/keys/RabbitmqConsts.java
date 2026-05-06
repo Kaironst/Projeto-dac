@@ -10,17 +10,17 @@ public class RabbitmqConsts {
   // key para o listener de clientes
   public static final String ORCHESTRATOR_USERS_KEY = "orchestrator.users.key";
   // queue para o listener de clientes
-  public static final String ORCHESTRATOR_USERS_QUEUE = "orchestrator.users.key";
+  public static final String ORCHESTRATOR_USERS_QUEUE = "orchestrator.users.queue";
 
   // key para o listener de gerentes
   public static final String ORCHESTRATOR_GERENTES_KEY = "orchestrator.gerentes.key";
   // queue para o listener de gerentes
-  public static final String ORCHESTRATOR_GERENTES_QUEUE = "orchestrator.gerentes.key";
+  public static final String ORCHESTRATOR_GERENTES_QUEUE = "orchestrator.gerentes.queue";
 
   // key para o listener de saga
-  public static final String ORCHESTRATOR_SAGA_KEY = "saga.orchestrator.key";
+  public static final String ORCHESTRATOR_SAGA_KEY = "orchestrator.saga.key";
   // queue para o listener de saga
-  public static final String ORCHESTRATOR_SAGA_QUEUE = "saga.orchestrator.queue";
+  public static final String ORCHESTRATOR_SAGA_QUEUE = "orchestrator.saga.queue";
 
   // --------------------------------------------------------------------------------------------------------
 

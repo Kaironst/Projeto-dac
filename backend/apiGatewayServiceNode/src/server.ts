@@ -4,7 +4,8 @@ import cors from "cors";
 import axios from "axios";
 import ClienteController from "./controller/ClienteController";
 import GerenteController from "./controller/GerenteController";
-import { GerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
+import { gerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
+import { sagaProducer } from './messaging/GenericProducer';
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
@@ -18,15 +19,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/clientes", ClienteController);
+app.use("/gerentes", GerenteController);
 
 // Email endpoint proxy
 app.post("/emails/enviar", async (req: Request, res: Response) => {
   try {
     const { destinatario, assunto, conteudoHtml } = req.body;
-    
+
     if (!destinatario || !assunto || !conteudoHtml) {
-      return res.status(400).json({ 
-        error: "Missing required fields: destinatario, assunto, conteudoHtml" 
+      return res.status(400).json({
+        error: "Missing required fields: destinatario, assunto, conteudoHtml"
       });
     }
 
@@ -36,22 +38,22 @@ app.post("/emails/enviar", async (req: Request, res: Response) => {
       conteudoHtml
     });
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Email enviado com sucesso",
-      destinatario 
+      destinatario
     });
   } catch (error: any) {
     console.error("Erro ao enviar email:", error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Erro ao enviar email",
-      details: error.message 
+      details: error.message
     });
   }
 });
 
-app.use("/gerentes", GerenteController);
 usersProducer.init();
-GerentesProducer.init();
+gerentesProducer.init();
+sagaProducer.init();
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);

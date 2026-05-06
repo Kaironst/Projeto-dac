@@ -1,8 +1,9 @@
 import amqp from "amqplib";
 import { rabbitmqUrl } from "../server";
 import { randomUUID } from "crypto";
-import { UsersDtoMessage } from "../dto/UsersDto";
-import { GerentesDtoMessage } from "../dto/GerentesDto";
+import { UsersDtoCliente } from "../dto/UsersDto";
+import { GerentesDtoGerente } from "../dto/GerentesDto";
+import { MessageWrapper } from "../dto/MessageWrapper";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
@@ -53,6 +54,10 @@ class GenericProducerRPC<MessageType> {
 
   public async requestService(message: MessageType): Promise<MessageType> {
 
+    if (!this.channel) {
+      throw new Error("canal não inicializado");
+    }
+
     const correlationId = randomUUID();
 
 
@@ -86,5 +91,5 @@ class GenericProducerRPC<MessageType> {
 }
 
 export default GenericProducerRPC;
-export const usersProducer = new GenericProducerRPC<UsersDtoMessage>("app.exchange", "orchestrator.users.key");
-export const GerentesProducer = new GenericProducerRPC<GerentesDtoMessage>("app.exchange", "orchestrator.gerentes.key");
+export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
+export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");

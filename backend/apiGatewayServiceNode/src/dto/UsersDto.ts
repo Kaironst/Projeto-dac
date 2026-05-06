@@ -1,9 +1,3 @@
-
-export interface UsersDtoMessage {
-  operation: null | string;
-  data: null | UsersDtoCliente[];
-}
-
 export interface UsersDtoCliente {
   id: null | number;
 

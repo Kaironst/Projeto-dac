@@ -1,9 +1,3 @@
-
-export interface GerentesDtoMessage {
-  operation: null | string;
-  data: null | GerentesDtoGerente[];
-}
-
 export interface GerentesDtoGerente {
   id: null | number;
 
@@ -11,4 +5,5 @@ export interface GerentesDtoGerente {
   email: null | string;
   cpf: null | string;
   telefone: null | string;
+  administrador: null | boolean;
 }

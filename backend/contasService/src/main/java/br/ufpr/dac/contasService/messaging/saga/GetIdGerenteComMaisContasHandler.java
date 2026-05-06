@@ -62,6 +62,11 @@ public class GetIdGerenteComMaisContasHandler {
       sucesso = false;
     }
 
+    if (gerenteEscolhido == null) {
+      sucesso = false;
+      gerenteEscolhido = 0l;
+    }
+
     this.enviarMenssagem(
         new SagaMessageWrapper<Long>(
             sucesso ? SagaOperations.InsertGerente.GET_COM_MAIS_CONTAS_RESULT

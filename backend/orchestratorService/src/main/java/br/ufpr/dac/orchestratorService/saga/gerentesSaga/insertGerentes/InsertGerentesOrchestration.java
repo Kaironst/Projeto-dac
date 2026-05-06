@@ -1,6 +1,5 @@
 package br.ufpr.dac.orchestratorService.saga.gerentesSaga.insertGerentes;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 import br.ufpr.dac.orchestratorService.saga.SagaProducerFactory;
 import br.ufpr.dac.orchestratorService.saga.SagaState;
 import br.ufpr.dac.orchestratorService.saga.SagaStatus;
-import br.ufpr.dac.orchestratorService.saga.sagaStep;
 import br.ufpr.dac.orchestratorService.saga.SagaProducerFactory.SagaProducer;
 import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
@@ -37,6 +35,7 @@ public class InsertGerentesOrchestration {
       MessageOperations.ERROR_GENERIC);
 
   public void StartSaga(SagaMessageWrapper<GerentesDto.Gerente> message) {
+    System.out.println("startSaga acionado");
     UUID correlationId = UUID.randomUUID();
     message.setCorrelationId(correlationId);
 
@@ -62,6 +61,7 @@ public class InsertGerentesOrchestration {
 
   // PASSO 2, INSERIR GERENTE NO BANCO DE DADOS
   public void handleInserirGerente(SagaMessageWrapper<Long> message) {
+    System.out.println("inserirGerente acionado");
 
     // se a falha ocorrer no primeiro passo, que é apenas um get, não há necessidade
     // de rollback
@@ -84,6 +84,7 @@ public class InsertGerentesOrchestration {
 
   // PASSSO 3, MOVER CONTA DO GERENTE ANTIGO AO NOVO
   public void handleMoverContas(SagaMessageWrapper<Object> message) {
+    System.out.println("moverContasAcionado");
 
     // falha no passo 2, ainda não há nada a ser alterado
     if (errors.contains(message.getOperation())) {
@@ -104,6 +105,7 @@ public class InsertGerentesOrchestration {
   }
 
   public void handleFinalizar(SagaMessageWrapper<Object> message) {
+    System.out.println("finalizar acionado");
 
     // falha no passo 3, conta não alterada, mas precisamos excluir o gerente novo
     // do passo 2 completo
@@ -120,6 +122,8 @@ public class InsertGerentesOrchestration {
   }
 
   public void handleRollback(UUID correlationId) {
+    System.out.println("rollback acionado");
+
     var state = sagas.get(correlationId);
     state.setStatus(SagaStatus.COMPENSATING);
     // remover o gerente inserido (unico caso de rollback necessário)
