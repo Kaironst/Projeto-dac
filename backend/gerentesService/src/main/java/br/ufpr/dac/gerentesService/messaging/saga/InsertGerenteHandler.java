@@ -29,6 +29,9 @@ public class InsertGerenteHandler {
     boolean sucesso = true;
     try {
       queryResult = repo.saveAll(MessageConsumer.dtoToGerentes(message.getData()));
+      if (queryResult.isEmpty() || queryResult == null) {
+        sucesso = false;
+      }
     } catch (Exception e) {
       e.printStackTrace();
       sucesso = false;
@@ -37,7 +40,8 @@ public class InsertGerenteHandler {
         new SagaMessageWrapper<Long>(
             sucesso ? SagaOperations.InsertGerente.INSERIR_NOVO_RESULT
                 : SagaOperations.InsertGerente.INSERIR_NOVO_ERROR,
-            List.of(MessageConsumer.gerentesToDto(queryResult).getFirst().getId()),
+            sucesso ? List.of(MessageConsumer.gerentesToDto(queryResult).getFirst().getId())
+                : List.of(),
             message.getCorrelationId()));
   }
 

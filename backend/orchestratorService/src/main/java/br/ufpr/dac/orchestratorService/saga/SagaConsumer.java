@@ -36,16 +36,20 @@ public class SagaConsumer {
         }
         case InsertGerente.GET_COM_MAIS_CONTAS_RESULT, InsertGerente.GET_COM_MAIS_CONTAS_ERROR -> {
           insertGerentesOrchestration
-              .handleInserirGerente(mapper.convertValue(
+              .handleGerenteFound(mapper.convertValue(
                   message,
                   new TypeReference<SagaMessageWrapper<Long>>() {
                   }));
         }
         case InsertGerente.INSERIR_NOVO_RESULT, InsertGerente.INSERIR_NOVO_ERROR -> {
-          insertGerentesOrchestration.handleMoverContas(message);
+          insertGerentesOrchestration
+              .handleGerenteInserted(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<Long>>() {
+                  }));
         }
         case InsertGerente.MOVER_CONTAS_RESULT, InsertGerente.MOVER_CONTAS_ERROR -> {
-          insertGerentesOrchestration.handleFinalizar(message);
+          insertGerentesOrchestration.handleContasSwapped(message);
         }
         // ===================================================================
 

@@ -79,8 +79,9 @@ public class GetIdGerenteComMaisContasHandler {
   public void enviarMenssagem(SagaMessageWrapper<Long> message) {
     template.convertAndSend(
         RabbitmqConsts.APP_EXCHANGE,
-        RabbitmqConsts.ORCHESTRATOR_SAGA_QUEUE,
+        RabbitmqConsts.ORCHESTRATOR_SAGA_KEY,
         message);
+    System.out.println("message" + message + "sent to " + RabbitmqConsts.ORCHESTRATOR_SAGA_QUEUE);
   }
 
 };

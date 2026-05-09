@@ -35,6 +35,19 @@ public class RabbitMQConfig {
         .noargs();
   }
 
+  @Bean
+  public Queue sagaQueue() {
+    return new Queue(RabbitmqConsts.GERENTES_SAGA_QUEUE);
+  }
+
+  @Bean
+  public Binding sagaBinding(Queue sagaQueue, Exchange exchange) {
+    return BindingBuilder.bind(sagaQueue)
+        .to(exchange)
+        .with(RabbitmqConsts.GERENTES_SAGA_KEY)
+        .noargs();
+  }
+
   // parte para a configuração de serialização das menssagens em json
 
   @Bean
