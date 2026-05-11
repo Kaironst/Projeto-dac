@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,8 +126,18 @@ public class MessageConsumer {
 
   @Transactional
   private MessageWrapper<UsersDto.Cliente> handleCreate(List<UsersDto.Cliente> clientes) {
-    List<Cliente> qResult = repo.saveAll(dtoToClientes(clientes));
-    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(qResult));
+    try {
+      for (UsersDto.Cliente cliente : clientes) {
+        if (cliente.getCpf() != null && repo.findByCpf(cliente.getCpf()) != null) {
+          return new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_CPF_DUPLICADO, null);
+        }
+      }
+
+      List<Cliente> qResult = repo.saveAll(dtoToClientes(clientes));
+      return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(qResult));
+    } catch (DataIntegrityViolationException e) {
+      return new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_CPF_DUPLICADO, null);
+    }
   }
 
   @Transactional(readOnly = true)

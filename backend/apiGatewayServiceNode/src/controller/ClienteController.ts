@@ -3,6 +3,8 @@ import { UsersDtoCliente } from "../dto/UsersDto";
 import { usersProducer } from "../messaging/GenericProducerRPC";
 
 const router = Router();
+const CPF_DUPLICADO_ERROR = "ERROR_CPF_DUPLICADO";
+const CPF_DUPLICADO_MESSAGE = "CPF já cadastrado ou aguardando aprovação.";
 
 //GET /id
 router.get("/:id", async (req: Request, res: Response) => {
@@ -29,9 +31,24 @@ router.post("/", async (req: Request, res: Response) => {
     const newCliente = req.body as UsersDtoCliente;
     console.log("enviando: ", req.body);
     const clientesMessage = await usersProducer.requestService({ operation: "CREATE", data: [newCliente] });
-    res.sendStatus(201);
+
+    if (clientesMessage?.operation === CPF_DUPLICADO_ERROR) {
+      return res.status(409).json({
+        message: CPF_DUPLICADO_MESSAGE
+      });
+    }
+
+    if (clientesMessage?.operation !== "RESULT") {
+      return res.status(500).json({
+        message: "Erro ao criar cliente."
+      });
+    }
+
+    return res.status(201).json(clientesMessage.data);
   } catch (error) {
-    res.sendStatus(500);
+    return res.status(500).json({
+      message: "Erro ao criar cliente."
+    });
   }
 });
 
