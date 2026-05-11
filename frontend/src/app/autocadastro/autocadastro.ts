@@ -30,6 +30,8 @@ export class Autocadastro {
   private clienteUtil = inject(ClienteUtil);
   public formGroup: FormGroup;
   public mostrarMensagemSucesso = false;
+  public mostrarMensagemErro = false;
+  public mensagemErro = '';
 
   constructor() {
     this.formGroup = new FormGroup({
@@ -52,6 +54,10 @@ export class Autocadastro {
       this.formGroup.markAllAsTouched();
       return;
     }
+
+    this.mostrarMensagemSucesso = false;
+    this.mostrarMensagemErro = false;
+    this.mensagemErro = '';
 
     const form = this.formGroup.value;
 
@@ -81,11 +87,19 @@ export class Autocadastro {
         console.error('Erro detalhado do backend:', erro);
 
         if (erro.status === 0) {
-          alert('Nao foi possivel conectar com o backend. Verifique se a API gateway esta rodando na porta 8080.');
+          this.mensagemErro = 'Nao foi possivel conectar com o backend. Verifique se a API gateway esta rodando na porta 8080.';
+          this.mostrarMensagemErro = true;
           return;
         }
 
-        alert('Erro ao realizar autocadastro. Verifique os logs do backend para mais detalhes.');
+        if (erro.status === 409) {
+          this.mensagemErro = erro.error?.message ?? 'CPF já cadastrado ou aguardando aprovação.';
+          this.mostrarMensagemErro = true;
+          return;
+        }
+
+        this.mensagemErro = erro.error?.message ?? 'Erro ao realizar autocadastro. Verifique os logs do backend para mais detalhes.';
+        this.mostrarMensagemErro = true;
       }
     });
   }
@@ -93,6 +107,10 @@ export class Autocadastro {
   fecharMensagemSucesso() {
     this.mostrarMensagemSucesso = false;
     this.router.navigate(['/tela-principal']);
+  }
+
+  fecharMensagemErro() {
+    this.mostrarMensagemErro = false;
   }
 
   voltar() {

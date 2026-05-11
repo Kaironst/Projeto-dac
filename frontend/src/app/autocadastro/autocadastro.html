@@ -100,3 +100,18 @@
     </mat-card>
   </div>
 }
+
+@if (mostrarMensagemErro) {
+  <div class="error-backdrop" (click)="fecharMensagemErro()">
+    <mat-card class="error-card" appearance="outlined" (click)="$event.stopPropagation()">
+      <mat-card-content class="error-content">
+        <h2>Não foi possível concluir o autocadastro</h2>
+        <p>{{ mensagemErro }}</p>
+      </mat-card-content>
+
+      <mat-card-actions class="error-actions">
+        <button type="button" mat-flat-button color="warn" (click)="fecharMensagemErro()">OK</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+}

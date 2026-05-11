@@ -41,7 +41,7 @@ export class ClienteUtil extends ContatoComBanco {
   }
 
   override create(cliente: Cliente) {
-    return this.http.post(this.requestUrl, cliente, { responseType: 'text' });
+    return this.http.post<unknown>(this.requestUrl, cliente);
   }
 
   override update(id: number, cliente: Cliente) {

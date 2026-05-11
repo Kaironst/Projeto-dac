@@ -14,6 +14,7 @@ public class MessageOperations {
   // Resultados de operações
   public static final String RESULT = "RESULT";
   public static final String ERROR_GENERIC = "ERROR";
+  public static final String ERROR_CPF_DUPLICADO = "ERROR_CPF_DUPLICADO";
 
   // --------------------------------------------------------------------------------------------------------
 
