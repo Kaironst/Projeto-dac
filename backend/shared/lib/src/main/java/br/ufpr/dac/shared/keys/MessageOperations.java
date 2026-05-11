@@ -38,6 +38,25 @@ public class MessageOperations {
       public static final String ROLLBACK_REMOVER_GERENTE_ERROR = "INSERT_GERENTE_ROLLBACK_REMOVER_GERENTE_ERROR";
     }
 
+    public static class RemoveGerente {
+      // RemoveGerente
+      public static final String START = "REMOVE_GERENTE_START_REMOVER_GERENTE";
+      public static final String GET_COM_MENOS_CONTAS = "REMOVE_GERENTE_GET_COM_MENOS_CONTAS";
+      public static final String MOVER_CONTAS = "REMOVE_GERENTE_MOVER_CONTAS";
+      public static final String REMOVER_GERENTE = "REMOVE_GERENTE_REMOVER_GERENTE";
+      public static final String ROLLBACK_REVERTER_MOVER_CONTAS = "REMOVE_GERENTE_ROLLBACK_REVERTER_MOVE";
+      // RemoveGerente - Resultado de operações
+      public static final String GET_COM_MENOS_CONTAS_RESULT = "REMOVE_GERENTE_GET_COM_MENOS_CONTAS_RESULT";
+      public static final String GET_COM_MENOS_CONTAS_ERROR = "REMOVE_GERENTE_GET_COM_MENOS_CONTAS_ERROR";
+      public static final String MOVER_CONTAS_RESULT = "REMOVE_GERENTE_MOVER_CONTAS_RESULT";
+      public static final String MOVER_CONTAS_ERROR = "REMOVE_GERENTE_MOVER_CONTAS_ERROR";
+      public static final String REMOVER_GERENTE_RESULT = "REMOVE_GERENTE_REMOVER_GERENTE_RESULT";
+      public static final String REMOVER_GERENTE_ERROR = "REMOVE_GERENTE_REMOVER_GERENTE_ERROR";
+      public static final String ROLLBACK_REVERTER_MOVER_CONTAS_RESULT = "REMOVE_GERENTE_ROLLBACK_REVERTER_MOVE_RESULT";
+      public static final String ROLLBACK_REVERTER_MOVER_CONTAS_ERROR = "REMOVE_GERENTE_ROLLBACK_REVERTER_MOVE_ERROR";
+
+    }
+
   }
 
 }

@@ -32,6 +32,7 @@ public class InsertGerentesOrchestration {
       InsertGerente.GET_COM_MAIS_CONTAS_ERROR,
       InsertGerente.INSERIR_NOVO_ERROR,
       InsertGerente.MOVER_CONTAS_ERROR,
+      InsertGerente.ROLLBACK_REMOVER_GERENTE_ERROR,
       MessageOperations.ERROR_GENERIC);
 
   public void StartSaga(SagaMessageWrapper<GerentesDto.Gerente> message) {
@@ -67,7 +68,7 @@ public class InsertGerentesOrchestration {
     // se a falha ocorrer no primeiro passo, que é apenas um get, não há necessidade
     // de rollback
     if (errors.contains(message.getOperation())) {
-      handleRollback(message.getCorrelationId());
+      handleRollback(state);
       return;
     }
 
@@ -84,12 +85,12 @@ public class InsertGerentesOrchestration {
 
   // PASSSO 3, MOVER CONTA DO GERENTE ANTIGO AO NOVO
   public void handleGerenteInserted(SagaMessageWrapper<Long> message) {
-    System.out.println("moverContasAcionado");
+    System.out.println("moverContas acionado");
     var state = sagas.get(message.getCorrelationId());
 
     // falha no passo 2, ainda não há nada a ser alterado
     if (errors.contains(message.getOperation())) {
-      handleRollback(message.getCorrelationId());
+      handleRollback(state);
       return;
     }
 
@@ -107,6 +108,7 @@ public class InsertGerentesOrchestration {
 
   }
 
+  // finalizando
   public void handleContasSwapped(SagaMessageWrapper<Object> message) {
     System.out.println("finalizar acionado");
     var state = sagas.get(message.getCorrelationId());
@@ -114,7 +116,7 @@ public class InsertGerentesOrchestration {
     // falha no passo 3, conta não alterada, mas precisamos excluir o gerente novo
     // do passo 2 completo
     if (errors.contains(message.getOperation())) {
-      handleRollback(message.getCorrelationId());
+      handleRollback(state);
       return;
     }
 
@@ -130,27 +132,34 @@ public class InsertGerentesOrchestration {
 
   }
 
-  public void handleRollback(UUID correlationId) {
+  public void handleRollback(SagaState<InsertGerentesData> state) {
     System.out.println("rollback acionado");
-    var state = sagas.get(correlationId);
 
     state.setStatus(SagaStatus.COMPENSATING);
 
-    // remover o gerente inserido (unico caso de rollback necessário)
-    if (state.getStep() == InsertGerentesPasso.DANDO_CONTA_AO_NOVO_GERENTE) {
-      SagaProducer<Long> gerenteMessageProducer = producerFactory.create();
-      gerenteMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
-          SagaOperations.InsertGerente.ROLLBACK_REMOVER_GERENTE,
-          List.of(state.getSagaData().getGerenteAInserir().getId()),
-          correlationId),
-          RabbitmqConsts.GERENTES_SAGA_KEY);
+    switch (state.getStep()) {
+      // conta não dada ao gerente, remover gerente inserido
+      case InsertGerentesPasso.DANDO_CONTA_AO_NOVO_GERENTE:
+        SagaProducer<Long> gerenteMessageProducer = producerFactory.create();
+        gerenteMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
+            SagaOperations.InsertGerente.ROLLBACK_REMOVER_GERENTE,
+            List.of(state.getSagaData().getGerenteAInserir().getId()),
+            state.getCorrelationId()),
+            RabbitmqConsts.GERENTES_SAGA_KEY);
+        // gerente não inserido, sem operações para reverter
+      case InsertGerentesPasso.INSERINDO_GERENTE:
+        // apenas read
+      case InsertGerentesPasso.BUSCANDO_GERENTE_COM_MAIS_CONTAS:
+        break;
+      default:
     }
+
     state.setStep(InsertGerentesPasso.FINALIZADO);
     state.setStatus(SagaStatus.FAILED);
     System.out.println("rollback completo!");
 
     // cleanup
-    sagas.remove(correlationId);
+    sagas.remove(state.getCorrelationId());
   }
 
 }
