@@ -50,9 +50,9 @@ services:
   email-service:
     build:
       context: ..
-      dockerfile: docker/email-service.dockerfile
+      dockerfile: docker/spring-boot-service.dockerfile
       args:
-        PROJECT_DIR: emailService
+        PROJECT_DIR: mailService
     depends_on:
       - rabbitmq
     ports:
