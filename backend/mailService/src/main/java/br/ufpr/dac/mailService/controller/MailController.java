@@ -6,21 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/email")
 public class MailController {
 
     @Autowired
     private MailService mailService;
 
-    @PostMapping("/send")
-    public String enviar(
-            @RequestParam String destinatario,
-            @RequestParam String assunto,
-            @RequestParam String conteudo
-    ) {
+    @PostMapping("/send-email")
+    public String enviar(@RequestBody EmailRequest request) {
 
-        mailService.enviarEmail(destinatario, assunto, conteudo);
+        mailService.enviarEmail(request.destinatario(), request.assunto(), request.conteudoHtml());
 
         return "E-mail enviado com sucesso!";
+    }
+
+    public record EmailRequest(String destinatario, String assunto, String conteudoHtml) {
     }
 }
