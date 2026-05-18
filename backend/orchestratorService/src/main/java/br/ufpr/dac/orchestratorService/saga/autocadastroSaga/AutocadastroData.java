@@ -19,5 +19,6 @@ public class AutocadastroData {
   private GerentesDto.Gerente gerenteResponsavel;
   private ContasDto.Conta contaCriada;
   private AutocadastroDto.UsuarioAuth usuarioAuth;
+  private boolean authCriado;
   private AutocadastroDto.Falha falha;
 }

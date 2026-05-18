@@ -32,7 +32,7 @@ interface GerenteApiPayload {
   styleUrl: './crud-gerente.css',
 })
 export class CrudGerente implements OnInit {
-  private readonly gerentesApiUrl = 'http://localhost:8080/gerentes';
+  private readonly gerentesApiUrl = '/gerentes';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   protected gerentes: GerenteCadastro[] = [];

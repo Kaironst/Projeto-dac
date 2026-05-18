@@ -4,7 +4,9 @@ import cors from "cors";
 import axios from "axios";
 import ClienteController from "./controller/ClienteController";
 import GerenteController from "./controller/GerenteController";
-import { autocadastroUsersProducer, gerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
+import ContaController from "./controller/ContaController";
+import LoginController from "./controller/LoginController";
+import { authProducer, autocadastroUsersProducer, contasProducer, gerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
 import { sagaProducer } from './messaging/GenericProducer';
 
 const app: Express = express();
@@ -20,6 +22,8 @@ app.use(cors());
 
 app.use("/clientes", ClienteController);
 app.use("/gerentes", GerenteController);
+app.use("/contas", ContaController);
+app.use("/login", LoginController);
 
 // Email endpoint proxy
 app.post("/emails/enviar", async (req: Request, res: Response) => {
@@ -54,6 +58,8 @@ app.post("/emails/enviar", async (req: Request, res: Response) => {
 usersProducer.init();
 gerentesProducer.init();
 autocadastroUsersProducer.init();
+contasProducer.init();
+authProducer.init();
 sagaProducer.init();
 
 app.listen(port, () => {

@@ -17,7 +17,7 @@ export interface EmailResponse {
   providedIn: 'root'
 })
 export class EmailService {
-  private apiUrl = 'http://localhost:8080/emails/enviar';
+  private apiUrl = '/emails/enviar';
 
   constructor(private http: HttpClient) { }
 

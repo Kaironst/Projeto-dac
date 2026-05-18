@@ -17,8 +17,19 @@ public class MailService {
   @Value("${app.mail.from:manutencaoequipamentos3@gmail.com}")
   private String remetentePadrao;
 
+  @Value("${spring.mail.username:}")
+  private String mailUsername;
+
+  @Value("${spring.mail.password:}")
+  private String mailPassword;
+
   public void enviarEmail(String destinatario, String assunto, String conteudoHtml) {
     try {
+      if (mailUsername == null || mailUsername.isBlank() || mailPassword == null || mailPassword.isBlank()) {
+        System.out.println("SMTP nao configurado. E-mail simulado para " + destinatario + " com assunto: " + assunto);
+        return;
+      }
+
       MimeMessage mensagem = mailSender.createMimeMessage();
       MimeMessageHelper helper = new MimeMessageHelper(mensagem, true, "UTF-8");
 

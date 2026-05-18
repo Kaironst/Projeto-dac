@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -7,8 +7,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
+import { forkJoin } from 'rxjs';
+import { Cliente, ClienteUtil, Endereco } from '../services/DBUtil/cliente-util';
+import { Conta, ContaUtil } from '../services/DBUtil/conta-util';
 
-interface ClienteMock {
+interface ClienteConsulta {
   nome: string;
   email: string;
   cpf: string;
@@ -51,18 +54,23 @@ type FuncionalidadeConsulta = 'cpf' | 'top3' | 'todos';
 export class ConsultarCliente {
 
   private router = inject(Router);
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  private clienteUtil = inject(ClienteUtil);
+  private contaUtil = inject(ContaUtil);
 
   public formGroup: FormGroup;
-  public clienteConsultado: ClienteMock | null = null;
-  public pesquisado: boolean = false;
-  public funcionalidadeAtiva: FuncionalidadeConsulta = null as any;
+  public clienteConsultado: ClienteConsulta | null = null;
+  public pesquisado = false;
+  public funcionalidadeAtiva: FuncionalidadeConsulta | null = null;
 
-  public filtroCpfTodos: string = '';
-  public filtroNomeTodos: string = '';
-  public clienteDetalhes: ClienteMock | null = null;
+  public filtroCpfTodos = '';
+  public filtroNomeTodos = '';
+  public clienteDetalhes: ClienteConsulta | null = null;
+  public carregando = false;
+  public mensagemErro = '';
 
-  private clientes: any[] = [];
-  private contas: any[] = [];
+  private clientes: Cliente[] = [];
+  private contas: Conta[] = [];
 
   constructor() {
     this.formGroup = new FormGroup({
@@ -72,29 +80,42 @@ export class ConsultarCliente {
     this.carregarDados();
   }
 
-  carregarDados() {
-    this.clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
-    this.contas = JSON.parse(localStorage.getItem('contas') || '[]');
+  carregarDados(): void {
+    this.carregando = true;
+    this.mensagemErro = '';
+
+    forkJoin({
+      clientes: this.clienteUtil.getAll(),
+      contas: this.contaUtil.getAll()
+    }).subscribe({
+      next: ({ clientes, contas }) => {
+        this.clientes = clientes ?? [];
+        this.contas = contas ?? [];
+        this.carregando = false;
+        this.changeDetectorRef.markForCheck();
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar clientes/contas:', erro);
+        this.clientes = [];
+        this.contas = [];
+        this.carregando = false;
+        this.mensagemErro = 'Nao foi possivel carregar dados do backend.';
+        this.changeDetectorRef.markForCheck();
+      }
+    });
   }
 
-  montarCliente(cliente: any): ClienteMock {
-
-    const conta = this.contas.find(c => c.clienteCpf === cliente.cpf);
+  montarCliente(cliente: Cliente): ClienteConsulta {
+    const conta = this.contas.find(item => item.cliente?.id === cliente.id);
+    const endereco = cliente.enderecos?.[0];
 
     return {
-      nome: cliente.nome,
-      email: cliente.email,
-      cpf: cliente.cpf,
-      telefone: cliente.telefone || '',
-      salario: cliente.salario,
-      endereco: cliente.endereco || {
-        cep: '',
-        logradouro: '',
-        numero: '',
-        complemento: '',
-        cidade: '',
-        estado: ''
-      },
+      nome: cliente.nome ?? '',
+      email: cliente.email ?? '',
+      cpf: cliente.cpf ?? '',
+      telefone: cliente.telefone ?? '',
+      salario: cliente.salario ?? 0,
+      endereco: this.montarEndereco(endereco),
       conta: {
         saldo: conta?.saldo ?? 0,
         limite: conta?.limite ?? 0
@@ -102,41 +123,38 @@ export class ConsultarCliente {
     };
   }
 
-  consultar() {
+  consultar(): void {
     if (this.formGroup.valid) {
       this.pesquisado = true;
 
       const cpfBuscado = this.normalizarCpf(this.formGroup.get('cpf')?.value ?? '');
-
-      const cliente = this.clientes.find(c => c.cpf === cpfBuscado);
+      const cliente = this.clientes.find(item => item.cpf === cpfBuscado);
 
       this.clienteConsultado = cliente ? this.montarCliente(cliente) : null;
     }
   }
 
-  selecionarFuncionalidade(funcionalidade: FuncionalidadeConsulta) {
+  selecionarFuncionalidade(funcionalidade: FuncionalidadeConsulta): void {
     this.funcionalidadeAtiva = funcionalidade;
     this.limparConsultaCpf();
     this.fecharDetalhesCliente();
   }
 
-  get melhoresClientes(): ClienteMock[] {
+  get melhoresClientes(): ClienteConsulta[] {
     return this.clientes
-      .map(c => this.montarCliente(c))
+      .map(cliente => this.montarCliente(cliente))
       .sort((a, b) => b.conta.saldo - a.conta.saldo)
       .slice(0, 3);
   }
 
-  get clientesOrdenadosFiltrados(): ClienteMock[] {
-
+  get clientesOrdenadosFiltrados(): ClienteConsulta[] {
     const cpfFiltro = this.normalizarCpf(this.filtroCpfTodos);
     const nomeFiltro = this.filtroNomeTodos.trim().toLowerCase();
 
     return this.clientes
-      .map(c => this.montarCliente(c))
+      .map(cliente => this.montarCliente(cliente))
       .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
       .filter(cliente => {
-
         const cpfOk = !cpfFiltro || cliente.cpf.includes(cpfFiltro);
         const nomeOk = !nomeFiltro || cliente.nome.toLowerCase().includes(nomeFiltro);
 
@@ -144,15 +162,26 @@ export class ConsultarCliente {
       });
   }
 
-  abrirDetalhesCliente(cliente: ClienteMock) {
+  abrirDetalhesCliente(cliente: ClienteConsulta): void {
     this.clienteDetalhes = cliente;
   }
 
-  fecharDetalhesCliente() {
+  fecharDetalhesCliente(): void {
     this.clienteDetalhes = null;
   }
 
-  private limparConsultaCpf() {
+  private montarEndereco(endereco?: Endereco): ClienteConsulta['endereco'] {
+    return {
+      cep: endereco?.cep ?? '',
+      logradouro: endereco?.logradouro ?? '',
+      numero: endereco?.numero === null || endereco?.numero === undefined ? '' : String(endereco.numero),
+      complemento: endereco?.complemento ?? '',
+      cidade: endereco?.cidade ?? '',
+      estado: endereco?.estado ?? ''
+    };
+  }
+
+  private limparConsultaCpf(): void {
     this.pesquisado = false;
     this.clienteConsultado = null;
     this.formGroup.reset();
@@ -162,7 +191,7 @@ export class ConsultarCliente {
     return cpf.replace(/\D/g, '');
   }
 
-  voltar() {
+  voltar(): void {
     this.router.navigate(['/tela-principal']);
   }
 }

@@ -70,6 +70,7 @@ public class MessageConsumer {
           .email(cliente.getEmail())
           .cpf(cliente.getCpf())
           .estado(cliente.getEstado())
+          .telefone(cliente.getTelefone())
           .build();
 
       var enderecosCliente = new ArrayList<UsersDto.Endereco>();

@@ -42,9 +42,11 @@ public class AutocadastroOrchestration {
       SagaOperations.Autocadastro.VINCULAR_GERENTE_ERROR,
       SagaOperations.Autocadastro.APROVAR_SOLICITACAO_ERROR,
       SagaOperations.Autocadastro.CRIAR_CONTA_ERROR,
+      SagaOperations.Autocadastro.CRIAR_AUTH_ERROR,
       SagaOperations.Autocadastro.ENVIAR_EMAIL_APROVACAO_ERROR,
       SagaOperations.Autocadastro.ROLLBACK_SOLICITACAO_ERROR,
       SagaOperations.Autocadastro.ROLLBACK_CONTA_ERROR,
+      SagaOperations.Autocadastro.ROLLBACK_AUTH_ERROR,
       MessageOperations.ERROR_GENERIC);
 
   public void startSaga(SagaMessageWrapper<AutocadastroDto.SolicitacaoEntrada> message) {
@@ -237,6 +239,27 @@ public class AutocadastroOrchestration {
         .tipo("CLIENTE")
         .build());
 
+    state.setStep(AutocadastroPasso.CRIANDO_AUTH);
+    SagaProducer<AutocadastroDto.UsuarioAuth> producer = producerFactory.create();
+    producer.enviarMenssagem(new SagaMessageWrapper<AutocadastroDto.UsuarioAuth>(
+        SagaOperations.Autocadastro.CRIAR_AUTH,
+        List.of(state.getSagaData().getUsuarioAuth()),
+        message.getCorrelationId()),
+        RabbitmqConsts.AUTH_SAGA_KEY);
+  }
+
+  public void handleAuthCriado(SagaMessageWrapper<AutocadastroDto.UsuarioAuth> message) {
+    var state = sagas.get(message.getCorrelationId());
+    if (state == null) {
+      return;
+    }
+
+    if (errors.contains(message.getOperation())) {
+      handleRollback(state);
+      return;
+    }
+
+    state.getSagaData().setAuthCriado(true);
     state.setStep(AutocadastroPasso.ENVIANDO_EMAIL_APROVACAO);
     SagaProducer<AutocadastroDto.Notificacao> producer = producerFactory.create();
     producer.enviarMenssagem(new SagaMessageWrapper<AutocadastroDto.Notificacao>(
@@ -264,6 +287,16 @@ public class AutocadastroOrchestration {
 
   private void handleRollback(SagaState<AutocadastroData> state) {
     state.setStatus(SagaStatus.COMPENSATING);
+
+    if (state.getSagaData().isAuthCriado() && state.getSagaData().getUsuarioAuth() != null) {
+      state.setStep(AutocadastroPasso.COMPENSANDO_AUTH);
+      SagaProducer<AutocadastroDto.UsuarioAuth> producer = producerFactory.create();
+      producer.enviarMenssagem(new SagaMessageWrapper<AutocadastroDto.UsuarioAuth>(
+          SagaOperations.Autocadastro.ROLLBACK_AUTH,
+          List.of(state.getSagaData().getUsuarioAuth()),
+          state.getCorrelationId()),
+          RabbitmqConsts.AUTH_SAGA_KEY);
+    }
 
     if (state.getSagaData().getContaCriada() != null) {
       state.setStep(AutocadastroPasso.COMPENSANDO_CONTA);

@@ -36,11 +36,26 @@
     <mat-card class="success-card" appearance="outlined" (click)="$event.stopPropagation()">
       <mat-card-content class="success-content">
         <h2>Login realizado com sucesso</h2>
-        <p>Seu acesso foi enviado. Você será direcionado para a tela inicial.</p>
+        <p>Acesso validado pelo backend. Você será direcionado para a área correspondente.</p>
       </mat-card-content>
 
       <mat-card-actions class="success-actions">
         <button type="button" mat-flat-button color="primary" (click)="fecharMensagemSucesso()">OK</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+}
+
+@if (mostrarMensagemErro) {
+  <div class="success-backdrop" (click)="fecharMensagemErro()">
+    <mat-card class="success-card" appearance="outlined" (click)="$event.stopPropagation()">
+      <mat-card-content class="success-content">
+        <h2>Não foi possível realizar login</h2>
+        <p>{{ mensagemErro }}</p>
+      </mat-card-content>
+
+      <mat-card-actions class="success-actions">
+        <button type="button" mat-flat-button color="warn" (click)="fecharMensagemErro()">OK</button>
       </mat-card-actions>
     </mat-card>
   </div>

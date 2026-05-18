@@ -32,6 +32,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  auth-database:
+    image: mongo:7
+    container_name: auth-database
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+
   api-gateway-service-node:
     build:
       context: ..
@@ -62,6 +70,24 @@ services:
       - PORT=3005
       - MAILJET_API_KEY=${MAILJET_API_KEY:-}
       - MAILJET_SECRET_KEY=${MAILJET_SECRET_KEY:-}
+
+  auth-service:
+    build:
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
+      args:
+        PROJECT_DIR: authService
+    restart: always
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      auth-database:
+        condition: service_started
+    ports:
+      - "8085:8080"
+    environment:
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET:-bantads-dev-secret-change-me}
+      - AUTH_JWT_EXPIRATION_SECONDS=${AUTH_JWT_EXPIRATION_SECONDS:-3600}
 
   users-service:
     build:
@@ -136,6 +162,8 @@ services:
     depends_on:
       contas-service:
         condition: service_started
+      auth-service:
+        condition: service_started
       rabbitmq:
         condition: service_healthy
     ports:
@@ -146,5 +174,6 @@ services:
 volumes:
   pgdata:
   rabbitmq_data:
+  mongodata:
   gradle-caches:
   gradle-wrapper:

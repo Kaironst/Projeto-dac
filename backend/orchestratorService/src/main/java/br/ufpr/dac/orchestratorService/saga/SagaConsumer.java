@@ -114,6 +114,13 @@ public class SagaConsumer {
                   new TypeReference<SagaMessageWrapper<AutocadastroDto.ContaCriada>>() {
                   }));
         }
+        case Autocadastro.CRIAR_AUTH_RESULT, Autocadastro.CRIAR_AUTH_ERROR -> {
+          autocadastroOrchestration
+              .handleAuthCriado(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<AutocadastroDto.UsuarioAuth>>() {
+                  }));
+        }
         case Autocadastro.ENVIAR_EMAIL_APROVACAO_RESULT, Autocadastro.ENVIAR_EMAIL_APROVACAO_ERROR -> {
           autocadastroOrchestration
               .handleEmailAprovacaoEnviado(mapper.convertValue(

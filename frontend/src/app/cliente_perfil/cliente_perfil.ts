@@ -21,7 +21,7 @@ interface Cliente {
 })
 export class ClientePerfil {
 
-  private readonly apiUrl = 'http://localhost:8080/clientes';
+  private readonly apiUrl = '/clientes';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   perfilForm: FormGroup;

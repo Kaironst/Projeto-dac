@@ -1,14 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
+import { Cliente, ClienteUtil } from '../services/DBUtil/cliente-util';
+import { Conta, ContaUtil } from '../services/DBUtil/conta-util';
+import { Gerente, GerenteUtil } from '../services/DBUtil/gerente-util';
 
-interface Cliente {
+interface ClienteResumo {
   nome: string;
   saldo: number;
-}
-
-interface Gerente {
-  nome: string;
-  clientes: Cliente[];
 }
 
 interface GerenteResumo {
@@ -25,63 +24,66 @@ interface GerenteResumo {
   templateUrl: './admin_tela.html',
   styleUrls: ['./admin_tela.css']
 })
-export class AdminTela {
+export class AdminTela implements OnInit {
 
-  gerentes: Gerente[] = [];
+  private clienteUtil = inject(ClienteUtil);
+  private contaUtil = inject(ContaUtil);
+  private gerenteUtil = inject(GerenteUtil);
+
   resumoGerentes: GerenteResumo[] = [];
 
-  constructor() {
+  ngOnInit(): void {
     this.carregarDados();
-    this.processarDados();
   }
 
-  carregarDados() {
+  carregarDados(): void {
+    forkJoin({
+      gerentes: this.gerenteUtil.getAll(),
+      clientes: this.clienteUtil.getAll(),
+      contas: this.contaUtil.getAll()
+    }).subscribe({
+      next: ({ gerentes, clientes, contas }) => {
+        this.resumoGerentes = this.processarDados(gerentes, clientes, contas);
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar dados administrativos:', erro);
+        this.resumoGerentes = [];
+      }
+    });
+  }
 
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
-    const contas = JSON.parse(localStorage.getItem('contas') || '[]');
+  private processarDados(gerentes: Gerente[], clientes: Cliente[], contas: Conta[]): GerenteResumo[] {
+    return gerentes
+      .filter(gerente => !gerente.administrador)
+      .map(gerente => {
+        const clientesDoGerente = this.clientesDoGerente(gerente, clientes, contas);
+        const totalPositivo = clientesDoGerente
+          .filter(cliente => cliente.saldo >= 0)
+          .reduce((sum, cliente) => sum + cliente.saldo, 0);
 
-    const gerentesUsuarios = usuarios.filter((u: any) => u.tipo === 'gerente');
-
-    this.gerentes = gerentesUsuarios.map((g: any) => {
-
-      const contasDoGerente = contas.filter((c: any) => c.gerente === g.nome);
-
-      const clientesDoGerente: Cliente[] = contasDoGerente.map((conta: any) => {
-        const cliente = clientes.find((c: any) => c.cpf === conta.clienteCpf);
+        const totalNegativo = clientesDoGerente
+          .filter(cliente => cliente.saldo < 0)
+          .reduce((sum, cliente) => sum + cliente.saldo, 0);
 
         return {
-          nome: cliente ? cliente.nome : 'Desconhecido',
-          saldo: conta.saldo
+          nome: gerente.nome ?? 'Gerente sem nome',
+          totalClientes: clientesDoGerente.length,
+          totalPositivo,
+          totalNegativo
         };
-      });
-
-      return {
-        nome: g.nome,
-        clientes: clientesDoGerente
-      };
-    });
+      })
+      .sort((a, b) => b.totalPositivo - a.totalPositivo);
   }
 
-  processarDados() {
-    this.resumoGerentes = this.gerentes.map(g => {
-      const totalPositivo = g.clientes
-        .filter(c => c.saldo >= 0)
-        .reduce((sum, c) => sum + c.saldo, 0);
-
-      const totalNegativo = g.clientes
-        .filter(c => c.saldo < 0)
-        .reduce((sum, c) => sum + c.saldo, 0);
-
-      return {
-        nome: g.nome,
-        totalClientes: g.clientes.length,
-        totalPositivo,
-        totalNegativo
-      };
-    });
-
-    // Mostrar ordem por saldo
-    this.resumoGerentes.sort((a, b) => b.totalPositivo - a.totalPositivo);
+  private clientesDoGerente(gerente: Gerente, clientes: Cliente[], contas: Conta[]): ClienteResumo[] {
+    return contas
+      .filter(conta => conta.gerente?.id === gerente.id)
+      .map(conta => {
+        const cliente = clientes.find(item => item.id === conta.cliente?.id);
+        return {
+          nome: cliente?.nome ?? 'Desconhecido',
+          saldo: conta.saldo ?? 0
+        };
+      });
   }
 }

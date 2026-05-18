@@ -27,7 +27,7 @@ interface Transacao {
 })
 export class ClienteTela {
 
-  private readonly apiUrl = 'http://localhost:8080/clientes';
+  private readonly apiUrl = '/clientes';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   cpf: string = '12912861012';

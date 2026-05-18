@@ -5,6 +5,8 @@ import { UsersDtoCliente } from "../dto/UsersDto";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
 import { MessageWrapper } from "../dto/MessageWrapper";
 import { AutocadastroSolicitacao } from "../dto/AutocadastroDto";
+import { ContasDtoConta } from "../dto/ContasDto";
+import { AuthLoginRequest, AuthLoginResponse } from "../dto/AuthDto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
@@ -95,3 +97,5 @@ export default GenericProducerRPC;
 export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
 export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
 export const autocadastroUsersProducer = new GenericProducerRPC<MessageWrapper<AutocadastroSolicitacao>>("app.exchange", "users.autocadastro.key");
+export const contasProducer = new GenericProducerRPC<MessageWrapper<ContasDtoConta>>("app.exchange", "contas.key");
+export const authProducer = new GenericProducerRPC<MessageWrapper<AuthLoginRequest | AuthLoginResponse>>("app.exchange", "auth.key");
