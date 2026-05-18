@@ -15,13 +15,16 @@ import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import br.ufpr.dac.usersService.entity.Cliente;
 import br.ufpr.dac.usersService.entity.Endereco;
 import br.ufpr.dac.usersService.repository.ClienteRepository;
+import br.ufpr.dac.usersService.repository.SolicitacaoAutocadastroRepository;
 import lombok.AllArgsConstructor;
+import br.ufpr.dac.shared.dto.AutocadastroDto.StatusSolicitacao;
 
 @Component
 @AllArgsConstructor
 public class MessageConsumer {
 
   private final ClienteRepository repo;
+  private final SolicitacaoAutocadastroRepository solicitacaoRepo;
 
   @RabbitListener(queues = RabbitmqConsts.USERS_QUEUE)
   public MessageWrapper<UsersDto.Cliente> recieve(MessageWrapper<UsersDto.Cliente> message) {
@@ -41,6 +44,9 @@ public class MessageConsumer {
         }
         case MessageOperations.DELETE -> {
           return handleDelete(message.getData());
+        }
+        case MessageOperations.VALIDATE_AUTOCADASTRO_CPF -> {
+          return handleValidateAutocadastroCpf(message.getData());
         }
         default -> {
           throw new UnsupportedOperationException();
@@ -138,6 +144,22 @@ public class MessageConsumer {
     } catch (DataIntegrityViolationException e) {
       return new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_CPF_DUPLICADO, null);
     }
+  }
+
+  @Transactional(readOnly = true)
+  private MessageWrapper<UsersDto.Cliente> handleValidateAutocadastroCpf(List<UsersDto.Cliente> clientes) {
+    for (UsersDto.Cliente cliente : clientes) {
+      if (cliente.getCpf() != null && cpfJaExisteOuEstaPendente(cliente.getCpf())) {
+        return new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_CPF_DUPLICADO, null);
+      }
+    }
+
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientes);
+  }
+
+  private boolean cpfJaExisteOuEstaPendente(String cpf) {
+    return repo.findByCpf(cpf) != null
+        || solicitacaoRepo.existsByCpfAndStatus(cpf, StatusSolicitacao.PENDENTE);
   }
 
   @Transactional(readOnly = true)

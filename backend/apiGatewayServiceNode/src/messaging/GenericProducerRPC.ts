@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { UsersDtoCliente } from "../dto/UsersDto";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
 import { MessageWrapper } from "../dto/MessageWrapper";
+import { AutocadastroSolicitacao } from "../dto/AutocadastroDto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
@@ -93,3 +94,4 @@ class GenericProducerRPC<MessageType> {
 export default GenericProducerRPC;
 export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
 export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
+export const autocadastroUsersProducer = new GenericProducerRPC<MessageWrapper<AutocadastroSolicitacao>>("app.exchange", "users.autocadastro.key");

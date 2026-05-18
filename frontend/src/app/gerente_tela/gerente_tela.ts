@@ -10,11 +10,14 @@ import { HttpClient } from '@angular/common/http';
 import { EmailService } from '../services/DBUtil/email.service';
 
 interface PedidoAprovacao {
+  id?: number;
+  solicitacaoId?: number;
   cpf: string;
   nome: string;
   salario: number;
   email: string;
   telefone: string;
+  gerenteId?: number;
 }
 
 @Component({
@@ -63,25 +66,18 @@ export class GerenteTela implements OnInit {
 
   aprovar(pedido: PedidoAprovacao) {
     this.carregando = true;
-    const numeroConta = Math.floor(1000 + Math.random() * 9000).toString();
-    const senhaAleatoria = this.gerarSenhaAleatoria();
 
     const payload = {
+      solicitacaoId: pedido.solicitacaoId ?? pedido.id,
       cpf: pedido.cpf,
-      nome: pedido.nome,
-      email: pedido.email,
-      telefone: pedido.telefone,
-      salario: pedido.salario,
-      numeroConta: numeroConta,
-      senha: senhaAleatoria
+      gerenteId: pedido.gerenteId
     };
 
     // Chamar endpoint POST para aprovar cliente
     this.http.post('http://localhost:8080/gerentes/aprovar-cliente', payload)
       .subscribe({
         next: () => {
-          this.enviarEmailAproacao(pedido, numeroConta, senhaAleatoria);
-          this.mensagem = `Cliente ${pedido.nome} aprovado com sucesso!`;
+          this.mensagem = `Aprovação de ${pedido.nome} enviada para processamento.`;
           this.carregarPedidos();
         },
         error: (erro) => {

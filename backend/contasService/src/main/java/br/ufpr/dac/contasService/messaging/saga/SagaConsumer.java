@@ -3,6 +3,7 @@ package br.ufpr.dac.contasService.messaging.saga;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import br.ufpr.dac.shared.dto.AutocadastroDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
@@ -16,6 +17,9 @@ public class SagaConsumer {
 
   private GetIdGerenteComMaisContasHandler getIdGerenteComMaisContasHandler;
   private MoverContasHandler moverContasHandler;
+  private EscolherGerenteComMenosClientesHandler escolherGerenteComMenosClientesHandler;
+  private CriarContaAutocadastroHandler criarContaAutocadastroHandler;
+  private RollbackContaAutocadastroHandler rollbackContaAutocadastroHandler;
   private final ObjectMapper mapper;
 
   @RabbitListener(queues = RabbitmqConsts.CONTAS_SAGA_QUEUE)
@@ -32,6 +36,24 @@ public class SagaConsumer {
         moverContasHandler.handleMoverContas(
             mapper.convertValue(message,
                 new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.Autocadastro.ESCOLHER_GERENTE -> {
+        escolherGerenteComMenosClientesHandler.handleEscolherGerente(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.Autocadastro.CRIAR_CONTA -> {
+        criarContaAutocadastroHandler.handleCriarConta(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<AutocadastroDto.Solicitacao>>() {
+                }));
+      }
+      case SagaOperations.Autocadastro.ROLLBACK_CONTA -> {
+        rollbackContaAutocadastroHandler.handleRollbackConta(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<AutocadastroDto.ContaCriada>>() {
                 }));
       }
     }

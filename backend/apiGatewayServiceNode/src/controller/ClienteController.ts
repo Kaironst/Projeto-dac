@@ -1,6 +1,8 @@
 import { Router, Request, Response } from "express";
 import { UsersDtoCliente } from "../dto/UsersDto";
 import { usersProducer } from "../messaging/GenericProducerRPC";
+import { sagaProducer } from "../messaging/GenericProducer";
+import { AutocadastroSolicitacaoEntrada } from "../dto/AutocadastroDto";
 
 const router = Router();
 const CPF_DUPLICADO_ERROR = "ERROR_CPF_DUPLICADO";
@@ -30,7 +32,10 @@ router.post("/", async (req: Request, res: Response) => {
   try {
     const newCliente = req.body as UsersDtoCliente;
     console.log("enviando: ", req.body);
-    const clientesMessage = await usersProducer.requestService({ operation: "CREATE", data: [newCliente] });
+    const clientesMessage = await usersProducer.requestService({
+      operation: "VALIDATE_AUTOCADASTRO_CPF",
+      data: [newCliente]
+    });
 
     if (clientesMessage?.operation === CPF_DUPLICADO_ERROR) {
       return res.status(409).json({
@@ -44,7 +49,16 @@ router.post("/", async (req: Request, res: Response) => {
       });
     }
 
-    return res.status(201).json(clientesMessage.data);
+    const solicitacao: AutocadastroSolicitacaoEntrada = { cliente: newCliente };
+    await sagaProducer.messageService({
+      operation: "AUTOCADASTRO_START",
+      data: [solicitacao],
+      correlationId: null
+    });
+
+    return res.status(202).json({
+      message: "Solicitação de autocadastro enviada para aprovação."
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao criar cliente."

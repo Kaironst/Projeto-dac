@@ -54,11 +54,14 @@ services:
       args:
         PROJECT_DIR: mailService
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "3006:3005"
     environment:
       - PORT=3005
+      - MAILJET_API_KEY=${MAILJET_API_KEY:-}
+      - MAILJET_SECRET_KEY=${MAILJET_SECRET_KEY:-}
 
   users-service:
     build:

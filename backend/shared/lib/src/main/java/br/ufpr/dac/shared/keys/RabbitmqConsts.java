@@ -32,6 +32,10 @@ public class RabbitmqConsts {
   public static final String USERS_SAGA_QUEUE = "saga.users.queue";
   // key do usersService para sagas
   public static final String USERS_SAGA_KEY = "saga.users.key";
+  // queue do usersService para consultas de autocadastro
+  public static final String USERS_AUTOCADASTRO_QUEUE = "users.autocadastro.queue";
+  // key do usersService para consultas de autocadastro
+  public static final String USERS_AUTOCADASTRO_KEY = "users.autocadastro.key";
 
   // --------------------------------------------------------------------------------------------------------
 
@@ -59,5 +63,23 @@ public class RabbitmqConsts {
 
   // key do apiGateway (queue em node apenas)
   public static final String API_GATEWAY_KEY = "apiGateway.key";
+
+  // --------------------------------------------------------------------------------------------------------
+
+  // queue do authService
+  public static final String AUTH_QUEUE = "auth.queue";
+  // key do authService
+  public static final String AUTH_KEY = "auth.key";
+  // queue do authService para sagas
+  public static final String AUTH_SAGA_QUEUE = "saga.auth.queue";
+  // key do authService para sagas
+  public static final String AUTH_SAGA_KEY = "saga.auth.key";
+
+  // --------------------------------------------------------------------------------------------------------
+
+  // queue do mailService para sagas
+  public static final String MAIL_SAGA_QUEUE = "saga.mail.queue";
+  // key do mailService para sagas
+  public static final String MAIL_SAGA_KEY = "saga.mail.key";
 
 }

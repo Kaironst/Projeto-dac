@@ -4,7 +4,7 @@ import cors from "cors";
 import axios from "axios";
 import ClienteController from "./controller/ClienteController";
 import GerenteController from "./controller/GerenteController";
-import { gerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
+import { autocadastroUsersProducer, gerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
 import { sagaProducer } from './messaging/GenericProducer';
 
 const app: Express = express();
@@ -53,6 +53,7 @@ app.post("/emails/enviar", async (req: Request, res: Response) => {
 
 usersProducer.init();
 gerentesProducer.init();
+autocadastroUsersProducer.init();
 sagaProducer.init();
 
 app.listen(port, () => {

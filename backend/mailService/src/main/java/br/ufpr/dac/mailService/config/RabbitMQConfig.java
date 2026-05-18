@@ -1,4 +1,4 @@
-package br.ufpr.dac.usersService.config;
+package br.ufpr.dac.mailService.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -18,50 +18,22 @@ import br.ufpr.dac.shared.keys.RabbitmqConsts;
 public class RabbitMQConfig {
 
   @Bean
-  public Queue queue() {
-    return new Queue(RabbitmqConsts.USERS_QUEUE);
-  }
-
-  @Bean
   public Exchange exchange() {
     return new DirectExchange(RabbitmqConsts.APP_EXCHANGE);
   }
 
   @Bean
-  public Binding binding(Queue queue, Exchange exchange) {
-    return BindingBuilder.bind(queue)
-        .to(exchange)
-        .with(RabbitmqConsts.USERS_KEY)
-        .noargs();
-  }
-
-  @Bean
   public Queue sagaQueue() {
-    return new Queue(RabbitmqConsts.USERS_SAGA_QUEUE);
+    return new Queue(RabbitmqConsts.MAIL_SAGA_QUEUE);
   }
 
   @Bean
   public Binding sagaBinding(Queue sagaQueue, Exchange exchange) {
     return BindingBuilder.bind(sagaQueue)
         .to(exchange)
-        .with(RabbitmqConsts.USERS_SAGA_KEY)
+        .with(RabbitmqConsts.MAIL_SAGA_KEY)
         .noargs();
   }
-
-  @Bean
-  public Queue autocadastroQueue() {
-    return new Queue(RabbitmqConsts.USERS_AUTOCADASTRO_QUEUE);
-  }
-
-  @Bean
-  public Binding autocadastroBinding(Queue autocadastroQueue, Exchange exchange) {
-    return BindingBuilder.bind(autocadastroQueue)
-        .to(exchange)
-        .with(RabbitmqConsts.USERS_AUTOCADASTRO_KEY)
-        .noargs();
-  }
-
-  // parte para a configuração de serialização das menssagens em json
 
   @Bean
   public JacksonJsonMessageConverter jsonMessageConverter() {
@@ -70,7 +42,6 @@ public class RabbitMQConfig {
     return converter;
   }
 
-  // sobrescreve o rabbit template para utilizar a serialização em json
   @Bean
   public RabbitTemplate rabbitTemplate(
       ConnectionFactory connectionFactory,
@@ -80,7 +51,6 @@ public class RabbitMQConfig {
     return template;
   }
 
-  // sobrescreve o rabbit listener padrão para usar serialização json
   @Bean
   public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
       ConnectionFactory connectionFactory,

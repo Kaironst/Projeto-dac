@@ -12,6 +12,8 @@ public interface ContaRepository extends JpaRepository<Conta, Long> {
 
   Conta findByGerente(Long idGerente);
 
+  boolean existsByNumero(String numero);
+
   List<Conta> findAllByCliente(Long idCliente);
 
   List<Conta> findAllByGerente(Long idGerente);
