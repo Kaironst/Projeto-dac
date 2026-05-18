@@ -27,6 +27,8 @@ public class MailService {
     try {
       if (mailUsername == null || mailUsername.isBlank() || mailPassword == null || mailPassword.isBlank()) {
         System.out.println("SMTP nao configurado. E-mail simulado para " + destinatario + " com assunto: " + assunto);
+        System.out.println("Conteudo do e-mail simulado:");
+        System.out.println(conteudoHtml);
         return;
       }
 
