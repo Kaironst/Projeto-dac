@@ -18,6 +18,12 @@ public class MessageOperations {
 
   // --------------------------------------------------------------------------------------------------------
 
+  // Operações de login
+  public static final String LOGIN = "LOGIN";
+  public static final String LOGOUT = "LOGOUT";
+
+  // --------------------------------------------------------------------------------------------------------
+
   // Operações e resultados de saga
   public static class SagaOperations {
 
