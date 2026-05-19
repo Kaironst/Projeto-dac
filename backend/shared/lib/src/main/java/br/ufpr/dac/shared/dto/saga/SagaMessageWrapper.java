@@ -27,9 +27,9 @@ public class SagaMessageWrapper<T> {
   @SuppressWarnings("unused")
   public static <T> SagaMessageWrapper<T> convertWrapper(SagaMessageWrapper<Object> original, Class<T> tipo) {
     return new SagaMessageWrapper<T>(
-        original.getOperation(),
-        convertList(original.getData(), tipo),
-        original.getCorrelationId());
+        original.operation,
+        convertList(original.data, tipo),
+        original.correlationId);
   }
 
 }

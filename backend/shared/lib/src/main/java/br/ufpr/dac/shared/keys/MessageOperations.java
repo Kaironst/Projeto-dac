@@ -8,7 +8,6 @@ public class MessageOperations {
   public static final String READ_ALL = "READ_ALL";
   public static final String UPDATE = "UPDATE";
   public static final String DELETE = "DELETE";
-  public static final String LOGIN = "LOGIN";
   public static final String VALIDATE_AUTOCADASTRO_CPF = "VALIDATE_AUTOCADASTRO_CPF";
   public static final String READ_AUTOCADASTRO_PENDENTES = "READ_AUTOCADASTRO_PENDENTES";
 
