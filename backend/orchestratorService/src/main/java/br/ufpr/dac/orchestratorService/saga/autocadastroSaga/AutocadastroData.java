@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class AutocadastroData {
   private AutocadastroDto.SolicitacaoEntrada entrada;
   private AutocadastroDto.Aprovacao aprovacao;
+  private AutocadastroDto.Rejeicao rejeicao;
   private AutocadastroDto.Solicitacao solicitacao;
   private UsersDto.Cliente cliente;
   private GerentesDto.Gerente gerenteResponsavel;

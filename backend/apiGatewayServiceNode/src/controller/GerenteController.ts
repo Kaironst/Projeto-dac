@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
-import { AutocadastroAprovacao } from "../dto/AutocadastroDto";
+import { AutocadastroAprovacao, AutocadastroRejeicao } from "../dto/AutocadastroDto";
 import { autocadastroUsersProducer, gerentesProducer } from "../messaging/GenericProducerRPC";
 import { sagaProducer } from "../messaging/GenericProducer";
 
@@ -64,6 +64,40 @@ router.post("/aprovar-cliente", async (req: Request, res: Response) => {
     await sagaProducer.messageService({
       operation: "AUTOCADASTRO_APROVAR_SOLICITACAO",
       data: [aprovacao],
+      correlationId: null
+    });
+
+    res.sendStatus(202);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
+router.post("/rejeitar-cliente", async (req: Request, res: Response) => {
+  try {
+    const solicitacaoId = parseOptionalNumber(req.body.solicitacaoId ?? req.body.id);
+    const gerenteId = parseOptionalNumber(req.body.gerenteId);
+    const motivo = typeof req.body.motivo === "string" ? req.body.motivo.trim() : "";
+
+    if (solicitacaoId === null) {
+      res.status(400).json({ message: "Informe solicitacaoId para rejeitar." });
+      return;
+    }
+
+    if (!motivo) {
+      res.status(400).json({ message: "Informe o motivo da rejeicao." });
+      return;
+    }
+
+    const rejeicao: AutocadastroRejeicao = {
+      solicitacaoId,
+      gerenteId,
+      motivo
+    };
+
+    await sagaProducer.messageService({
+      operation: "AUTOCADASTRO_REJEITAR_SOLICITACAO",
+      data: [rejeicao],
       correlationId: null
     });
 

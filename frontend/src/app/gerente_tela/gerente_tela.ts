@@ -7,7 +7,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { HttpClient } from '@angular/common/http';
-import { EmailService } from '../services/DBUtil/email.service';
 
 interface PedidoAprovacao {
   id?: number;
@@ -37,7 +36,6 @@ interface PedidoAprovacao {
 })
 export class GerenteTela implements OnInit {
   private http = inject(HttpClient);
-  private emailService = inject(EmailService);
 
   pedidos: PedidoAprovacao[] = [];
   motivoRejeicao: { [cpf: string]: string } = {};
@@ -78,7 +76,8 @@ export class GerenteTela implements OnInit {
       .subscribe({
         next: () => {
           this.mensagem = `Aprovação de ${pedido.nome} enviada para processamento.`;
-          this.carregarPedidos();
+          this.removerPedidoDaLista(pedido);
+          this.sincronizarPedidosDepoisDaSaga();
         },
         error: (erro) => {
           console.error('Erro ao aprovar cliente:', erro);
@@ -99,7 +98,8 @@ export class GerenteTela implements OnInit {
     this.carregando = true;
 
     const payload = {
-      cpf: pedido.cpf,
+      solicitacaoId: pedido.solicitacaoId ?? pedido.id,
+      gerenteId: pedido.gerenteId ?? null,
       motivo: motivo
     };
 
@@ -107,10 +107,10 @@ export class GerenteTela implements OnInit {
     this.http.post('/gerentes/rejeitar-cliente', payload)
       .subscribe({
         next: () => {
-          this.enviarEmailRejeicao(pedido, motivo);
-          this.mensagem = `Cliente ${pedido.nome} rejeitado com sucesso!`;
+          this.mensagem = `Rejeição de ${pedido.nome} enviada para processamento.`;
           this.motivoRejeicao[pedido.cpf] = '';
-          this.carregarPedidos();
+          this.removerPedidoDaLista(pedido);
+          this.sincronizarPedidosDepoisDaSaga();
         },
         error: (erro) => {
           console.error('Erro ao rejeitar cliente:', erro);
@@ -120,75 +120,14 @@ export class GerenteTela implements OnInit {
       });
   }
 
-  private enviarEmailAproacao(pedido: PedidoAprovacao, numeroConta: string, senha: string) {
-    const conteudo = `
-      <h2>Parabéns! Sua conta foi aprovada!</h2>
-      <p>Bem-vindo ao BANTADS - Internet Banking do TADS</p>
-      
-      <h3>Dados da sua conta:</h3>
-      <ul>
-        <li><strong>Nome:</strong> ${pedido.nome}</li>
-        <li><strong>Número da Conta:</strong> ${numeroConta}</li>
-        <li><strong>Seu e-mail:</strong> ${pedido.email}</li>
-      </ul>
-
-      <h3>Credenciais de acesso:</h3>
-      <p><strong>Usuário:</strong> ${pedido.email}</p>
-      <p><strong>Senha:</strong> ${senha}</p>
-
-      <p style="color: red;"><strong>⚠️ IMPORTANTE:</strong> Altere sua senha no primeiro acesso!</p>
-      
-      <p>Acesse o sistema em: <a href="http://localhost:4200">http://localhost:4200</a></p>
-      
-      <p>Qualquer dúvida, entre em contato com seu gerente responsável.</p>
-    `;
-
-    this.emailService.enviarEmail({
-      destinatario: pedido.email,
-      assunto: 'Sua conta BANTADS foi aprovada!',
-      conteudoHtml: conteudo
-    }).subscribe({
-      next: () => {
-        console.log('Email de aprovação enviado com sucesso');
-      },
-      error: (erro) => {
-        console.error('Erro ao enviar email de aprovação:', erro);
-      }
-    });
+  private removerPedidoDaLista(pedido: PedidoAprovacao) {
+    const solicitacaoId = pedido.solicitacaoId ?? pedido.id;
+    this.pedidos = this.pedidos.filter(item => (item.solicitacaoId ?? item.id) !== solicitacaoId);
+    this.carregando = false;
   }
 
-  private enviarEmailRejeicao(pedido: PedidoAprovacao, motivo: string) {
-    const conteudo = `
-      <h2>Sua solicitação de cadastro foi recusada</h2>
-      
-      <p>Prezado(a) ${pedido.nome},</p>
-      
-      <p>Lamentavelmente, sua solicitação de cadastro no BANTADS foi analisada e <strong>recusada</strong>.</p>
-      
-      <h3>Motivo da recusa:</h3>
-      <p>${motivo}</p>
-      
-      <p>Se acredita que houve um erro, ou se deseja mais informações, por favor entre em contato conosco.</p>
-      
-      <p>Atenciosamente,<br>Equipe BANTADS</p>
-    `;
-
-    this.emailService.enviarEmail({
-      destinatario: pedido.email,
-      assunto: 'Resultado da sua solicitação de cadastro BANTADS',
-      conteudoHtml: conteudo
-    }).subscribe({
-      next: () => {
-        console.log('Email de rejeição enviado com sucesso');
-      },
-      error: (erro) => {
-        console.error('Erro ao enviar email de rejeição:', erro);
-      }
-    });
-  }
-
-  private gerarSenhaAleatoria(): string {
-    return Math.random().toString(36).slice(-8);
+  private sincronizarPedidosDepoisDaSaga() {
+    window.setTimeout(() => this.carregarPedidos(), 1500);
   }
 
   limparMensagem() {

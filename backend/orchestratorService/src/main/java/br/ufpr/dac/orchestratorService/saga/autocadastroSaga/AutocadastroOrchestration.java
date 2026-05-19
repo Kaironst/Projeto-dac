@@ -41,6 +41,7 @@ public class AutocadastroOrchestration {
       SagaOperations.Autocadastro.ESCOLHER_GERENTE_ERROR,
       SagaOperations.Autocadastro.VINCULAR_GERENTE_ERROR,
       SagaOperations.Autocadastro.APROVAR_SOLICITACAO_ERROR,
+      SagaOperations.Autocadastro.REJEITAR_SOLICITACAO_ERROR,
       SagaOperations.Autocadastro.CRIAR_CONTA_ERROR,
       SagaOperations.Autocadastro.CRIAR_AUTH_ERROR,
       SagaOperations.Autocadastro.ENVIAR_EMAIL_APROVACAO_ERROR,
@@ -285,6 +286,65 @@ public class AutocadastroOrchestration {
     sagas.remove(message.getCorrelationId());
   }
 
+  public void startRejeicaoSaga(SagaMessageWrapper<AutocadastroDto.Rejeicao> message) {
+    UUID correlationId = UUID.randomUUID();
+    message.setCorrelationId(correlationId);
+
+    var state = new SagaState<AutocadastroData>(
+        correlationId,
+        AutocadastroPasso.REJEITANDO_SOLICITACAO,
+        SagaStatus.RUNNING,
+        new AutocadastroData());
+
+    state.getSagaData().setRejeicao(message.getData().getFirst());
+    sagas.put(correlationId, state);
+
+    SagaProducer<AutocadastroDto.Rejeicao> producer = producerFactory.create();
+    producer.enviarMenssagem(new SagaMessageWrapper<AutocadastroDto.Rejeicao>(
+        SagaOperations.Autocadastro.REJEITAR_SOLICITACAO,
+        message.getData(),
+        correlationId),
+        RabbitmqConsts.USERS_SAGA_KEY);
+  }
+
+  public void handleSolicitacaoRejeitada(SagaMessageWrapper<AutocadastroDto.Solicitacao> message) {
+    var state = sagas.get(message.getCorrelationId());
+    if (state == null) {
+      return;
+    }
+
+    if (errors.contains(message.getOperation())) {
+      finalizarSagaComFalha(state);
+      return;
+    }
+
+    state.setStep(AutocadastroPasso.ENVIANDO_EMAIL_REJEICAO);
+    state.getSagaData().setSolicitacao(message.getData().getFirst());
+
+    SagaProducer<AutocadastroDto.Notificacao> producer = producerFactory.create();
+    producer.enviarMenssagem(new SagaMessageWrapper<AutocadastroDto.Notificacao>(
+        SagaOperations.Autocadastro.ENVIAR_EMAIL_REJEICAO,
+        List.of(criarNotificacaoRejeicao(state)),
+        message.getCorrelationId()),
+        RabbitmqConsts.MAIL_SAGA_KEY);
+  }
+
+  public void handleEmailRejeicaoEnviado(SagaMessageWrapper<AutocadastroDto.Notificacao> message) {
+    var state = sagas.get(message.getCorrelationId());
+    if (state == null) {
+      return;
+    }
+
+    if (SagaOperations.Autocadastro.ENVIAR_EMAIL_REJEICAO_ERROR.equals(message.getOperation())) {
+      finalizarSagaComFalha(state);
+      return;
+    }
+
+    state.setStep(AutocadastroPasso.FINALIZADO);
+    state.setStatus(SagaStatus.SUCCESS);
+    sagas.remove(message.getCorrelationId());
+  }
+
   private void handleRollback(SagaState<AutocadastroData> state) {
     state.setStatus(SagaStatus.COMPENSATING);
 
@@ -322,6 +382,12 @@ public class AutocadastroOrchestration {
     }
 
     enviarEmailFalha(state);
+    state.setStep(AutocadastroPasso.FINALIZADO);
+    state.setStatus(SagaStatus.FAILED);
+    sagas.remove(state.getCorrelationId());
+  }
+
+  private void finalizarSagaComFalha(SagaState<AutocadastroData> state) {
     state.setStep(AutocadastroPasso.FINALIZADO);
     state.setStatus(SagaStatus.FAILED);
     sagas.remove(state.getCorrelationId());
@@ -368,6 +434,31 @@ public class AutocadastroOrchestration {
             escapeHtml(usuarioAuth.getEmail()),
             escapeHtml(usuarioAuth.getSenhaTemporaria())))
         .tipo(AutocadastroDto.TipoNotificacao.APROVACAO)
+        .build();
+  }
+
+  private AutocadastroDto.Notificacao criarNotificacaoRejeicao(SagaState<AutocadastroData> state) {
+    var solicitacao = state.getSagaData().getSolicitacao();
+    var cliente = solicitacao.getCliente();
+    var motivo = solicitacao.getMotivoRejeicao() == null
+        ? "Nao informado."
+        : solicitacao.getMotivoRejeicao();
+
+    return AutocadastroDto.Notificacao.builder()
+        .solicitacaoId(solicitacao.getId())
+        .destinatario(cliente.getEmail())
+        .assunto("Sua solicitacao BANTADS foi rejeitada")
+        .conteudoHtml("""
+            <h2>Sua solicitacao de autocadastro foi rejeitada</h2>
+            <p>Ola, %s.</p>
+            <p>Sua solicitacao foi analisada e rejeitada.</p>
+            <h3>Motivo</h3>
+            <p>%s</p>
+            <p>Se acredita que houve um erro, entre em contato com o banco.</p>
+            """.formatted(
+            escapeHtml(cliente.getNome()),
+            escapeHtml(motivo)))
+        .tipo(AutocadastroDto.TipoNotificacao.REJEICAO)
         .build();
   }
 

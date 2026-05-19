@@ -72,6 +72,13 @@ public class SagaConsumer {
                   new TypeReference<SagaMessageWrapper<AutocadastroDto.Aprovacao>>() {
                   }));
         }
+        case Autocadastro.REJEITAR_SOLICITACAO -> {
+          autocadastroOrchestration
+              .startRejeicaoSaga(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<AutocadastroDto.Rejeicao>>() {
+                  }));
+        }
         case Autocadastro.VALIDAR_CPF_RESULT, Autocadastro.VALIDAR_CPF_ERROR -> {
           autocadastroOrchestration
               .handleCpfValidado(mapper.convertValue(
@@ -107,6 +114,13 @@ public class SagaConsumer {
                   new TypeReference<SagaMessageWrapper<AutocadastroDto.Solicitacao>>() {
                   }));
         }
+        case Autocadastro.REJEITAR_SOLICITACAO_RESULT, Autocadastro.REJEITAR_SOLICITACAO_ERROR -> {
+          autocadastroOrchestration
+              .handleSolicitacaoRejeitada(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<AutocadastroDto.Solicitacao>>() {
+                  }));
+        }
         case Autocadastro.CRIAR_CONTA_RESULT, Autocadastro.CRIAR_CONTA_ERROR -> {
           autocadastroOrchestration
               .handleContaCriada(mapper.convertValue(
@@ -124,6 +138,13 @@ public class SagaConsumer {
         case Autocadastro.ENVIAR_EMAIL_APROVACAO_RESULT, Autocadastro.ENVIAR_EMAIL_APROVACAO_ERROR -> {
           autocadastroOrchestration
               .handleEmailAprovacaoEnviado(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<AutocadastroDto.Notificacao>>() {
+                  }));
+        }
+        case Autocadastro.ENVIAR_EMAIL_REJEICAO_RESULT, Autocadastro.ENVIAR_EMAIL_REJEICAO_ERROR -> {
+          autocadastroOrchestration
+              .handleEmailRejeicaoEnviado(mapper.convertValue(
                   message,
                   new TypeReference<SagaMessageWrapper<AutocadastroDto.Notificacao>>() {
                   }));

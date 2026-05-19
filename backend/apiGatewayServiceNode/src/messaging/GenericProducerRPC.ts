@@ -10,11 +10,11 @@ import { AuthLoginRequest, AuthLoginResponse } from "../dto/AuthDto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
-class GenericProducerRPC<MessageType> {
+class GenericProducerRPC<RequestType, ResponseType = RequestType> {
 
   private connection: amqp.ChannelModel | null = null;
   private channel: amqp.Channel | null = null;
-  private pending = new Map<string, (msg: any) => void>();
+  private pending = new Map<string, (msg: ResponseType) => void>();
 
   constructor(
     private exchange: string,
@@ -43,7 +43,7 @@ class GenericProducerRPC<MessageType> {
         if (!handler) return;
 
         try {
-          const parsed = JSON.parse(msg.content.toString()) as MessageType;
+          const parsed = JSON.parse(msg.content.toString()) as ResponseType;
           handler(parsed);
         } catch (err) {
           console.error("invalid json", err);
@@ -55,7 +55,7 @@ class GenericProducerRPC<MessageType> {
     );
   }
 
-  public async requestService(message: MessageType): Promise<MessageType> {
+  public async requestService(message: RequestType): Promise<ResponseType> {
 
     if (!this.channel) {
       throw new Error("canal não inicializado");
@@ -64,7 +64,7 @@ class GenericProducerRPC<MessageType> {
     const correlationId = randomUUID();
 
 
-    const result = await new Promise<MessageType>((resolve, reject) => {
+    const result = await new Promise<ResponseType>((resolve, reject) => {
 
       const timeout = setTimeout(() => {
         this.pending.delete(correlationId);
@@ -98,4 +98,4 @@ export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoClien
 export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
 export const autocadastroUsersProducer = new GenericProducerRPC<MessageWrapper<AutocadastroSolicitacao>>("app.exchange", "users.autocadastro.key");
 export const contasProducer = new GenericProducerRPC<MessageWrapper<ContasDtoConta>>("app.exchange", "contas.key");
-export const authProducer = new GenericProducerRPC<MessageWrapper<AuthLoginRequest | AuthLoginResponse>>("app.exchange", "auth.key");
+export const authProducer = new GenericProducerRPC<MessageWrapper<AuthLoginRequest>, MessageWrapper<AuthLoginResponse>>("app.exchange", "auth.key");

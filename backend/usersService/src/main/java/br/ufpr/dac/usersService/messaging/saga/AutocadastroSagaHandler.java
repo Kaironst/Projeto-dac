@@ -146,6 +146,43 @@ public class AutocadastroSagaHandler {
   }
 
   @Transactional
+  public void handleRejeitarSolicitacao(SagaMessageWrapper<AutocadastroDto.Rejeicao> message) {
+    try {
+      var rejeicao = message.getData().getFirst();
+      var motivo = rejeicao.getMotivo() == null ? "" : rejeicao.getMotivo().trim();
+
+      if (motivo.isEmpty()) {
+        throw new IllegalArgumentException("Motivo de rejeicao e obrigatorio.");
+      }
+
+      var solicitacao = solicitacaoRepo.findById(rejeicao.getSolicitacaoId())
+          .filter(item -> item.getStatus() == StatusSolicitacao.PENDENTE)
+          .orElseThrow();
+
+      if (rejeicao.getGerenteId() != null) {
+        solicitacao.setGerente(rejeicao.getGerenteId());
+      }
+
+      solicitacao.setStatus(StatusSolicitacao.REJEITADO);
+      solicitacao.setMotivoRejeicao(motivo);
+      solicitacao.setDataAnalise(LocalDateTime.now());
+
+      var atualizada = solicitacaoRepo.save(solicitacao);
+
+      enviarMensagem(new SagaMessageWrapper<AutocadastroDto.Solicitacao>(
+          SagaOperations.Autocadastro.REJEITAR_SOLICITACAO_RESULT,
+          List.of(toDto(atualizada)),
+          message.getCorrelationId()));
+    } catch (Exception e) {
+      e.printStackTrace();
+      enviarMensagem(new SagaMessageWrapper<AutocadastroDto.Solicitacao>(
+          SagaOperations.Autocadastro.REJEITAR_SOLICITACAO_ERROR,
+          List.of(),
+          message.getCorrelationId()));
+    }
+  }
+
+  @Transactional
   public void handleRollbackSolicitacao(SagaMessageWrapper<AutocadastroDto.Solicitacao> message) {
     try {
       if (message.getData() != null && !message.getData().isEmpty() && message.getData().getFirst().getId() != null) {

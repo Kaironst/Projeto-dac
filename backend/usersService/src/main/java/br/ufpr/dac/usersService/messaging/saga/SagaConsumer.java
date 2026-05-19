@@ -41,6 +41,11 @@ public class SagaConsumer {
               message,
               new TypeReference<SagaMessageWrapper<AutocadastroDto.Aprovacao>>() {
               }));
+      case SagaOperations.Autocadastro.REJEITAR_SOLICITACAO -> autocadastroSagaHandler.handleRejeitarSolicitacao(
+          mapper.convertValue(
+              message,
+              new TypeReference<SagaMessageWrapper<AutocadastroDto.Rejeicao>>() {
+              }));
       case SagaOperations.Autocadastro.ROLLBACK_SOLICITACAO -> autocadastroSagaHandler.handleRollbackSolicitacao(
           mapper.convertValue(
               message,

@@ -35,7 +35,7 @@ export interface AutocadastroAprovacao {
 
 export interface AutocadastroRejeicao {
   solicitacaoId: number;
-  gerenteId: number;
+  gerenteId: null | number;
   motivo: string;
 }
 

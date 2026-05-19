@@ -60,7 +60,8 @@ public class AuthService {
       throw new IllegalArgumentException("Email e senha sao obrigatorios.");
     }
 
-    var usuario = repo.findByEmailIgnoreCase(request.getEmail()).orElseThrow();
+    var usuario = repo.findByEmailIgnoreCase(request.getEmail())
+        .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas."));
     if (!passwordEncoder.matches(request.getSenha(), usuario.getSenhaHash())) {
       throw new IllegalArgumentException("Credenciais invalidas.");
     }

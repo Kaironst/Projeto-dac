@@ -25,6 +25,9 @@ public class MessageConsumer {
         }
         default -> throw new UnsupportedOperationException();
       }
+    } catch (IllegalArgumentException e) {
+      System.out.println("auth login rejected: " + e.getMessage());
+      return new MessageWrapper<AuthDto.LoginResponse>(MessageOperations.ERROR_GENERIC, null);
     } catch (Exception e) {
       System.out.println("error on auth message consumer listener");
       e.printStackTrace();
