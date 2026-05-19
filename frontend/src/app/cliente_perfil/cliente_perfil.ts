@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angul
 import { NgxMaskDirective } from 'ngx-mask';
 import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, switchMap } from 'rxjs';
 import { CepService } from '../services/cep.service';
+import { UFS } from '../shared/ufs';
 
 interface Cliente {
   id?: number;
@@ -39,6 +40,7 @@ export class ClientePerfil {
 
   saldo: number = 0;
   limite: number = 0;
+  readonly ufs = UFS;
 
   constructor(private fb: FormBuilder) {
     this.perfilForm = this.fb.group({

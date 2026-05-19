@@ -88,7 +88,12 @@
 
         <div class="form-group">
           <label>Estado</label>
-          <input type="text" formControlName="estado"/>
+          <select formControlName="estado">
+            <option value="">Selecione</option>
+            @for (estado of ufs; track estado.uf) {
+              <option [value]="estado.uf">{{ estado.uf }} - {{ estado.nome }}</option>
+            }
+          </select>
         </div>
       </div>
 

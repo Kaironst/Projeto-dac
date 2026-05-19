@@ -6,11 +6,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
 import { NgxMaskDirective } from 'ngx-mask';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, switchMap } from 'rxjs';
 import { ClienteUtil } from '../services/DBUtil/cliente-util';
 import { CepService } from '../services/cep.service';
+import { UFS } from '../shared/ufs';
 
 @Component({
   selector: 'app-autocadastro',
@@ -22,6 +24,7 @@ import { CepService } from '../services/cep.service';
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
+    MatSelectModule,
     NgxMaskDirective
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +41,7 @@ export class Autocadastro {
   public mostrarMensagemSucesso = false;
   public mostrarMensagemErro = false;
   public mensagemErro = '';
+  public readonly ufs = UFS;
 
   constructor() {
     this.formGroup = new FormGroup({

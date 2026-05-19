@@ -75,7 +75,11 @@
       <div class="form-row">
         <mat-form-field appearance="outline">
           <mat-label>Estado</mat-label>
-          <input matInput formControlName="estado" placeholder="PR">
+          <mat-select formControlName="estado">
+            @for (estado of ufs; track estado.uf) {
+              <mat-option [value]="estado.uf">{{ estado.uf }} - {{ estado.nome }}</mat-option>
+            }
+          </mat-select>
         </mat-form-field>
       </div>
 
