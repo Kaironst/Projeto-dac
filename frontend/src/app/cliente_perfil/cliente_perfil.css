@@ -138,6 +138,12 @@ body {
   cursor: not-allowed;
 }
 
+.field-error {
+  margin-top: 6px;
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
 /* BOTÃO */
 
 .btn-salvar {

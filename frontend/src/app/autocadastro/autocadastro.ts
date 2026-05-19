@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -7,7 +8,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { NgxMaskDirective } from 'ngx-mask';
 import { HttpErrorResponse } from '@angular/common/http';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, switchMap } from 'rxjs';
 import { ClienteUtil } from '../services/DBUtil/cliente-util';
+import { CepService } from '../services/cep.service';
 
 @Component({
   selector: 'app-autocadastro',
@@ -28,6 +31,9 @@ import { ClienteUtil } from '../services/DBUtil/cliente-util';
 export class Autocadastro {
   private router = inject(Router);
   private clienteUtil = inject(ClienteUtil);
+  private cepService = inject(CepService);
+  private destroyRef = inject(DestroyRef);
+  private changeDetectorRef = inject(ChangeDetectorRef);
   public formGroup: FormGroup;
   public mostrarMensagemSucesso = false;
   public mostrarMensagemErro = false;
@@ -46,6 +52,42 @@ export class Autocadastro {
       complemento: new FormControl(''),
       cidade: new FormControl('', [Validators.required]),
       estado: new FormControl('', [Validators.required])
+    });
+
+    this.configurarAutocompleteCep();
+  }
+
+  private configurarAutocompleteCep(): void {
+    const cepControl = this.formGroup.get('cep');
+
+    cepControl?.valueChanges.pipe(
+      debounceTime(300),
+      map((cep: string | null) => this.normalizarCep(cep ?? '')),
+      distinctUntilChanged(),
+      filter((cep) => cep.length === 8),
+      switchMap((cep) => this.cepService.fetchAddressByCep(cep).pipe(
+        catchError(() => {
+          cepControl.setErrors({ cepNaoEncontrado: true });
+          this.formGroup.patchValue({
+            logradouro: '',
+            cidade: '',
+            estado: ''
+          }, { emitEvent: false });
+          this.changeDetectorRef.markForCheck();
+          return EMPTY;
+        })
+      )),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((address) => {
+      this.formGroup.patchValue({
+        cep: address.cep,
+        logradouro: address.logradouro,
+        cidade: address.cidade,
+        estado: address.estado
+      }, { emitEvent: false });
+
+      cepControl.setErrors(null);
+      this.changeDetectorRef.markForCheck();
     });
   }
 
@@ -123,5 +165,9 @@ export class Autocadastro {
 
   private normalizarTelefone(telefone: string): string {
     return telefone.replace(/\D/g, '');
+  }
+
+  private normalizarCep(cep: string): string {
+    return cep.replace(/\D/g, '');
   }
 }

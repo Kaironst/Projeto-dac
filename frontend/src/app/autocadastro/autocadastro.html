@@ -44,6 +44,9 @@
         <mat-form-field appearance="outline">
           <mat-label>CEP</mat-label>
           <input matInput formControlName="cep" mask="00000-000" placeholder="00000-000">
+          @if (formGroup.get('cep')?.hasError('cepNaoEncontrado')) {
+            <mat-error>CEP não encontrado</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
