@@ -61,6 +61,13 @@ public class RabbitmqConsts {
 
   // --------------------------------------------------------------------------------------------------------
 
+  // queue do authService
+  public static final String AUTH_QUEUE = "auth.queue";
+  // key do authservice
+  public static final String AUTH_KEY = "auth.key";
+
+  // --------------------------------------------------------------------------------------------------------
+
   // key do apiGateway (queue em node apenas)
   public static final String API_GATEWAY_KEY = "apiGateway.key";
 

@@ -17,6 +17,20 @@ services:
       retries: 5
       start_period: 5s
 
+  auth-database:
+    image: mongo
+    container_name: auth-database
+    ports:
+      - "1502:27017"
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: usuario
+      MONGO_INITDB_ROOD_PASSWORD: admin
+      MONGO_INITDB_DATABASE: auth_database
+
+    volumes:
+      - mongodb_data:/data/db
+
   users-database:
     image: postgres
     container_name: users-database
@@ -54,6 +68,29 @@ services:
     environment:
       - PORT=3000
       - EMAIL_SERVICE_URL=http://email-service:3005
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+
+  auth-service:
+    build:
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
+      args:
+        PROJECT_DIR: authService
+    restart: always
+    volumes:
+      - gradle-caches:/home/gradle/.gradle/caches
+      - gradle-wrapper:/home/gradle/.gradle/wrapper
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      users-database:
+        condition: service_started
+    ports:
+      - "8085:8080"
+    environment:
+      - GRADLE_OPTS=-Xmx512m -Xms256m -XX:+HeapDumpOnOutOfMemoryError
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
 
   email-service:
     build:
@@ -173,6 +210,7 @@ services:
 
 volumes:
   pgdata:
+  mongodb_data:
   rabbitmq_data:
   mongodata:
   gradle-caches:
