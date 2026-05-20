@@ -31,6 +31,9 @@ public class MessageConsumer {
         case MessageOperations.READ -> {
           return handleRead(message.getData());
         }
+        case MessageOperations.READ_BY_EMAIL -> {
+          return handleReadByEmail(message.getData());
+        }
         case MessageOperations.READ_ALL -> {
           return handleReadAll();
         }
@@ -95,6 +98,14 @@ public class MessageConsumer {
     final var idList = new ArrayList<Long>();
     gerentes.forEach(gerente -> idList.add(gerente.getId()));
     List<Gerente> queryResult = repo.findAllById(idList);
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
+  }
+
+  @Transactional(readOnly = true)
+  private MessageWrapper<GerentesDto.Gerente> handleReadByEmail(List<GerentesDto.Gerente> gerentes) {
+    final var emailList = new ArrayList<String>();
+    gerentes.forEach(gerente -> emailList.add(gerente.getEmail()));
+    List<Gerente> queryResult = repo.findAllByEmailIgnoreCase(emailList);
     return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 

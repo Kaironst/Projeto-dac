@@ -1,5 +1,7 @@
 package br.ufpr.dac.authService.document;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,12 +19,14 @@ public class Conta {
   @Id
   private String id;
 
-  private String email;
-
+  private String userId;
   @Indexed(unique = true)
-  private String accountId;
+  private String email;
+  @Indexed(unique = true)
+  private String cpf;
+
+  private List<String> roles;
 
   private String senha;
-  private String salt;
 
 }
