@@ -103,9 +103,14 @@ public class MessageConsumer {
 
   @Transactional(readOnly = true)
   private MessageWrapper<GerentesDto.Gerente> handleReadByEmail(List<GerentesDto.Gerente> gerentes) {
-    final var emailList = new ArrayList<String>();
-    gerentes.forEach(gerente -> emailList.add(gerente.getEmail()));
-    List<Gerente> queryResult = repo.findAllByEmailIgnoreCase(emailList);
+    List<Gerente> queryResult = new ArrayList<Gerente>();
+    gerentes.forEach(gerente -> {
+      Gerente gerenteEncontrado = repo.findByEmailIgnoreCase(gerente.getEmail());
+
+      if (gerenteEncontrado != null) {
+        queryResult.add(gerenteEncontrado);
+      }
+    });
     return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 

@@ -175,6 +175,12 @@ body {
   margin-top: 10px;
 }
 
+.status-message {
+  color: #475569;
+  font-weight: 600;
+  margin-top: 18px;
+}
+
 .cards-grid {
   display: grid;
   grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));

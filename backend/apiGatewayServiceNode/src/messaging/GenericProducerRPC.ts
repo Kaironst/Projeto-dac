@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { UsersDtoCliente } from "../dto/UsersDto";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
 import { MessageWrapper } from "../dto/MessageWrapper";
+import { ContasDtoConta } from "../dto/ContasDto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
@@ -22,7 +23,7 @@ class GenericProducerRPC<MessageType> {
   async init() {
     if (this.connection && this.channel) return;
 
-    this.connection = await amqp.connect(rabbitmqUrl);
+    this.connection = await this.connectWithRetry();
     this.channel = await this.connection.createChannel();
 
     await this.channel.assertExchange(this.exchange, "direct", {});
@@ -50,6 +51,26 @@ class GenericProducerRPC<MessageType> {
       },
       { noAck: true }
     );
+  }
+
+  private async connectWithRetry(maxAttempts = 20, delayMs = 1000): Promise<amqp.ChannelModel> {
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await amqp.connect(rabbitmqUrl);
+      } catch (error) {
+        lastError = error;
+        console.warn(`RabbitMQ unavailable for ${this.routingKey}. Attempt ${attempt}/${maxAttempts}.`);
+        await this.delay(delayMs);
+      }
+    }
+
+    throw lastError;
+  }
+
+  private delay(delayMs: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 
   public async requestService(message: MessageType): Promise<MessageType> {
@@ -93,3 +114,4 @@ class GenericProducerRPC<MessageType> {
 export default GenericProducerRPC;
 export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
 export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
+export const contasProducer = new GenericProducerRPC<MessageWrapper<ContasDtoConta>>("app.exchange", "contas.key");

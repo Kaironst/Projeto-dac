@@ -67,6 +67,7 @@ public class MessageConsumer {
           .email(cliente.getEmail())
           .cpf(cliente.getCpf())
           .estado(cliente.getEstado())
+          .telefone(cliente.getTelefone())
           .build();
 
       var enderecosCliente = new ArrayList<UsersDto.Endereco>();
@@ -102,6 +103,7 @@ public class MessageConsumer {
           .email(clienteDto.getEmail())
           .cpf(clienteDto.getCpf())
           .estado(clienteDto.getEstado())
+          .telefone(clienteDto.getTelefone())
           .build();
 
       var enderecosCliente = new ArrayList<Endereco>();
@@ -154,10 +156,14 @@ public class MessageConsumer {
 
   @Transactional(readOnly = true)
   private MessageWrapper<UsersDto.Cliente> handleReadByEmail(List<UsersDto.Cliente> clientes) {
-    var emailList = new ArrayList<String>();
-    clientes.forEach(c -> emailList.add(c.getEmail()));
+    var clientesEncontrados = new ArrayList<Cliente>();
+    clientes.forEach(c -> {
+      Cliente clienteEncontrado = repo.findByEmailIgnoreCase(c.getEmail());
 
-    List<Cliente> clientesEncontrados = repo.findAllByEmailIgnoreCase(emailList);
+      if (clienteEncontrado != null) {
+        clientesEncontrados.add(clienteEncontrado);
+      }
+    });
     return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
   }
 

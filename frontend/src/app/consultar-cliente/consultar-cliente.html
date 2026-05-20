@@ -38,6 +38,12 @@
 
     </div>
 
+    @if (mensagemErro) {
+      <p class="error-message">
+        {{ mensagemErro }}
+      </p>
+    }
+
     @if (funcionalidadeAtiva === 'cpf') {
 
       <form
@@ -59,7 +65,7 @@
               mask="000.000.000-00"
             />
 
-            @if (pesquisado && !clienteConsultado) {
+            @if (pesquisado && !carregando && !clienteConsultado) {
               <p class="error-message">
                 Cliente não encontrado com o CPF informado.
               </p>
@@ -72,7 +78,7 @@
             <button
               type="submit"
               class="btn btn-primary"
-              [disabled]="!formGroup.valid"
+              [disabled]="!formGroup.valid || carregando"
             >
               Pesquisar
             </button>
@@ -91,7 +97,15 @@
 
       </form>
 
-      @if (pesquisado && clienteConsultado) {
+      @if (carregando) {
+
+        <p class="status-message">
+          Carregando cliente...
+        </p>
+
+      }
+
+      @if (pesquisado && !carregando && clienteConsultado) {
 
         <div class="resultados-container">
 
@@ -185,42 +199,58 @@
           3 Clientes com Maiores Saldos
         </h3>
 
-        <div class="cards-grid">
+        @if (carregando) {
 
-          @for (cliente of melhoresClientes; track cliente.cpf; let i = $index) {
+          <p class="status-message">
+            Carregando clientes...
+          </p>
 
-            <div class="cliente-card">
+        } @else if (melhoresClientes.length) {
 
-              <div class="cliente-ranking">
-                #{{ i + 1 }}
+          <div class="cards-grid">
+
+            @for (cliente of melhoresClientes; track cliente.cpf; let i = $index) {
+
+              <div class="cliente-card">
+
+                <div class="cliente-ranking">
+                  #{{ i + 1 }}
+                </div>
+
+                <h4>{{ cliente.nome }}</h4>
+
+                <p>
+                  <strong>CPF:</strong>
+                  {{ cliente.cpf | mask:'000.000.000-00' }}
+                </p>
+
+                <p>
+                  <strong>Cidade:</strong>
+                  {{ cliente.endereco.cidade }}
+                </p>
+
+                <p>
+                  <strong>Estado:</strong>
+                  {{ cliente.endereco.estado }}
+                </p>
+
+                <p class="saldo">
+                  {{ cliente.conta.saldo | currency:'BRL':'symbol' }}
+                </p>
+
               </div>
 
-              <h4>{{ cliente.nome }}</h4>
+            }
 
-              <p>
-                <strong>CPF:</strong>
-                {{ cliente.cpf | mask:'000.000.000-00' }}
-              </p>
+          </div>
 
-              <p>
-                <strong>Cidade:</strong>
-                {{ cliente.endereco.cidade }}
-              </p>
+        } @else {
 
-              <p>
-                <strong>Estado:</strong>
-                {{ cliente.endereco.estado }}
-              </p>
+          <p class="sem-resultados">
+            Nenhum cliente encontrado.
+          </p>
 
-              <p class="saldo">
-                {{ cliente.conta.saldo | currency:'BRL':'symbol' }}
-              </p>
-
-            </div>
-
-          }
-
-        </div>
+        }
 
       </div>
 
@@ -266,7 +296,13 @@
 
           </div>
 
-          @if (clientesOrdenadosFiltrados.length) {
+          @if (carregando) {
+
+            <p class="status-message">
+              Carregando clientes...
+            </p>
+
+          } @else if (clientesOrdenadosFiltrados.length) {
 
             <div class="table-wrapper">
 
