@@ -1,42 +1,151 @@
+<div class="home-container">
 
-  <div class="container">
-    <header>
+  <section class="self">
+
+    <div class="self-content">
+
+      <span class="badge">
+        Internet Banking Acadêmico
+      </span>
+
       <h1>BANTADS</h1>
-      <p>
-        Sistema de Internet Banking para aqueles associados com o curso de TADS da UFPR.
+
+      <p class="self-description">
+        Sistema de Internet Banking desenvolvido para os associados
+        ao curso de TADS da UFPR.
       </p>
-    </header>
-    <section class="about">
+
+      <div class="self-actions">
+
+        <a
+          routerLink="/autocadastro"
+          class="btn btn-primary"
+        >
+          Criar Conta
+        </a>
+
+        <a
+          routerLink="/login"
+          class="btn btn-secondary"
+        >
+          Fazer Login
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="content-card">
+
+    <div class="section-header">
       <h2>Sobre o Sistema</h2>
-      <p>
-        Este projeto foi desenvolvido como parte do curso de
-        <strong>Análise e Desenvolvimento de Sistemas</strong> da <strong>UFPR</strong>.
-        O objetivo é simular um ambiente bancário digital.
-      </p>
-    </section>
+    </div>
 
-    <section class="features">
+    <p>
+      Este projeto foi desenvolvido como parte do curso de
+      <strong>Análise e Desenvolvimento de Sistemas</strong>
+      da
+      <strong>UFPR</strong>.
+    </p>
+
+    <p>
+      O objetivo é simular um ambiente bancário digital moderno,
+      permitindo operações bancárias, gerenciamento de contas,
+      consultas e movimentações financeiras.
+    </p>
+
+  </section>
+
+  <section class="content-card">
+
+    <div class="section-header">
       <h2>Funcionalidades</h2>
+    </div>
 
-      <ul>
-        <a mat-button routerLink="/autocadastro">Autocadastro</a>
-        <br>
-        <a mat-button routerLink="/login">Login</a>
-        <li>Gerenciamento de contas bancárias</li>
-        <li>Registro de transações</li>
-        <li>Relatórios financeiros</li>
-      </ul>
+    <div class="features-grid">
 
-    </section>
+      <div class="feature-card">
+        <div class="feature-icon">👤</div>
 
-    <section class="developers">
+        <h3>Autocadastro</h3>
+
+        <p>
+          Cadastro completo de novos clientes.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+
+        <h3>Contas Bancárias</h3>
+
+        <p>
+          Gerenciamento de saldo, limite e perfil.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💸</div>
+
+        <h3>Transações</h3>
+
+        <p>
+          Depósitos, saques e transferências.
+        </p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+
+        <h3>Relatórios</h3>
+
+        <p>
+          Consulta de extratos e dados financeiros.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- DESENVOLVEDORES -->
+
+  <section class="content-card">
+
+    <div class="section-header">
       <h2>Desenvolvedores</h2>
+    </div>
 
-      <ul>
-        <li>Bruno Kussen</li>
-        <li>Bruno Pedron</li>
-        <li>Pedro Novak</li>
-      </ul>
+    <div class="developers-grid">
 
-    </section>
-  </div>
+      <div class="developer-card">
+        <span class="developer-avatar">
+          BK
+        </span>
+
+        <h3>Bruno Kussen</h3>
+      </div>
+
+      <div class="developer-card">
+        <span class="developer-avatar">
+          BP
+        </span>
+
+        <h3>Bruno Pedron</h3>
+      </div>
+
+      <div class="developer-card">
+        <span class="developer-avatar">
+          PN
+        </span>
+
+        <h3>Pedro Novak</h3>
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

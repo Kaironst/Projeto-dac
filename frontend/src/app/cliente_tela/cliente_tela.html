@@ -1,68 +1,169 @@
-<div class="container">
-  <header>
+<div class="cliente-container">
+
+  <div class="header">
     <h1>Tela do Cliente</h1>
-  </header>
-
-  <div class="saldo" [ngClass]="{ negativo: saldo < 0 }">
-    Saldo: R$ {{ saldo.toFixed(2) }} <br>
-    Limite: R$ {{ limite.toFixed(2) }}
+    <p>Gerencie saldo, movimentações e transferências</p>
   </div>
 
-  <div class="acoes">
-    <div class="card">
+  <div class="saldo-card" [class.negativo]="saldo < 0">
+
+    <div class="saldo-info">
+      <span class="saldo-label">Saldo Atual</span>
+
+      <h2>
+        R$ {{ saldo.toFixed(2) }}
+      </h2>
+    </div>
+
+    <div class="limite-info">
+      <span class="saldo-label">Limite</span>
+
+      <h3>
+        R$ {{ limite.toFixed(2) }}
+      </h3>
+    </div>
+
+  </div>
+
+
+  <div class="acoes-grid">
+
+    <div class="acao-card">
+
       <h2>Depositar</h2>
-      <label>Valor:</label>
-      <input type="number" [(ngModel)]="valorDeposito" />
-      <button (click)="depositar()">Depositar</button>
+
+      <div class="form-group">
+        <label>Valor</label>
+
+        <input
+          type="number" [(ngModel)]="valorDeposito"/>
+      </div>
+
+      <button
+        class="btn btn-deposito"
+        (click)="depositar()"
+      >
+        Depositar
+      </button>
+
     </div>
 
-    <div class="card">
+    <div class="acao-card">
+
       <h2>Sacar</h2>
-      <label>Valor:</label>
-      <input type="number" [(ngModel)]="valorSaque" />
-      <button (click)="sacar()">Sacar</button>
+
+      <div class="form-group">
+        <label>Valor</label>
+
+        <input type="number" [(ngModel)]="valorSaque"/>
+      </div>
+
+      <button class="btn btn-saque" (click)="sacar()">
+        Sacar
+      </button>
+
     </div>
 
-    <div class="card">
+    <div class="acao-card">
+
       <h2>Transferir</h2>
-      <label>Conta de Destino:</label>
-      <input type="text" [(ngModel)]="contaDestino" />
-      <label>Valor:</label>
-      <input type="number" [(ngModel)]="valorTransferencia" />
-      <button (click)="transferir()">Transferir</button>
+
+      <div class="form-group">
+        <label>Conta de Destino</label>
+
+        <input type="text" [(ngModel)]="contaDestino"/>
+      </div>
+
+      <div class="form-group">
+        <label>Valor</label>
+
+        <input type="number" [(ngModel)]="valorTransferencia"/>
+      </div>
+
+      <button class="btn btn-transferencia" (click)="transferir()">
+        Transferir
+      </button>
+
     </div>
+
   </div>
 
-  <div class="extrato">
-    <h2>Extrato</h2>
+
+  <div class="extrato-card">
+
+    <div class="extrato-header">
+      <h2>Extrato</h2>
+    </div>
 
     <div class="filtro-extrato">
-      <label>Data início:</label>
-      <input type="date" [(ngModel)]="dataInicio" />
 
-      <label>Data fim:</label>
-      <input type="date" [(ngModel)]="dataFim" />
+      <div class="form-group">
+        <label>Data início</label>
 
-      <button class="extrato-filtrar" (click)="filtrarExtrato()">Filtrar</button>
-      <button class="extrato-limpar" (click)="limparFiltro()">Limpar</button>
+        <input type="date" [(ngModel)]="dataInicio"/>
+      </div>
+
+      <div class="form-group">
+        <label>Data fim</label>
+
+        <input type="date" [(ngModel)]="dataFim" />
+      </div>
+
+      <div class="filtro-botoes">
+
+        <button class="btn btn-filtrar" (click)="filtrarExtrato()">
+          Filtrar
+        </button>
+
+        <button class="btn btn-limpar" (click)="limparFiltro()">
+          Limpar
+        </button>
+
+      </div>
+
     </div>
 
     @if (extrato.length === 0) {
-      <div>Nenhuma transação ainda.</div>
+
+      <div class="sem-extrato">
+        Nenhuma transação encontrada.
+      </div>
+
     } @else {
-      @for (t of extratoFiltrado; track t) {
-        <div class="transacao">
-          <div>
-            <strong>{{ t.tipo }}</strong> - {{ t.descricao }}
+
+      <div class="transacoes-lista">
+
+        @for (t of extratoFiltrado; track t) {
+
+          <div class="transacao">
+
+            <div class="transacao-topo">
+
+              <div>
+                <strong>{{ t.tipo }}</strong>
+                <span class="descricao">
+                  - {{ t.descricao }}
+                </span>
+              </div>
+
+              <div
+                class="valor" [class.positivo]="t.valor >= 0" [class.negativo]="t.valor < 0">
+                R$ {{ t.valor.toFixed(2) }}
+              </div>
+
+            </div>
+
+            <small>
+              {{ t.data | date:'dd/MM/yyyy HH:mm' }}
+            </small>
+
           </div>
-          <div [ngClass]="{ positivo: t.valor >= 0, negativo: t.valor < 0 }">
-            R$ {{ t.valor.toFixed(2) }}
-          </div>
-          <small>
-            {{ t.data | date:'dd/MM/yyyy HH:mm' }}
-          </small>
-        </div>
-      }
+
+        }
+
+      </div>
+
     }
+
   </div>
 </div>
