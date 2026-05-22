@@ -25,7 +25,7 @@ public class ClienteUserDetailsService implements UserDetailsService {
       var user = repo.findByEmailIgnoreCase(email);
       var roles = new ArrayList<SimpleGrantedAuthority>();
       user.getRoles().forEach(roleString -> {
-        roles.add(new SimpleGrantedAuthority(roleString));
+        roles.add(new SimpleGrantedAuthority(roleString.name()));
       });
       return new User(
           user.getEmail(),
