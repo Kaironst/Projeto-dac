@@ -10,25 +10,16 @@ import java.util.Base64;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 
 import br.ufpr.dac.authService.security.ClienteUserDetailsService;
-import br.ufpr.dac.authService.security.JwtAuthenticationFilter;
-import br.ufpr.dac.authService.security.JwtService;
 
 @Configuration
 public class SecurityConfig {
-
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http, ClienteUserDetailsService userDetailsService,
-      JwtService jwtService, PasswordEncoder passwordEncoder) throws Exception {
-
-    JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, userDetailsService);
-
-  }
 
   @Bean
   public RSAPrivateKey privateKey() throws Exception {
@@ -70,4 +61,31 @@ public class SecurityConfig {
   public KeyPair keyPair(RSAPrivateKey privateKey, RSAPublicKey publicKey) {
     return new KeyPair(publicKey, privateKey);
   }
+
+  // valida o login, verifica se o usuario existe e se a senha bate quando os
+  // dados são enviados
+  @Bean
+  public AuthenticationProvider authenticationProvider(ClienteUserDetailsService userDetailsService,
+      PasswordEncoder encoder) {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+    provider.setPasswordEncoder(encoder);
+    return provider;
+  }
+
+  // retorna Authentications validas ou não dependendo da Authentication recebida
+  // AuthenticationConfig é um bean fornecido pelo spring que encapsula todos os
+  // authenticationProvidersRegistrados
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    return config.getAuthenticationManager();
+  }
+
+  // criptografa senhas antes de guardar no banco e compara senha criptografada
+  // com a crua
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    // sha256+salt customizado para atender aos requisitos
+    return new Sha256SaltEncoder();
+  }
+
 }

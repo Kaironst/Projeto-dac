@@ -7,25 +7,33 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Document
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Data
 public class Conta {
+
+  public static enum Roles {
+    CLIENTE,
+    GERENTE,
+    ADMINISTRADOR,
+  }
 
   @Id
   private String id;
 
-  private String userId;
+  private Long userId;
   @Indexed(unique = true)
   private String email;
   @Indexed(unique = true)
   private String cpf;
 
-  private List<String> roles;
+  private List<Roles> roles;
 
   private String senha;
 

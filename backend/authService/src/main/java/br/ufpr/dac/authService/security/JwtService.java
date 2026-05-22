@@ -41,7 +41,7 @@ public class JwtService {
   }
 
   // provavelmente vou mander o validateToken para o shared/
-  boolean validateToken(String token, UserDetails userDetails) {
+  public boolean validateToken(String token, UserDetails userDetails) {
 
     // verifica o token usando a chave e padga os claims dele
     Jws<Claims> jws = Jwts.parser()

@@ -36,6 +36,9 @@ public class MessageConsumer {
         case MessageOperations.READ_BY_EMAIL -> {
           return handleReadByEmail(message.getData());
         }
+        case MessageOperations.READ_BY_CPF -> {
+          return handleReadByCpf(message.getData());
+        }
         case MessageOperations.READ_ALL -> {
           return handleReadAll();
         }
@@ -159,6 +162,19 @@ public class MessageConsumer {
     var clientesEncontrados = new ArrayList<Cliente>();
     clientes.forEach(c -> {
       Cliente clienteEncontrado = repo.findByEmailIgnoreCase(c.getEmail());
+
+      if (clienteEncontrado != null) {
+        clientesEncontrados.add(clienteEncontrado);
+      }
+    });
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
+  }
+
+  @Transactional(readOnly = true)
+  private MessageWrapper<UsersDto.Cliente> handleReadByCpf(List<UsersDto.Cliente> clientes) {
+    var clientesEncontrados = new ArrayList<Cliente>();
+    clientes.forEach(c -> {
+      Cliente clienteEncontrado = repo.findByCpf(c.getCpf());
 
       if (clienteEncontrado != null) {
         clientesEncontrados.add(clienteEncontrado);

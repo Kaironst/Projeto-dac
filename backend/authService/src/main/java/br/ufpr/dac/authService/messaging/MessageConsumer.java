@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,7 +61,7 @@ public class MessageConsumer {
 
       return new MessageWrapper<TokenDto>(MessageOperations.RESULT, List.of(new TokenDto(token)));
 
-    } catch (BadCredentialsException e) {
+    } catch (Exception e) {
       return new MessageWrapper<TokenDto>(MessageOperations.ERROR_INVALID_LOGIN, List.of());
     }
   }
