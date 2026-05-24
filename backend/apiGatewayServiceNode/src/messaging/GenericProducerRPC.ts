@@ -5,10 +5,12 @@ import { UsersDtoCliente } from "../dto/UsersDto";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
 import { MessageWrapper } from "../dto/MessageWrapper";
 import { ContasDtoConta } from "../dto/ContasDto";
+import { LoginRequest } from "../dto/LoginRequest";
+import { TokenDto } from "../dto/TokenDto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
-class GenericProducerRPC<MessageType> {
+class GenericProducerRPC<ReqMessageType, ResMessageType> {
 
   private connection: amqp.ChannelModel | null = null;
   private channel: amqp.Channel | null = null;
@@ -26,8 +28,10 @@ class GenericProducerRPC<MessageType> {
     this.connection = await this.connectWithRetry();
     this.channel = await this.connection.createChannel();
 
+    //declara a exchange
     await this.channel.assertExchange(this.exchange, "direct", {});
 
+    //esse é o consumer
     //usa o pseudo_queue reply-to (usado no spring no convertSendAndRecieve)
     await this.channel.consume(
       "amq.rabbitmq.reply-to",
@@ -35,13 +39,14 @@ class GenericProducerRPC<MessageType> {
 
         if (!msg) return;
 
+        //pega 
         const correlationId = msg.properties.correlationId;
         const handler = this.pending.get(correlationId);
 
         if (!handler) return;
 
         try {
-          const parsed = JSON.parse(msg.content.toString()) as MessageType;
+          const parsed = JSON.parse(msg.content.toString()) as ResMessageType;
           handler(parsed);
         } catch (err) {
           console.error("invalid json", err);
@@ -73,7 +78,7 @@ class GenericProducerRPC<MessageType> {
     return new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 
-  public async requestService(message: MessageType): Promise<MessageType> {
+  public async requestService(message: ReqMessageType): Promise<ResMessageType> {
 
     if (!this.channel) {
       throw new Error("canal não inicializado");
@@ -82,7 +87,7 @@ class GenericProducerRPC<MessageType> {
     const correlationId = randomUUID();
 
 
-    const result = await new Promise<MessageType>((resolve, reject) => {
+    const result = await new Promise<ResMessageType>((resolve, reject) => {
 
       const timeout = setTimeout(() => {
         this.pending.delete(correlationId);
@@ -112,6 +117,7 @@ class GenericProducerRPC<MessageType> {
 }
 
 export default GenericProducerRPC;
-export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
-export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
-export const contasProducer = new GenericProducerRPC<MessageWrapper<ContasDtoConta>>("app.exchange", "contas.key");
+export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>, MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
+export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>, MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
+export const contasProducer = new GenericProducerRPC<MessageWrapper<ContasDtoConta>, MessageWrapper<ContasDtoConta>>("app.exchange", "contas.key");
+export const authProducer = new GenericProducerRPC<MessageWrapper<LoginRequest>, MessageWrapper<TokenDto>>("app.exchange", "auth.key")
