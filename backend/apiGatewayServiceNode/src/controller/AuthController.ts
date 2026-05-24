@@ -4,8 +4,8 @@ import { authProducer } from "../messaging/GenericProducerRPC";
 
 const router = Router();
 
-//GET /id
-router.get("/", async (req: Request, res: Response) => {
+//POST /
+router.post("/", async (req: Request, res: Response) => {
   try {
     const loginRequest = req.body as LoginRequest;
     const responseToken = await authProducer.requestService({ operation: "LOGIN", data: [loginRequest] });

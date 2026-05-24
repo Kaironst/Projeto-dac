@@ -75,8 +75,13 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      users-database:
+      auth-database:
         condition: service_started
+      users-service:
+        condition: service_started
+      gerentes-service:
+        condition: service_started
+
     ports:
       - "8085:8080"
     environment:
