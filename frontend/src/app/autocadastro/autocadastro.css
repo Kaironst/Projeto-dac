@@ -74,7 +74,8 @@ body {
   font-weight: 600;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   padding: 12px 14px;
   border-radius: 10px;
   border: 1px solid #dbe2ea;
@@ -83,14 +84,16 @@ body {
   transition:border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow:0 0 0 4px rgba(102, 126, 234, 0.15);
   background: white;
 }
 
-.form-group input:disabled {
+.form-group input:disabled,
+.form-group select:disabled {
   background: #edf2f7;
   color: #64748b;
   cursor: not-allowed;
@@ -143,7 +146,8 @@ body {
   animation: fadeIn 0.2s ease;
 }
 
-.form-group input.ng-invalid.ng-touched {
+.form-group input.ng-invalid.ng-touched,
+.form-group select.ng-invalid.ng-touched {
   border-color: #ef4444;
   background: #fff5f5;
   box-shadow:0 0 0 4px rgba(239, 68, 68, 0.12);
