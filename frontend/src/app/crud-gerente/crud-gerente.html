@@ -1,87 +1,112 @@
-<section class="crud-gerente-page">
-	<mat-card class="crud-card" appearance="outlined">
-		<mat-card-header class="card-header">
-			<mat-card-title class="crud-title">CRUD Gerentes - RF17 - 20</mat-card-title>
-		</mat-card-header>
+<div class="admin-container">
 
-		<mat-card-content class="card-content">
-			<div class="card-topbar">
-				<p class="card-description">A tela lista os gerentes cadastrados em ordem crescente por nome.</p>
-				<button
-					class="add-button"
-					type="button"
-					aria-label="Adicionar gerente"
-					title="Adicionar gerente"
-					(click)="abrirCadastro()"
-				>
-					+
-				</button>
-			</div>
+  <div class="header">
+    <h1>CRUD de Gerentes</h1>
+    <p>
+      Gerencie os gerentes cadastrados no sistema
+    </p>
+  </div>
 
-			@if (mensagemStatus) {
-				<p class="status-message">{{ mensagemStatus }}</p>
-			}
+  @if (mensagemStatus) {
+    <div class="status-message">
+      {{ mensagemStatus }}
+    </div>
+  }
 
-			@if (gerentesOrdenados.length > 0) {
-				<div class="table-wrapper">
-					<table class="gerentes-table">
-						<thead>
-							<tr>
-								<th>Nome</th>
-								<th>CPF</th>
-								<th>E-mail</th>
-								<th>Telefone</th>
-								<th>Ações</th>
-							</tr>
-						</thead>
-						<tbody>
-							@for (gerente of gerentesOrdenados; track gerente.cpf) {
-								<tr>
-									<td>{{ gerente.nome }}</td>
-									<td>{{ gerente.cpf }}</td>
-									<td>{{ gerente.email }}</td>
-									<td>{{ gerente.telefone }}</td>
-									<td class="actions-cell">
-										<button
-											class="edit-button"
-											type="button"
-											aria-label="Editar gerente"
-											title="Editar gerente"
-											(click)="abrirEdicao(gerente)"
-										>
-											<span class="material-icons">edit</span>
-										</button>
-										<button
-											class="delete-button"
-											type="button"
-											aria-label="Remover gerente"
-											title="Remover gerente"
-											(click)="abrirConfirmacaoRemocao(gerente)"
-										>
-											<span class="material-icons">delete</span>
-										</button>
-									</td>
-								</tr>
-							}
-						</tbody>
-					</table>
-				</div>
-			} @else {
-				<p class="empty-state">Nenhum gerente cadastrado.</p>
-			}
-		</mat-card-content>
-	</mat-card>
+  <div class="top-actions">
+    <button
+      class="btn-adicionar"
+      type="button"
+      (click)="abrirCadastro()"
+    >
+      + Adicionar Gerente
+    </button>
+  </div>
 
-	<app-gerente-form-modal
-		[aberto]="modalAberto"
-		[gerente]="gerenteSelecionadoParaEdicao"
-		[modo]="modalModo"
-		(fechar)="fecharCadastro($event)"
-	></app-gerente-form-modal>
-	<app-gerente-remover-modal
-		[aberto]="confirmacaoRemocaoAberta"
-		[gerenteNome]="gerenteSelecionadoParaRemocao?.nome ?? ''"
-		(confirmar)="removerGerenteSelecionado()"
-		(cancelar)="cancelarRemocao()"
-	></app-gerente-remover-modal>
-</section>
+  @if (gerentesOrdenados.length > 0) {
+
+    <div class="cards-grid">
+
+      @for (gerente of gerentesOrdenados; track gerente.cpf) {
+
+        <div class="gerente-card">
+
+          <div class="card-topo">
+
+            <div class="avatar">
+              {{ gerente.nome.charAt(0) }}
+            </div>
+
+            <div class="gerente-info">
+              <h2>{{ gerente.nome }}</h2>
+
+              <span class="cpf">
+                CPF: {{ gerente.cpf }}
+              </span>
+            </div>
+
+          </div>
+
+          <div class="dados-grid">
+
+            <div class="info-box">
+              <span class="label">E-mail</span>
+              <strong>{{ gerente.email }}</strong>
+            </div>
+
+            <div class="info-box">
+              <span class="label">Telefone</span>
+              <strong>{{ gerente.telefone }}</strong>
+            </div>
+
+          </div>
+
+          <div class="card-actions">
+
+            <button
+              class="btn-editar"
+              type="button"
+              (click)="abrirEdicao(gerente)"
+            >
+              Editar
+            </button>
+
+            <button
+              class="btn-remover"
+              type="button"
+              (click)="abrirConfirmacaoRemocao(gerente)"
+            >
+              Remover
+            </button>
+
+          </div>
+
+        </div>
+
+      }
+
+    </div>
+
+  } @else {
+
+    <div class="sem-gerentes">
+      Nenhum gerente cadastrado.
+    </div>
+
+  }
+
+  <app-gerente-form-modal
+    [aberto]="modalAberto"
+    [gerente]="gerenteSelecionadoParaEdicao"
+    [modo]="modalModo"
+    (fechar)="fecharCadastro($event)"
+  ></app-gerente-form-modal>
+
+  <app-gerente-remover-modal
+    [aberto]="confirmacaoRemocaoAberta"
+    [gerenteNome]="gerenteSelecionadoParaRemocao?.nome ?? ''"
+    (confirmar)="removerGerenteSelecionado()"
+    (cancelar)="cancelarRemocao()"
+  ></app-gerente-remover-modal>
+
+</div>

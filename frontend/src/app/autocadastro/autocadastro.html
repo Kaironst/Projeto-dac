@@ -1,117 +1,346 @@
-<form method="POST" [formGroup]="formGroup" (ngSubmit)="cadastrar()" class="cadastro-form">
-  <mat-card class="cadastro-card" appearance="outlined">
+<div class="cliente-container">
 
-    <mat-card-header class="card-header">
-      <mat-card-title class="cadastro-title">Autocadastro de Cliente</mat-card-title>
-    </mat-card-header>
+  <div class="header">
+    <h1>Autocadastro de Cliente</h1>
+    <p>
+      Preencha seus dados pessoais e endereço para solicitar seu cadastro
+    </p>
+  </div>
 
-    <mat-card-content class="card-content">
+  <form
+    method="POST"
+    [formGroup]="formGroup"
+    (ngSubmit)="cadastrar()"
+  >
 
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nome Completo</mat-label>
-          <input matInput formControlName="nome" placeholder="Seu nome completo">
-        </mat-form-field>
+    <div class="perfil-card">
+
+      <div class="section-title">
+        <h2>Dados Pessoais</h2>
       </div>
 
-      <div class="form-row two-cols">
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input type="email" matInput formControlName="email" placeholder="cliente@bantads.com">
-        </mat-form-field>
+      <div class="form-grid">
 
-        <mat-form-field appearance="outline">
-          <mat-label>CPF</mat-label>
-          <input matInput formControlName="cpf" placeholder="000.000.000-00" mask="999.999.999-99">
-        </mat-form-field>
+        <!-- NOME -->
+
+        <div class="form-group">
+          <label>Nome Completo</label>
+
+          <input
+            type="text"
+            formControlName="nome"
+            placeholder="Seu nome completo"
+          />
+
+          @if (
+            formGroup.get('nome')?.invalid &&
+            formGroup.get('nome')?.touched
+          ) {
+            <div class="field-error">
+              Nome inválido.
+            </div>
+          }
+        </div>
+
+        <!-- EMAIL -->
+
+        <div class="form-group">
+          <label>Email</label>
+
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="cliente@bantads.com"
+          />
+
+          @if (
+            formGroup.get('email')?.invalid &&
+            formGroup.get('email')?.touched
+          ) {
+            <div class="field-error">
+              Informe um email válido.
+            </div>
+          }
+        </div>
+
+        <!-- CPF -->
+
+        <div class="form-group">
+          <label>CPF</label>
+
+          <input
+            type="text"
+            formControlName="cpf"
+            placeholder="000.000.000-00"
+            mask="999.999.999-99"
+          />
+
+          @if (
+            formGroup.get('cpf')?.invalid &&
+            formGroup.get('cpf')?.touched
+          ) {
+            <div class="field-error">
+              CPF inválido.
+            </div>
+          }
+        </div>
+
+        <!-- TELEFONE -->
+
+        <div class="form-group">
+          <label>Telefone</label>
+
+          <input
+            type="text"
+            formControlName="telefone"
+            placeholder="(00) 00000-0000"
+            mask="(99) 99999-9999"
+          />
+
+          @if (
+            formGroup.get('telefone')?.invalid &&
+            formGroup.get('telefone')?.touched
+          ) {
+            <div class="field-error">
+              Telefone inválido.
+            </div>
+          }
+        </div>
+
+        <!-- SALÁRIO -->
+
+        <div class="form-group">
+          <label>Salário</label>
+
+          <input
+            type="number"
+            formControlName="salario"
+            placeholder="0000,00"
+          />
+
+          @if (
+            formGroup.get('salario')?.invalid &&
+            formGroup.get('salario')?.touched
+          ) {
+            <div class="field-error">
+              Informe um salário válido.
+            </div>
+          }
+        </div>
+
       </div>
 
-      <div class="form-row two-cols">
-        <mat-form-field appearance="outline">
-          <mat-label>Telefone</mat-label>
-          <input matInput formControlName="telefone" placeholder="(00) 00000-0000" mask="(99) 99999-9999">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Salário</mat-label>
-          <input type="number" matInput formControlName="salario" placeholder="0000,00">
-        </mat-form-field>
+      <div class="section-title endereco">
+        <h2>Endereço</h2>
       </div>
 
-      <h3 class="section-subtitle">Endereço</h3>
+      <div class="form-grid">
 
-      <div class="form-row two-cols-cep">
-        <mat-form-field appearance="outline">
-          <mat-label>CEP</mat-label>
-          <input matInput formControlName="cep" mask="00000-000" placeholder="00000-000">
-        </mat-form-field>
+        <!-- CEP -->
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Logradouro</mat-label>
-          <input matInput formControlName="logradouro" placeholder="Rua, Avenida, etc.">
-        </mat-form-field>
+        <div class="form-group">
+          <label>CEP</label>
+
+          <input
+            type="text"
+            formControlName="cep"
+            placeholder="00000-000"
+            mask="00000-000"
+          />
+
+          @if (
+            formGroup.get('cep')?.invalid &&
+            formGroup.get('cep')?.touched
+          ) {
+            <div class="field-error">
+              CEP inválido.
+            </div>
+          }
+        </div>
+
+        <!-- LOGRADOURO -->
+
+        <div class="form-group">
+          <label>Logradouro</label>
+
+          <input
+            type="text"
+            formControlName="logradouro"
+            placeholder="Rua, Avenida, etc."
+          />
+
+          @if (
+            formGroup.get('logradouro')?.invalid &&
+            formGroup.get('logradouro')?.touched
+          ) {
+            <div class="field-error">
+              Informe o logradouro.
+            </div>
+          }
+        </div>
+
+        <!-- NÚMERO -->
+
+        <div class="form-group">
+          <label>Número</label>
+
+          <input
+            type="text"
+            formControlName="numero"
+            placeholder="123"
+          />
+
+          @if (
+            formGroup.get('numero')?.invalid &&
+            formGroup.get('numero')?.touched
+          ) {
+            <div class="field-error">
+              Informe o número.
+            </div>
+          }
+        </div>
+
+        <!-- COMPLEMENTO -->
+
+        <div class="form-group">
+          <label>Complemento</label>
+
+          <input
+            type="text"
+            formControlName="complemento"
+            placeholder="Apto 1"
+          />
+        </div>
+
+        <!-- CIDADE -->
+
+        <div class="form-group">
+          <label>Cidade</label>
+
+          <input
+            type="text"
+            formControlName="cidade"
+            placeholder="Curitiba"
+          />
+
+          @if (
+            formGroup.get('cidade')?.invalid &&
+            formGroup.get('cidade')?.touched
+          ) {
+            <div class="field-error">
+              Informe a cidade.
+            </div>
+          }
+        </div>
+
+        <!-- ESTADO -->
+
+        <div class="form-group">
+          <label>Estado</label>
+
+          <input
+            type="text"
+            formControlName="estado"
+            placeholder="PR"
+          />
+
+          @if (
+            formGroup.get('estado')?.invalid &&
+            formGroup.get('estado')?.touched
+          ) {
+            <div class="field-error">
+              Informe o estado.
+            </div>
+          }
+        </div>
+
       </div>
 
-      <div class="form-row three-cols">
-        <mat-form-field appearance="outline">
-          <mat-label>Número</mat-label>
-          <input matInput formControlName="numero" placeholder="123">
-        </mat-form-field>
+      <div class="actions">
 
-        <mat-form-field appearance="outline">
-          <mat-label>Complemento</mat-label>
-          <input matInput formControlName="complemento" placeholder="Apto 1">
-        </mat-form-field>
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="!formGroup.valid"
+        >
+          Concluir Cadastro
+        </button>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Cidade</mat-label>
-          <input matInput formControlName="cidade" placeholder="Curitiba">
-        </mat-form-field>
+        <button
+          type="button"
+          class="btn-voltar"
+          (click)="voltar()"
+        >
+          Voltar
+        </button>
       </div>
 
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Estado</mat-label>
-          <input matInput formControlName="estado" placeholder="PR">
-        </mat-form-field>
-      </div>
+    </div>
 
-    </mat-card-content>
-
-    <mat-card-actions class="card-actions">
-      <button type="submit" mat-flat-button color="primary" class="submit-button" [disabled]="!formGroup.valid">Concluir Cadastro</button>
-      <button type="button" mat-button color="warn" class="voltar-button" (click)="voltar()">Voltar</button>
-    </mat-card-actions>
-
-  </mat-card>
-</form>
+  </form>
+</div>
 
 @if (mostrarMensagemSucesso) {
-  <div class="success-backdrop" (click)="fecharMensagemSucesso()">
-    <mat-card class="success-card" appearance="outlined" (click)="$event.stopPropagation()">
-      <mat-card-content class="success-content">
-        <h2>Autocadastro realizado com sucesso</h2>
-        <p>Seu cadastro foi enviado. Você será direcionado para a tela inicial.</p>
-      </mat-card-content>
+  <div
+    class="success-backdrop"
+    (click)="fecharMensagemSucesso()"
+  >
 
-      <mat-card-actions class="success-actions">
-        <button type="button" mat-flat-button color="primary" (click)="fecharMensagemSucesso()">OK</button>
-      </mat-card-actions>
-    </mat-card>
+    <div
+      class="success-card"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="success-content">
+        <h2>Autocadastro realizado com sucesso</h2>
+
+        <p>
+          Seu cadastro foi enviado.
+          Você será direcionado para a tela inicial.
+        </p>
+      </div>
+
+      <div class="success-actions">
+        <button
+          type="button"
+          (click)="fecharMensagemSucesso()"
+        >
+          OK
+        </button>
+      </div>
+
+    </div>
+
   </div>
 }
 
 @if (mostrarMensagemErro) {
-  <div class="error-backdrop" (click)="fecharMensagemErro()">
-    <mat-card class="error-card" appearance="outlined" (click)="$event.stopPropagation()">
-      <mat-card-content class="error-content">
-        <h2>Não foi possível concluir o autocadastro</h2>
-        <p>{{ mensagemErro }}</p>
-      </mat-card-content>
+  <div
+    class="error-backdrop"
+    (click)="fecharMensagemErro()"
+  >
 
-      <mat-card-actions class="error-actions">
-        <button type="button" mat-flat-button color="warn" (click)="fecharMensagemErro()">OK</button>
-      </mat-card-actions>
-    </mat-card>
+    <div
+      class="error-card"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="error-content">
+        <h2>Não foi possível concluir o autocadastro</h2>
+
+        <p>{{ mensagemErro }}</p>
+      </div>
+
+      <div class="error-actions">
+        <button
+          type="button"
+          (click)="fecharMensagemErro()"
+        >
+          OK
+        </button>
+      </div>
+
+    </div>
+
   </div>
 }

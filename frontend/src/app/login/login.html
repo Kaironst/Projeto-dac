@@ -1,47 +1,125 @@
-<form method="POST" [formGroup]="formGroup" (ngSubmit)="login()" class="login-form">
-  <mat-card class="login-card" appearance="outlined">
+<div class="login-container">
 
-    <mat-card-header class="card-header">
-      <mat-card-title class="login-title">Login</mat-card-title>
-    </mat-card-header>
+  <div class="header">
+    <h1>Login</h1>
+    <p>
+      Entre com suas credenciais para acessar o sistema
+    </p>
+  </div>
 
-    <mat-card-content class="card-content">
+  <form
+    method="POST"
+    [formGroup]="formGroup"
+    (ngSubmit)="login()"
+  >
 
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input type="email" matInput formControlName="email" placeholder="cliente@bantads.com">
-        </mat-form-field>
+    <div class="login-card">
+
+      <div class="section-title">
+        <h2>Acesso ao Sistema</h2>
       </div>
 
-      <div class="form-row">
-        <mat-form-field appearance="outline">
-          <mat-label>Senha</mat-label>
-          <input type="password" matInput formControlName="senha" placeholder="Sua senha">
-        </mat-form-field>
+      <div class="form-grid">
+
+        <!-- EMAIL -->
+
+        <div class="form-group full-width">
+          <label>Email</label>
+
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="cliente@bantads.com"
+          />
+
+          @if (
+            formGroup.get('email')?.invalid &&
+            formGroup.get('email')?.touched
+          ) {
+            <div class="field-error">
+              Informe um email válido.
+            </div>
+          }
+        </div>
+
+        <!-- SENHA -->
+
+        <div class="form-group full-width">
+          <label>Senha</label>
+
+          <input
+            type="password"
+            formControlName="senha"
+            placeholder="Sua senha"
+          />
+
+          @if (
+            formGroup.get('senha')?.invalid &&
+            formGroup.get('senha')?.touched
+          ) {
+            <div class="field-error">
+              Informe sua senha.
+            </div>
+          }
+        </div>
+
       </div>
 
-    </mat-card-content>
+      <div class="actions">
 
-    <mat-card-actions class="card-actions">
-      <button type="submit" mat-flat-button color="primary" class="submit-button" [disabled]="!formGroup.valid">Realizar Login</button>
-      <button type="button" mat-button color="warn" class="voltar-button" (click)="voltar()">Voltar</button>
-    </mat-card-actions>
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="!formGroup.valid"
+        >
+          Realizar Login
+        </button>
 
-  </mat-card>
-</form>
+        <button
+          type="button"
+          class="btn-voltar"
+          (click)="voltar()"
+        >
+          Voltar
+        </button>
+
+      </div>
+
+    </div>
+
+  </form>
+</div>
 
 @if (mostrarMensagemSucesso) {
-  <div class="success-backdrop" (click)="fecharMensagemSucesso()">
-    <mat-card class="success-card" appearance="outlined" (click)="$event.stopPropagation()">
-      <mat-card-content class="success-content">
-        <h2>Login realizado com sucesso</h2>
-        <p>Seu acesso foi enviado. Você será direcionado para a tela inicial.</p>
-      </mat-card-content>
+  <div
+    class="success-backdrop"
+    (click)="fecharMensagemSucesso()"
+  >
 
-      <mat-card-actions class="success-actions">
-        <button type="button" mat-flat-button color="primary" (click)="fecharMensagemSucesso()">OK</button>
-      </mat-card-actions>
-    </mat-card>
+    <div
+      class="success-card"
+      (click)="$event.stopPropagation()"
+    >
+
+      <div class="success-content">
+        <h2>Login realizado com sucesso</h2>
+
+        <p>
+          Seu acesso foi confirmado.
+          Você será direcionado para a próxima tela.
+        </p>
+      </div>
+
+      <div class="success-actions">
+        <button
+          type="button"
+          (click)="fecharMensagemSucesso()"
+        >
+          OK
+        </button>
+      </div>
+
+    </div>
+
   </div>
 }

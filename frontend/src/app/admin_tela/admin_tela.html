@@ -1,28 +1,58 @@
-<div class="container">
-    <header>
+<div class="admin-container">
+
+  <div class="header">
     <h1>Tela do Administrador</h1>
-    </header>
-
-  <div class="cards">
+    <p>
+      Visualize os dados financeiros e desempenho dos gerentes
+    </p>
+  </div>
+  <div class="cards-grid">
     @for (gerente of resumoGerentes; track gerente.nome) {
-      <div class="card">
-        <h2>{{ gerente.nome }}</h2>
+      <div class="gerente-card">
+        <div class="card-topo">
 
-        <div><strong>Clientes:</strong> {{ gerente.totalClientes }}</div>
+          <div class="avatar">
+            {{ gerente.nome.charAt(0) }}
+          </div>
 
-        <div class="positivo">
-          <strong>Total Positivo:</strong>
-          {{ gerente.totalPositivo.toFixed(2)}}
+          <div>
+            <h2>{{ gerente.nome }}</h2>
+            <span class="clientes">
+              {{ gerente.totalClientes }} clientes
+            </span>
+          </div>
+
         </div>
 
-        <div class="negativo">
-          <strong>Total Negativo:</strong>
-          {{ gerente.totalNegativo.toFixed(2)}}
+        <div class="metricas">
+          <div class="metrica positivo-card">
+            <span class="label">
+              Total Positivo
+            </span>
+
+            <strong>
+              R$ {{ gerente.totalPositivo.toFixed(2) }}
+            </strong>
+
+          </div>
+
+          <div class="metrica negativo-card">
+            <span class="label">
+              Total Negativo
+            </span>
+            <strong>
+              R$ {{ gerente.totalNegativo.toFixed(2) }}
+            </strong>
+          </div>
         </div>
       </div>
+
     } @empty {
-      <div>Nenhum gerente encontrado.</div>
+
+      <div class="sem-gerentes">
+        Nenhum gerente encontrado.
+      </div>
+
     }
   </div>
-
 </div>
