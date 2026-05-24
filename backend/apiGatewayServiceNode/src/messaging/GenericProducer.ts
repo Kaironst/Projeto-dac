@@ -19,10 +19,30 @@ class GenericProducer<MessageType> {
   async init() {
     if (this.connection && this.channel) return;
 
-    this.connection = await amqp.connect(rabbitmqUrl);
+    this.connection = await this.connectWithRetry();
     this.channel = await this.connection.createChannel();
 
     await this.channel.assertExchange(this.exchange, "direct", {});
+  }
+
+  private async connectWithRetry(maxAttempts = 20, delayMs = 1000): Promise<amqp.ChannelModel> {
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await amqp.connect(rabbitmqUrl);
+      } catch (error) {
+        lastError = error;
+        console.warn(`RabbitMQ unavailable for ${this.routingKey}. Attempt ${attempt}/${maxAttempts}.`);
+        await this.delay(delayMs);
+      }
+    }
+
+    throw lastError;
+  }
+
+  private delay(delayMs: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, delayMs));
   }
 
   public async messageService(message: MessageType) {

@@ -4,10 +4,13 @@ import { randomUUID } from "crypto";
 import { UsersDtoCliente } from "../dto/UsersDto";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
 import { MessageWrapper } from "../dto/MessageWrapper";
+import { ContasDtoConta } from "../dto/ContasDto";
+import { LoginRequest } from "../dto/LoginRequest";
+import { TokenDto } from "../dto/TokenDto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
-class GenericProducerRPC<MessageType> {
+class GenericProducerRPC<ReqMessageType, ResMessageType> {
 
   private connection: amqp.ChannelModel | null = null;
   private channel: amqp.Channel | null = null;
@@ -22,11 +25,13 @@ class GenericProducerRPC<MessageType> {
   async init() {
     if (this.connection && this.channel) return;
 
-    this.connection = await amqp.connect(rabbitmqUrl);
+    this.connection = await this.connectWithRetry();
     this.channel = await this.connection.createChannel();
 
+    //declara a exchange
     await this.channel.assertExchange(this.exchange, "direct", {});
 
+    //esse é o consumer
     //usa o pseudo_queue reply-to (usado no spring no convertSendAndRecieve)
     await this.channel.consume(
       "amq.rabbitmq.reply-to",
@@ -34,13 +39,14 @@ class GenericProducerRPC<MessageType> {
 
         if (!msg) return;
 
+        //pega 
         const correlationId = msg.properties.correlationId;
         const handler = this.pending.get(correlationId);
 
         if (!handler) return;
 
         try {
-          const parsed = JSON.parse(msg.content.toString()) as MessageType;
+          const parsed = JSON.parse(msg.content.toString()) as ResMessageType;
           handler(parsed);
         } catch (err) {
           console.error("invalid json", err);
@@ -52,7 +58,27 @@ class GenericProducerRPC<MessageType> {
     );
   }
 
-  public async requestService(message: MessageType): Promise<MessageType> {
+  private async connectWithRetry(maxAttempts = 20, delayMs = 1000): Promise<amqp.ChannelModel> {
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await amqp.connect(rabbitmqUrl);
+      } catch (error) {
+        lastError = error;
+        console.warn(`RabbitMQ unavailable for ${this.routingKey}. Attempt ${attempt}/${maxAttempts}.`);
+        await this.delay(delayMs);
+      }
+    }
+
+    throw lastError;
+  }
+
+  private delay(delayMs: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+
+  public async requestService(message: ReqMessageType): Promise<ResMessageType> {
 
     if (!this.channel) {
       throw new Error("canal não inicializado");
@@ -61,7 +87,7 @@ class GenericProducerRPC<MessageType> {
     const correlationId = randomUUID();
 
 
-    const result = await new Promise<MessageType>((resolve, reject) => {
+    const result = await new Promise<ResMessageType>((resolve, reject) => {
 
       const timeout = setTimeout(() => {
         this.pending.delete(correlationId);
@@ -91,5 +117,7 @@ class GenericProducerRPC<MessageType> {
 }
 
 export default GenericProducerRPC;
-export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
-export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
+export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>, MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
+export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>, MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
+export const contasProducer = new GenericProducerRPC<MessageWrapper<ContasDtoConta>, MessageWrapper<ContasDtoConta>>("app.exchange", "contas.key");
+export const authProducer = new GenericProducerRPC<MessageWrapper<LoginRequest>, MessageWrapper<TokenDto>>("app.exchange", "auth.key")

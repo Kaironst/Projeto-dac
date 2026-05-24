@@ -1,7 +1,11 @@
-import { Component, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgxMaskDirective } from 'ngx-mask';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, switchMap } from 'rxjs';
+import { CepService } from '../services/cep.service';
+import { UFS } from '../shared/ufs';
 
 interface Cliente {
   id?: number;
@@ -23,6 +27,8 @@ export class ClientePerfil {
 
   private readonly apiUrl = 'http://localhost:8080/clientes';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly cepService = inject(CepService);
+  private readonly destroyRef = inject(DestroyRef);
 
   perfilForm: FormGroup;
 
@@ -34,6 +40,7 @@ export class ClientePerfil {
 
   saldo: number = 0;
   limite: number = 0;
+  readonly ufs = UFS;
 
   constructor(private fb: FormBuilder) {
     this.perfilForm = this.fb.group({
@@ -50,7 +57,42 @@ export class ClientePerfil {
       estado: ['']
     });
 
+    this.configurarAutocompleteCep();
     this.carregarDadosCliente();
+  }
+
+  private configurarAutocompleteCep(): void {
+    const cepControl = this.perfilForm.get('cep');
+
+    cepControl?.valueChanges.pipe(
+      debounceTime(300),
+      map((cep: string | null) => this.normalizarCep(cep ?? '')),
+      distinctUntilChanged(),
+      filter((cep) => cep.length === 8),
+      switchMap((cep) => this.cepService.fetchAddressByCep(cep).pipe(
+        catchError(() => {
+          cepControl.setErrors({ cepNaoEncontrado: true });
+          this.perfilForm.patchValue({
+            logradouro: '',
+            cidade: '',
+            estado: ''
+          }, { emitEvent: false });
+          this.changeDetectorRef.detectChanges();
+          return EMPTY;
+        })
+      )),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((address) => {
+      this.perfilForm.patchValue({
+        cep: address.cep,
+        logradouro: address.logradouro,
+        cidade: address.cidade,
+        estado: address.estado
+      }, { emitEvent: false });
+
+      cepControl.setErrors(null);
+      this.changeDetectorRef.detectChanges();
+    });
   }
 
 
@@ -144,5 +186,9 @@ export class ClientePerfil {
 
   calcularLimite(salario: number): number {
     return salario * 0.5;
+  }
+
+  private normalizarCep(cep: string): string {
+    return cep.replace(/\D/g, '');
   }
 }

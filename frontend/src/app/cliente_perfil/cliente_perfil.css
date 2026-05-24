@@ -75,27 +75,39 @@ body {
   font-weight: 600;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   padding: 12px 14px;
   border-radius: 10px;
   border: 1px solid #dbe2ea;
   background: #f8fafc;
   font-size: 0.95rem;
   transition:border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  font-family: inherit;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #667eea;
   box-shadow:0 0 0 4px rgba(102, 126, 234, 0.15);
   background: white;
 }
 
-.form-group input:disabled {
+.form-group input:disabled,
+.form-group select:disabled {
   background: #edf2f7;
   color: #64748b;
   cursor: not-allowed;
 }
+
+.field-error {
+  margin-top: 6px;
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
+/* BOTÃO */
 
 .btn-salvar {
   width: 100%;

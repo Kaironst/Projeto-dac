@@ -2,6 +2,7 @@
 
   <div class="header">
     <h1>Autocadastro de Cliente</h1>
+
     <p>
       Preencha seus dados pessoais e endereço para solicitar seu cadastro
     </p>
@@ -156,6 +157,14 @@
               CEP inválido.
             </div>
           }
+
+          @if (
+            formGroup.get('cep')?.hasError('cepNaoEncontrado')
+          ) {
+            <div class="field-error">
+              CEP não encontrado.
+            </div>
+          }
         </div>
 
         <!-- LOGRADOURO -->
@@ -238,11 +247,19 @@
         <div class="form-group">
           <label>Estado</label>
 
-          <input
-            type="text"
-            formControlName="estado"
-            placeholder="PR"
-          />
+          <select formControlName="estado">
+
+            <option value="">
+              Selecione um estado
+            </option>
+
+            @for (estado of ufs; track estado.uf) {
+              <option [value]="estado.uf">
+                {{ estado.uf }} - {{ estado.nome }}
+              </option>
+            }
+
+          </select>
 
           @if (
             formGroup.get('estado')?.invalid &&
@@ -273,14 +290,17 @@
         >
           Voltar
         </button>
+
       </div>
 
     </div>
 
   </form>
+
 </div>
 
 @if (mostrarMensagemSucesso) {
+
   <div
     class="success-backdrop"
     (click)="fecharMensagemSucesso()"
@@ -292,29 +312,37 @@
     >
 
       <div class="success-content">
-        <h2>Autocadastro realizado com sucesso</h2>
+
+        <h2>
+          Autocadastro realizado com sucesso
+        </h2>
 
         <p>
           Seu cadastro foi enviado.
           Você será direcionado para a tela inicial.
         </p>
+
       </div>
 
       <div class="success-actions">
+
         <button
           type="button"
           (click)="fecharMensagemSucesso()"
         >
           OK
         </button>
+
       </div>
 
     </div>
 
   </div>
+
 }
 
 @if (mostrarMensagemErro) {
+
   <div
     class="error-backdrop"
     (click)="fecharMensagemErro()"
@@ -326,21 +354,28 @@
     >
 
       <div class="error-content">
-        <h2>Não foi possível concluir o autocadastro</h2>
+
+        <h2>
+          Não foi possível concluir o autocadastro
+        </h2>
 
         <p>{{ mensagemErro }}</p>
+
       </div>
 
       <div class="error-actions">
+
         <button
           type="button"
           (click)="fecharMensagemErro()"
         >
           OK
         </button>
+
       </div>
 
     </div>
 
   </div>
+
 }

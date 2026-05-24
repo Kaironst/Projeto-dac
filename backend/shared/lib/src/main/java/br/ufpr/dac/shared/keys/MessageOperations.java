@@ -9,12 +9,16 @@ public class MessageOperations {
   public static final String UPDATE = "UPDATE";
   public static final String DELETE = "DELETE";
 
+  public static final String READ_BY_EMAIL = "READ_BY_EMAIL";
+  public static final String READ_BY_CPF = "READ_BY_CPF";
+
   // --------------------------------------------------------------------------------------------------------
 
   // Resultados de operações
   public static final String RESULT = "RESULT";
   public static final String ERROR_GENERIC = "ERROR";
   public static final String ERROR_CPF_DUPLICADO = "ERROR_CPF_DUPLICADO";
+  public static final String ERROR_INVALID_LOGIN = "ERROR_NO_LOGIN";
 
   // --------------------------------------------------------------------------------------------------------
 

@@ -33,6 +33,12 @@ public class MessageConsumer {
         case MessageOperations.READ -> {
           return handleRead(message.getData());
         }
+        case MessageOperations.READ_BY_EMAIL -> {
+          return handleReadByEmail(message.getData());
+        }
+        case MessageOperations.READ_BY_CPF -> {
+          return handleReadByCpf(message.getData());
+        }
         case MessageOperations.READ_ALL -> {
           return handleReadAll();
         }
@@ -64,6 +70,7 @@ public class MessageConsumer {
           .email(cliente.getEmail())
           .cpf(cliente.getCpf())
           .estado(cliente.getEstado())
+          .telefone(cliente.getTelefone())
           .build();
 
       var enderecosCliente = new ArrayList<UsersDto.Endereco>();
@@ -99,6 +106,7 @@ public class MessageConsumer {
           .email(clienteDto.getEmail())
           .cpf(clienteDto.getCpf())
           .estado(clienteDto.getEstado())
+          .telefone(clienteDto.getTelefone())
           .build();
 
       var enderecosCliente = new ArrayList<Endereco>();
@@ -146,6 +154,32 @@ public class MessageConsumer {
     clientes.forEach(c -> idList.add(c.getId()));
 
     List<Cliente> clientesEncontrados = repo.findAllById(idList);
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
+  }
+
+  @Transactional(readOnly = true)
+  private MessageWrapper<UsersDto.Cliente> handleReadByEmail(List<UsersDto.Cliente> clientes) {
+    var clientesEncontrados = new ArrayList<Cliente>();
+    clientes.forEach(c -> {
+      Cliente clienteEncontrado = repo.findByEmailIgnoreCase(c.getEmail());
+
+      if (clienteEncontrado != null) {
+        clientesEncontrados.add(clienteEncontrado);
+      }
+    });
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
+  }
+
+  @Transactional(readOnly = true)
+  private MessageWrapper<UsersDto.Cliente> handleReadByCpf(List<UsersDto.Cliente> clientes) {
+    var clientesEncontrados = new ArrayList<Cliente>();
+    clientes.forEach(c -> {
+      Cliente clienteEncontrado = repo.findByCpf(c.getCpf());
+
+      if (clienteEncontrado != null) {
+        clientesEncontrados.add(clienteEncontrado);
+      }
+    });
     return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesEncontrados));
   }
 

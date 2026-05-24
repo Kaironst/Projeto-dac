@@ -4,8 +4,10 @@ import cors from "cors";
 import axios from "axios";
 import ClienteController from "./controller/ClienteController";
 import GerenteController from "./controller/GerenteController";
-import { gerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
+import ConsultaClienteController from "./controller/ConsultaClienteController";
+import { authProducer, contasProducer, gerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
 import { sagaProducer } from './messaging/GenericProducer';
+import AuthController from './controller/AuthController';
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
@@ -20,6 +22,8 @@ app.use(cors());
 
 app.use("/clientes", ClienteController);
 app.use("/gerentes", GerenteController);
+app.use("/consultas", ConsultaClienteController);
+app.use("/login", AuthController);
 
 // Email endpoint proxy
 app.post("/emails/enviar", async (req: Request, res: Response) => {
@@ -51,10 +55,21 @@ app.post("/emails/enviar", async (req: Request, res: Response) => {
   }
 });
 
-usersProducer.init();
-gerentesProducer.init();
-sagaProducer.init();
+async function startServer() {
+  await Promise.all([
+    authProducer.init(),
+    usersProducer.init(),
+    gerentesProducer.init(),
+    contasProducer.init(),
+    sagaProducer.init(),
+  ]);
 
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+  app.listen(port, () => {
+    console.log(`[server]: Server is running at http://localhost:${port}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Failed to start api gateway:", error);
+  process.exit(1);
 });

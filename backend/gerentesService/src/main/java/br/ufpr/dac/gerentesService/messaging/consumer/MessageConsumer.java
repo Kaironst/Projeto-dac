@@ -31,6 +31,12 @@ public class MessageConsumer {
         case MessageOperations.READ -> {
           return handleRead(message.getData());
         }
+        case MessageOperations.READ_BY_EMAIL -> {
+          return handleReadByEmail(message.getData());
+        }
+        case MessageOperations.READ_BY_CPF -> {
+          return handleReadByCpf(message.getData());
+        }
         case MessageOperations.READ_ALL -> {
           return handleReadAll();
         }
@@ -95,6 +101,32 @@ public class MessageConsumer {
     final var idList = new ArrayList<Long>();
     gerentes.forEach(gerente -> idList.add(gerente.getId()));
     List<Gerente> queryResult = repo.findAllById(idList);
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
+  }
+
+  @Transactional(readOnly = true)
+  private MessageWrapper<GerentesDto.Gerente> handleReadByEmail(List<GerentesDto.Gerente> gerentes) {
+    List<Gerente> queryResult = new ArrayList<Gerente>();
+    gerentes.forEach(gerente -> {
+      Gerente gerenteEncontrado = repo.findByEmailIgnoreCase(gerente.getEmail());
+
+      if (gerenteEncontrado != null) {
+        queryResult.add(gerenteEncontrado);
+      }
+    });
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
+  }
+
+  @Transactional(readOnly = true)
+  private MessageWrapper<GerentesDto.Gerente> handleReadByCpf(List<GerentesDto.Gerente> gerentes) {
+    List<Gerente> queryResult = new ArrayList<Gerente>();
+    gerentes.forEach(gerente -> {
+      Gerente gerenteEncontrado = repo.findByCpf(gerente.getCpf());
+
+      if (gerenteEncontrado != null) {
+        queryResult.add(gerenteEncontrado);
+      }
+    });
     return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 

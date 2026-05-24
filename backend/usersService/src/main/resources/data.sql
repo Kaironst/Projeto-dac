@@ -1,5 +1,5 @@
 insert into cliente (cpf, nome, email, salario, telefone, estado) values
-('12912861012', 'Catharyna', 'cli1@bantads.com.br', 10000.00, '41999999999', 1),
+('12912861012', 'Catharyna', 'cli1@bantads.com.br', 10000.00, '4199999999', 1),
 ('09506382000', 'Cleuddônio', 'cli2@bantads.com.br', 20000.00, '4188888888', 1),
 ('85733854057', 'Catianna', 'cli3@bantads.com.br', 3000.00, '4177777777', 1),
 ('58872160006', 'Cutardo', 'cli4@bantads.com.br', 500.00, '4166666666', 1),

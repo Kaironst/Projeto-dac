@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -7,26 +8,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
-
-interface ClienteMock {
-  nome: string;
-  email: string;
-  cpf: string;
-  telefone: string;
-  salario: number;
-  endereco: {
-    cep: string;
-    logradouro: string;
-    numero: string;
-    complemento: string;
-    cidade: string;
-    estado: string;
-  };
-  conta: {
-    saldo: number;
-    limite: number;
-  };
-}
+import { firstValueFrom } from 'rxjs';
+import { ClienteConsulta, ConsultaClienteUtil } from '../services/DBUtil/consulta-cliente-util';
 
 type FuncionalidadeConsulta = 'cpf' | 'top3' | 'todos';
 
@@ -51,89 +34,110 @@ type FuncionalidadeConsulta = 'cpf' | 'top3' | 'todos';
 export class ConsultarCliente {
 
   private router = inject(Router);
+  private consultaClienteUtil = inject(ConsultaClienteUtil);
+  private changeDetectorRef = inject(ChangeDetectorRef);
 
   public formGroup: FormGroup;
-  public clienteConsultado: ClienteMock | null = null;
+  public clienteConsultado: ClienteConsulta | null = null;
   public pesquisado: boolean = false;
   public funcionalidadeAtiva: FuncionalidadeConsulta = null as any;
+  public carregando: boolean = false;
+  public mensagemErro: string = '';
 
   public filtroCpfTodos: string = '';
   public filtroNomeTodos: string = '';
-  public clienteDetalhes: ClienteMock | null = null;
+  public clienteDetalhes: ClienteConsulta | null = null;
+  public melhoresClientes: ClienteConsulta[] = [];
 
-  private clientes: any[] = [];
-  private contas: any[] = [];
+  private clientes: ClienteConsulta[] = [];
 
   constructor() {
     this.formGroup = new FormGroup({
       cpf: new FormControl('', [Validators.required])
     });
 
-    this.carregarDados();
   }
 
-  carregarDados() {
-    this.clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
-    this.contas = JSON.parse(localStorage.getItem('contas') || '[]');
-  }
+  async consultar() {
+    if (!this.formGroup.valid) {
+      return;
+    }
 
-  montarCliente(cliente: any): ClienteMock {
+    this.pesquisado = true;
+    this.clienteConsultado = null;
+    this.mensagemErro = '';
 
-    const conta = this.contas.find(c => c.clienteCpf === cliente.cpf);
+    const cpfBuscado = this.normalizarCpf(this.formGroup.get('cpf')?.value ?? '');
 
-    return {
-      nome: cliente.nome,
-      email: cliente.email,
-      cpf: cliente.cpf,
-      telefone: cliente.telefone || '',
-      salario: cliente.salario,
-      endereco: cliente.endereco || {
-        cep: '',
-        logradouro: '',
-        numero: '',
-        complemento: '',
-        cidade: '',
-        estado: ''
-      },
-      conta: {
-        saldo: conta?.saldo ?? 0,
-        limite: conta?.limite ?? 0
+    await this.executarComCarregamento(async () => {
+      try {
+        this.clienteConsultado = await firstValueFrom(this.consultaClienteUtil.getByCpf(cpfBuscado));
+      } catch (erro) {
+        if (erro instanceof HttpErrorResponse && erro.status === 404) {
+          this.clienteConsultado = null;
+          return;
+        }
+
+        this.mensagemErro = 'Nao foi possivel consultar o cliente no backend.';
       }
-    };
+    });
   }
 
-  consultar() {
-    if (this.formGroup.valid) {
-      this.pesquisado = true;
+  async selecionarFuncionalidade(funcionalidade: FuncionalidadeConsulta) {
+    this.funcionalidadeAtiva = funcionalidade;
+    this.mensagemErro = '';
+    this.limparConsultaCpf();
+    this.fecharDetalhesCliente();
 
-      const cpfBuscado = this.normalizarCpf(this.formGroup.get('cpf')?.value ?? '');
+    if (funcionalidade === 'top3') {
+      await this.carregarMelhoresClientes();
+    }
 
-      const cliente = this.clientes.find(c => c.cpf === cpfBuscado);
-
-      this.clienteConsultado = cliente ? this.montarCliente(cliente) : null;
+    if (funcionalidade === 'todos') {
+      await this.carregarClientes();
     }
   }
 
-  selecionarFuncionalidade(funcionalidade: FuncionalidadeConsulta) {
-    this.funcionalidadeAtiva = funcionalidade;
-    this.limparConsultaCpf();
-    this.fecharDetalhesCliente();
+  private async carregarMelhoresClientes() {
+    await this.executarComCarregamento(async () => {
+      try {
+        this.melhoresClientes = await firstValueFrom(this.consultaClienteUtil.getTopSaldo(3));
+      } catch {
+        this.melhoresClientes = [];
+        this.mensagemErro = 'Nao foi possivel carregar os melhores clientes do backend.';
+      }
+    });
   }
 
-  get melhoresClientes(): ClienteMock[] {
-    return this.clientes
-      .map(c => this.montarCliente(c))
-      .sort((a, b) => b.conta.saldo - a.conta.saldo)
-      .slice(0, 3);
+  private async carregarClientes() {
+    await this.executarComCarregamento(async () => {
+      try {
+        this.clientes = await firstValueFrom(this.consultaClienteUtil.getAll());
+      } catch {
+        this.clientes = [];
+        this.mensagemErro = 'Nao foi possivel carregar os clientes do backend.';
+      }
+    });
   }
 
-  get clientesOrdenadosFiltrados(): ClienteMock[] {
+  private async executarComCarregamento(callback: () => Promise<void>) {
+    this.carregando = true;
+    this.changeDetectorRef.markForCheck();
+
+    try {
+      await callback();
+    } finally {
+      this.carregando = false;
+      this.changeDetectorRef.markForCheck();
+    }
+  }
+
+  get clientesOrdenadosFiltrados(): ClienteConsulta[] {
 
     const cpfFiltro = this.normalizarCpf(this.filtroCpfTodos);
     const nomeFiltro = this.filtroNomeTodos.trim().toLowerCase();
 
-    return this.clientes
-      .map(c => this.montarCliente(c))
+    return [...this.clientes]
       .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
       .filter(cliente => {
 
@@ -144,7 +148,7 @@ export class ConsultarCliente {
       });
   }
 
-  abrirDetalhesCliente(cliente: ClienteMock) {
+  abrirDetalhesCliente(cliente: ClienteConsulta) {
     this.clienteDetalhes = cliente;
   }
 
