@@ -25,7 +25,7 @@ services:
 
     environment:
       MONGO_INITDB_ROOT_USERNAME: usuario
-      MONGO_INITDB_ROOD_PASSWORD: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
       MONGO_INITDB_DATABASE: auth_database
 
     volumes:
