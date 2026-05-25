@@ -9,6 +9,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.ufpr.dac.authService.document.Conta;
@@ -27,6 +28,7 @@ public class AuthServiceApplication implements CommandLineRunner {
 
   RabbitTemplate template;
   ContaRepository repo;
+  PasswordEncoder passwordEncoder;
 
   @Override
   @Transactional
@@ -37,6 +39,8 @@ public class AuthServiceApplication implements CommandLineRunner {
     repo.findAll().forEach(c -> {
       allCpfs.add(c.getCpf());
     });
+    System.out.println("todos os usuários atuais:");
+    allCpfs.forEach(System.out::println);
 
     // fazendo os objetos de busca
     var cpfClientes = new ArrayList<String>();
@@ -51,43 +55,55 @@ public class AuthServiceApplication implements CommandLineRunner {
     cpfGerentes.add("23862179060");
     cpfGerentes.add("40501740066");
 
+    System.out.println("todos os usuários adicionados:");
+
     var clientes = new ArrayList<UsersDto.Cliente>();
     cpfClientes.forEach(cpf -> {
-      if (!allCpfs.contains(cpf))
+      if (!allCpfs.contains(cpf)) {
         clientes.add(UsersDto.Cliente.builder()
             .cpf(cpf)
             .build());
+        System.out.println(cpf);
+      }
     });
     var gerentes = new ArrayList<GerentesDto.Gerente>();
     cpfGerentes.forEach(cpf -> {
-      if (!allCpfs.contains(cpf))
+      if (!allCpfs.contains(cpf)) {
         gerentes.add(GerentesDto.Gerente.builder()
             .cpf(cpf)
             .build());
+        System.out.println(cpf);
+      }
     });
 
     // buscando os clientes finais pelo banco de dados dos outros serviços
-    MessageWrapper<UsersDto.Cliente> initialClientes = template.convertSendAndReceiveAsType(
-        RabbitmqConsts.APP_EXCHANGE,
-        RabbitmqConsts.USERS_KEY,
-        new MessageWrapper<UsersDto.Cliente>(MessageOperations.READ_BY_CPF, clientes),
-        new ParameterizedTypeReference<MessageWrapper<UsersDto.Cliente>>() {
-        });
-    MessageWrapper<GerentesDto.Gerente> initialGerentes = template.convertSendAndReceiveAsType(
-        RabbitmqConsts.APP_EXCHANGE,
-        RabbitmqConsts.GERENTES_KEY,
-        new MessageWrapper<GerentesDto.Gerente>(MessageOperations.READ_BY_CPF, gerentes),
-        new ParameterizedTypeReference<MessageWrapper<GerentesDto.Gerente>>() {
-        });
+    MessageWrapper<UsersDto.Cliente> initialClientes = null;
+    MessageWrapper<GerentesDto.Gerente> initialGerentes = null;
+    do {
+      initialClientes = template.convertSendAndReceiveAsType(
+          RabbitmqConsts.APP_EXCHANGE,
+          RabbitmqConsts.USERS_KEY,
+          new MessageWrapper<UsersDto.Cliente>(MessageOperations.READ_BY_CPF, clientes),
+          new ParameterizedTypeReference<MessageWrapper<UsersDto.Cliente>>() {
+          });
+    } while (initialClientes == null);
+    do {
+      initialGerentes = template.convertSendAndReceiveAsType(
+          RabbitmqConsts.APP_EXCHANGE,
+          RabbitmqConsts.GERENTES_KEY,
+          new MessageWrapper<GerentesDto.Gerente>(MessageOperations.READ_BY_CPF, gerentes),
+          new ParameterizedTypeReference<MessageWrapper<GerentesDto.Gerente>>() {
+          });
+
+    } while (initialGerentes == null);
 
     // monta os dados para inserir no repositório.
-
     initialClientes.getData().forEach(c -> {
       var conta = Conta.builder()
           .userId(c.getId())
           .email(c.getEmail())
           .cpf(c.getCpf())
-          .senha("1234")
+          .senha(passwordEncoder.encode("1234"))
           .roles(List.of(Roles.CLIENTE))
           .build();
       repo.save(conta);
@@ -98,7 +114,7 @@ public class AuthServiceApplication implements CommandLineRunner {
           .userId(c.getId())
           .email(c.getEmail())
           .cpf(c.getCpf())
-          .senha("1234")
+          .senha(passwordEncoder.encode("1234"))
           .roles(c.getAdministrador() ? List.of(Roles.GERENTE, Roles.ADMINISTRADOR) : List.of(Roles.GERENTE))
           .build();
       repo.save(conta);

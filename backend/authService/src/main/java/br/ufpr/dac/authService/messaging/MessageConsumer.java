@@ -38,6 +38,7 @@ public class MessageConsumer {
       // }
 
       default -> {
+        System.err.println(" switch case ativou default!!!!");
         return new MessageWrapper<TokenDto>(MessageOperations.ERROR_INVALID_LOGIN, List.of());
       }
 
@@ -48,6 +49,7 @@ public class MessageConsumer {
   public MessageWrapper<TokenDto> handleLogin(MessageWrapper<LoginRequest> message) {
     try {
       var user = message.getData().getFirst();
+      System.out.println("login request: " + user);
 
       // o autenticador aq precisa de uma bean de passwordencoder para funcionar,
       // ela sempre supoe que a senha no banco é hasheada
@@ -59,10 +61,14 @@ public class MessageConsumer {
       // gera o token jwt
       String token = jwtService.generateToken(userDetails);
 
+      System.out.println(new MessageWrapper<TokenDto>(MessageOperations.RESULT, List.of(new TokenDto(token))));
       return new MessageWrapper<TokenDto>(MessageOperations.RESULT, List.of(new TokenDto(token)));
 
     } catch (Exception e) {
-      return new MessageWrapper<TokenDto>(MessageOperations.ERROR_INVALID_LOGIN, List.of());
+      e.printStackTrace();
+      var response = new MessageWrapper<TokenDto>(MessageOperations.ERROR_INVALID_LOGIN, List.of());
+      System.out.println(response);
+      return response;
     }
   }
 
