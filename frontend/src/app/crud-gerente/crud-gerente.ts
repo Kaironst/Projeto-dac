@@ -32,7 +32,7 @@ interface GerenteApiPayload {
   styleUrl: './crud-gerente.css',
 })
 export class CrudGerente implements OnInit {
-  private readonly gerentesApiUrl = 'http://localhost:8080/gerentes';
+  private readonly gerentesApiUrl = '/gerentes';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   protected gerentes: GerenteCadastro[] = [];
@@ -199,6 +199,8 @@ export class CrudGerente implements OnInit {
         body: JSON.stringify(payload)
       });
 
+      // Aguarda 1.5 segundos para a SAGA assíncrona concluir
+      await new Promise(resolve => setTimeout(resolve, 1500));
       return response.ok;
     } catch {
       return false;
@@ -212,9 +214,9 @@ export class CrudGerente implements OnInit {
 
     const payload: GerenteApiPayload = {
       nome: gerenteAtualizado.nome,
-      cpf: this.normalizarCpf(gerenteOriginal.cpf),
+      cpf: this.normalizarCpf(gerenteAtualizado.cpf),
       email: gerenteAtualizado.email,
-      telefone: gerenteOriginal.telefone
+      telefone: gerenteAtualizado.telefone
     };
 
     if (gerenteAtualizado.senha?.trim()) {
@@ -246,6 +248,8 @@ export class CrudGerente implements OnInit {
         method: 'DELETE'
       });
 
+      // Aguarda 1 segundo para a SAGA assíncrona concluir
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return response.ok;
     } catch {
       return false;

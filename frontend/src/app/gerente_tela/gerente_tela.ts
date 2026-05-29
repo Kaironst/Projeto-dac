@@ -48,7 +48,7 @@ export class GerenteTela implements OnInit {
   carregarPedidos() {
     this.carregando = true;
     // Chamar endpoint GET para buscar pedidos pendentes de aprovação
-    this.http.get<PedidoAprovacao[]>('http://localhost:8080/gerentes/pedidos-aprovacao')
+    this.http.get<PedidoAprovacao[]>('/gerentes/pedidos-aprovacao')
       .subscribe({
         next: (dados) => {
           this.pedidos = dados;
@@ -77,7 +77,7 @@ export class GerenteTela implements OnInit {
     };
 
     // Chamar endpoint POST para aprovar cliente
-    this.http.post('http://localhost:8080/gerentes/aprovar-cliente', payload)
+    this.http.post('/gerentes/aprovar-cliente', payload)
       .subscribe({
         next: () => {
           this.enviarEmailAproacao(pedido, numeroConta, senhaAleatoria);
@@ -108,7 +108,7 @@ export class GerenteTela implements OnInit {
     };
 
     // Chamar endpoint POST para rejeitar cliente
-    this.http.post('http://localhost:8080/gerentes/rejeitar-cliente', payload)
+    this.http.post('/gerentes/rejeitar-cliente', payload)
       .subscribe({
         next: () => {
           this.enviarEmailRejeicao(pedido, motivo);

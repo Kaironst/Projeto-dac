@@ -36,7 +36,9 @@ public class GetIdGerenteComMaisContasHandler {
       // organiza contas em mapa com seu gerente
       var contasPorGerente = new HashMap<Long, List<Conta>>();
       repo.findAll().forEach(conta -> {
-        contasPorGerente.computeIfAbsent(conta.getGerente(), key -> new ArrayList<Conta>()).add(conta);
+        if (conta.getGerente() != null) {
+            contasPorGerente.computeIfAbsent(conta.getGerente(), key -> new ArrayList<Conta>()).add(conta);
+        }
       });
 
       if (contasPorGerente.isEmpty()) {
