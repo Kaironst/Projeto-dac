@@ -8,7 +8,7 @@
   </div>
 
   @if (mensagemStatus) {
-    <div class="status-message">
+    <div class="status-message" [ngClass]="statusTipo">
       {{ mensagemStatus }}
     </div>
   }

@@ -15,7 +15,7 @@ export const routes: Routes = [
     { path: '', redirectTo:'tela-principal', pathMatch:'full'},
     { path: 'autocadastro', component: Autocadastro },
     { path: 'login', component: Login },
-    { path: 'gerentes', component: CrudGerente },
+    { path: 'crud-gerentes', component: CrudGerente },
     { path: 'cliente-tela', component: ClienteTela },
     { path: 'cliente-perfil', component: ClientePerfil },
     { path: 'consultar-cliente', component: ConsultarCliente },
