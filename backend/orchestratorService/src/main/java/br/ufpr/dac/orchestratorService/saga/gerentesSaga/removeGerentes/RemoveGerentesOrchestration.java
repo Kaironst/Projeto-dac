@@ -29,6 +29,7 @@ public class RemoveGerentesOrchestration {
   private final SagaProducerFactory producerFactory;
   private final Set<String> errors = Set.of(
       RemoveGerente.MOVER_CONTAS_ERROR,
+      RemoveGerente.GET_TODOS_GERENTES_ERROR,
       RemoveGerente.GET_COM_MENOS_CONTAS_ERROR,
       RemoveGerente.REMOVER_GERENTE_ERROR,
       RemoveGerente.ROLLBACK_REVERTER_MOVER_CONTAS_ERROR,
@@ -41,25 +42,50 @@ public class RemoveGerentesOrchestration {
 
     var state = new SagaState<RemoveGerentesData>(
         correlationId,
-        RemoveGerentesPasso.BUSCANDO_GERENTE_COM_MENOS_CONTAS,
+        RemoveGerentesPasso.BUSCANDO_TODOS_GERENTES,
         SagaStatus.RUNNING,
         new RemoveGerentesData());
 
     state.getSagaData().setIdGerenteARemover(message.getData().getFirst());
     sagas.put(correlationId, state);
 
-    // PASSO 1, BUSCAR GERENTE COM MENOR NÚMERO DE CONTAS
+    // PASSO 1, BUSCAR TODOS OS GERENTES PARA PASSAR AO SERVIÇO DE CONTAS
+    SagaProducer<Long> longMessageProducer = producerFactory.create();
+    longMessageProducer.enviarMenssagem(
+        new SagaMessageWrapper<Long>(
+            SagaOperations.RemoveGerente.GET_TODOS_GERENTES,
+            List.of(),
+            correlationId),
+        RabbitmqConsts.GERENTES_SAGA_KEY);
+  }
+
+  // PASSO 1.5, RECEBE TODOS OS GERENTES E PEDE O COM MENOS CONTAS
+  public void handleTodosGerentesFound(SagaMessageWrapper<Long> message) {
+    System.out.println("todosGerentesFound acionado");
+    var state = sagas.get(message.getCorrelationId());
+
+    if (errors.contains(message.getOperation())) {
+      handleRollback(state);
+      return;
+    }
+
+    state.setStep(RemoveGerentesPasso.BUSCANDO_GERENTE_COM_MENOS_CONTAS);
+
+    // The data contains all gerentes IDs. Add the idGerenteARemover as the first element.
+    List<Long> dataToSend = new java.util.ArrayList<>();
+    dataToSend.add(state.getSagaData().getIdGerenteARemover());
+    dataToSend.addAll(message.getData());
+
     SagaProducer<Long> longMessageProducer = producerFactory.create();
     longMessageProducer.enviarMenssagem(
         new SagaMessageWrapper<Long>(
             SagaOperations.RemoveGerente.GET_COM_MENOS_CONTAS,
-            List.of(),
-            correlationId),
+            dataToSend,
+            message.getCorrelationId()),
         RabbitmqConsts.CONTAS_SAGA_KEY);
-
   }
 
-  // PASSO 2, MOOVER CONTA DO GERENTE REMOVIDO A O COM MENOS CONTAS
+  // PASSO 2, MOVER CONTA DO GERENTE REMOVIDO A O COM MENOS CONTAS
   public void handleGerenteFound(SagaMessageWrapper<Long> message) {
     System.out.println("moverContas acionado");
     var state = sagas.get(message.getCorrelationId());

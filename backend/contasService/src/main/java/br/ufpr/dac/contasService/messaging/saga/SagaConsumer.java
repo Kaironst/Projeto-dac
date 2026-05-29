@@ -15,6 +15,7 @@ import tools.jackson.databind.ObjectMapper;
 public class SagaConsumer {
 
   private GetIdGerenteComMaisContasHandler getIdGerenteComMaisContasHandler;
+  private GetIdGerenteComMenosContasHandler getIdGerenteComMenosContasHandler;
   private MoverContasHandler moverContasHandler;
   private final ObjectMapper mapper;
 
@@ -29,7 +30,25 @@ public class SagaConsumer {
                 }));
       }
       case SagaOperations.InsertGerente.MOVER_CONTAS -> {
-        moverContasHandler.handleMoverContas(
+        moverContasHandler.handleMoverContasInsert(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.RemoveGerente.GET_COM_MENOS_CONTAS -> {
+        getIdGerenteComMenosContasHandler.HandleGetIdGerenteComMenosContas(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.RemoveGerente.MOVER_CONTAS -> {
+        moverContasHandler.handleMoverContasRemove(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.RemoveGerente.ROLLBACK_REVERTER_MOVER_CONTAS -> {
+        moverContasHandler.handleRollbackMoverContasRemove(
             mapper.convertValue(message,
                 new TypeReference<SagaMessageWrapper<Long>>() {
                 }));
