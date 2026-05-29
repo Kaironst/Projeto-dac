@@ -32,7 +32,7 @@ interface GerenteApiPayload {
   styleUrl: './crud-gerente.css',
 })
 export class CrudGerente implements OnInit {
-  private readonly gerentesApiUrl = 'http://localhost:8080/gerentes';
+  private readonly gerentesApiUrl = '/gerentes';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   protected gerentes: GerenteCadastro[] = [];
@@ -43,13 +43,15 @@ export class CrudGerente implements OnInit {
   protected confirmacaoRemocaoAberta = false;
   protected gerenteSelecionadoParaRemocao: GerenteCadastro | null = null;
   protected mensagemStatus = '';
+  protected statusTipo: 'sucesso' | 'erro' | '' = '';
 
   private normalizarCpf(cpf: string): string {
     return cpf.replace(/\D/g, '');
   }
 
-  private atualizarMensagemStatus(mensagem: string): void {
+  private atualizarMensagemStatus(mensagem: string, tipo: 'sucesso' | 'erro' = 'erro'): void {
     this.mensagemStatus = mensagem;
+    this.statusTipo = tipo;
     this.changeDetectorRef.detectChanges();
   }
 
@@ -104,9 +106,11 @@ export class CrudGerente implements OnInit {
     }
 
     const listagemAtualizada = await this.carregarGerentes();
-    this.atualizarMensagemStatus(listagemAtualizada
-      ? 'Gerente excluido com sucesso.'
-      : 'Gerente removido, mas nao foi possivel atualizar a listagem.');
+    if (listagemAtualizada) {
+      this.atualizarMensagemStatus('Gerente excluido com sucesso.', 'sucesso');
+    } else {
+      this.atualizarMensagemStatus('Gerente removido, mas nao foi possivel atualizar a listagem.', 'sucesso');
+    }
 
     this.cancelarRemocao();
   }
@@ -142,9 +146,11 @@ export class CrudGerente implements OnInit {
         }
 
         const listagemAtualizada = await this.carregarGerentes();
-        this.atualizarMensagemStatus(listagemAtualizada
-          ? 'Gerente alterado com sucesso.'
-          : 'Gerente atualizado, mas nao foi possivel atualizar a listagem.');
+        if (listagemAtualizada) {
+          this.atualizarMensagemStatus('Gerente alterado com sucesso.', 'sucesso');
+        } else {
+          this.atualizarMensagemStatus('Gerente atualizado, mas nao foi possivel atualizar a listagem.', 'sucesso');
+        }
       }
 
     } else {
@@ -156,9 +162,11 @@ export class CrudGerente implements OnInit {
       }
 
       const listagemAtualizada = await this.carregarGerentes();
-      this.atualizarMensagemStatus(listagemAtualizada
-        ? 'Gerente criado com sucesso.'
-        : 'Gerente inserido, mas nao foi possivel atualizar a listagem.');
+      if (listagemAtualizada) {
+        this.atualizarMensagemStatus('Gerente criado com sucesso.', 'sucesso');
+      } else {
+        this.atualizarMensagemStatus('Gerente inserido, mas nao foi possivel atualizar a listagem.', 'sucesso');
+      }
     }
 
     this.modalModo = 'novo';
@@ -199,6 +207,8 @@ export class CrudGerente implements OnInit {
         body: JSON.stringify(payload)
       });
 
+      // Aguarda 1.5 segundos para a SAGA assíncrona concluir
+      await new Promise(resolve => setTimeout(resolve, 1500));
       return response.ok;
     } catch {
       return false;
@@ -212,9 +222,9 @@ export class CrudGerente implements OnInit {
 
     const payload: GerenteApiPayload = {
       nome: gerenteAtualizado.nome,
-      cpf: this.normalizarCpf(gerenteOriginal.cpf),
+      cpf: this.normalizarCpf(gerenteAtualizado.cpf),
       email: gerenteAtualizado.email,
-      telefone: gerenteOriginal.telefone
+      telefone: gerenteAtualizado.telefone
     };
 
     if (gerenteAtualizado.senha?.trim()) {
@@ -246,6 +256,8 @@ export class CrudGerente implements OnInit {
         method: 'DELETE'
       });
 
+      // Aguarda 1 segundo para a SAGA assíncrona concluir
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return response.ok;
     } catch {
       return false;

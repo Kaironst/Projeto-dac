@@ -18,7 +18,9 @@ public class SagaConsumer {
 
   GerenteRepository repo;
   InsertGerenteHandler insertGerenteHandler;
-  RollbackRemoveGerenteHandler removeGerenteHandler;
+  RollbackRemoveGerenteHandler rollbackRemoveGerenteHandler;
+  RemoveGerenteHandler removeGerenteHandler;
+  GetAllGerentesHandler getAllGerentesHandler;
   private final ObjectMapper mapper;
 
   @RabbitListener(queues = RabbitmqConsts.GERENTES_SAGA_QUEUE)
@@ -33,6 +35,20 @@ public class SagaConsumer {
                 }));
       }
       case SagaOperations.InsertGerente.ROLLBACK_REMOVER_GERENTE -> {
+        rollbackRemoveGerenteHandler.handleRemoveGerente(
+            mapper.convertValue(
+                message,
+                new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.RemoveGerente.GET_TODOS_GERENTES -> {
+        getAllGerentesHandler.handleGetAllGerentes(
+            mapper.convertValue(
+                message,
+                new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.RemoveGerente.REMOVER_GERENTE -> {
         removeGerenteHandler.handleRemoveGerente(
             mapper.convertValue(
                 message,

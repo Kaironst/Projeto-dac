@@ -36,27 +36,50 @@ public class GetIdGerenteComMaisContasHandler {
       // organiza contas em mapa com seu gerente
       var contasPorGerente = new HashMap<Long, List<Conta>>();
       repo.findAll().forEach(conta -> {
-        contasPorGerente.computeIfAbsent(conta.getGerente(), key -> new ArrayList<Conta>()).add(conta);
+        if (conta.getGerente() != null) {
+            contasPorGerente.computeIfAbsent(conta.getGerente(), key -> new ArrayList<Conta>()).add(conta);
+        }
       });
-      // transforma lista no tamanho dela
-      var numeroDeContasPorGerente = new HashMap<Long, Integer>();
-      contasPorGerente.forEach((gerenteId, contas) -> {
-        numeroDeContasPorGerente.put(gerenteId, contas.size());
-      });
-      // coleta gerentes com a maior conta
-      Optional<Integer> maiorValorOpt = numeroDeContasPorGerente.entrySet()
-          .stream()
-          .max(Comparator.comparingInt(Map.Entry::getValue))
-          .map(Map.Entry::getValue);
-      int maiorValor = maiorValorOpt.get();
-      List<Long> gerentesComMaisContas = numeroDeContasPorGerente.entrySet()
-          .stream()
-          .filter(entry -> entry.getValue() == maiorValor)
-          .map(Map.Entry::getKey)
-          .collect(Collectors.toList());
 
-      gerenteEscolhido = gerentesComMaisContas.get(new Random().nextInt(gerentesComMaisContas.size()));
+      if (contasPorGerente.isEmpty()) {
+          gerenteEscolhido = 0L;
+      } else {
+          // transforma lista no tamanho dela
+          var numeroDeContasPorGerente = new HashMap<Long, Integer>();
+          contasPorGerente.forEach((gerenteId, contas) -> {
+            numeroDeContasPorGerente.put(gerenteId, contas.size());
+          });
 
+          // coleta gerentes com a maior conta
+          Optional<Integer> maiorValorOpt = numeroDeContasPorGerente.entrySet()
+              .stream()
+              .max(Comparator.comparingInt(Map.Entry::getValue))
+              .map(Map.Entry::getValue);
+          
+          int maiorValor = maiorValorOpt.orElse(0);
+
+          if (maiorValor <= 1 && contasPorGerente.size() <= 1) {
+              gerenteEscolhido = 0L;
+          } else {
+              List<Long> gerentesComMaisContas = numeroDeContasPorGerente.entrySet()
+                  .stream()
+                  .filter(entry -> entry.getValue() == maiorValor)
+                  .map(Map.Entry::getKey)
+                  .collect(Collectors.toList());
+
+              if (gerentesComMaisContas.size() == 1) {
+                  gerenteEscolhido = gerentesComMaisContas.get(0);
+              } else {
+                  // Desempate: menor saldo positivo
+                  gerenteEscolhido = gerentesComMaisContas.stream().min(Comparator.comparingDouble(gId -> {
+                      return contasPorGerente.get(gId).stream()
+                          .filter(c -> c.getSaldo() != null && c.getSaldo() >= 0)
+                          .mapToDouble(Conta::getSaldo)
+                          .sum();
+                  })).orElse(0L);
+              }
+          }
+      }
     } catch (Exception e) {
       e.printStackTrace();
       sucesso = false;

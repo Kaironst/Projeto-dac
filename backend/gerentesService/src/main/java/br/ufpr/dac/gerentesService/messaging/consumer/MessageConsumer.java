@@ -147,7 +147,10 @@ public class MessageConsumer {
       gerenteAtual.setEmail(gerente.getEmail());
       gerenteAtual.setTelefone(gerente.getTelefone());
       gerenteAtual.setCpf(gerente.getCpf());
-      gerenteAtual.setAdministrador(gerente.getAdministrador());
+      
+      if (gerente.getAdministrador() != null) {
+          gerenteAtual.setAdministrador(gerente.getAdministrador());
+      }
 
       gerentesAtualizados.add(repo.save(gerenteAtual));
     });

@@ -97,6 +97,15 @@ public class InsertGerentesOrchestration {
     // atualiza o gerente no estado para ele conter id
     state.getSagaData().getGerenteAInserir().setId(message.getData().getFirst());
 
+    if (state.getSagaData().getIdGerenteAntigo() == null || state.getSagaData().getIdGerenteAntigo() == 0L) {
+        // Não há gerente de onde tirar a conta (primeiro gerente ou regras de negócio)
+        System.out.println("Nenhum gerente apto a ceder conta encontrado. Finalizando a saga.");
+        state.setStep(InsertGerentesPasso.CONCLUINDO);
+        state.setStatus(SagaStatus.SUCCESS);
+        sagas.remove(message.getCorrelationId());
+        return;
+    }
+
     state.setStep(InsertGerentesPasso.DANDO_CONTA_AO_NOVO_GERENTE);
 
     SagaProducer<Long> gerenteMessageProducer = producerFactory.create();
