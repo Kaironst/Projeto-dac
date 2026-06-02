@@ -17,6 +17,32 @@ services:
       retries: 5
       start_period: 5s
 
+  # debezium:
+  #   image: debezium/server:latest
+  #   container_name: debezium
+  #   environment:
+  #     #postgres
+  #     - DEBEZIUM_SOURCE_CONNECTOR_CLASS=io.debezium.connector.postgresql.PostgresConnector
+  #     - DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME=/data/offsets.dat
+  #     - DEBEZIUM_SOURCE_DATABASE_HOSTNAME=users-database
+  #     - DEBEZIUM_SOURCE_DATABASE_PORT=5432
+  #     - DEBEZIUM_SOURCE_DATABASE_USER=usuario
+  #     - DEBEZIUM_SOURCE_DATABASE_PASSWORD=admin
+  #     - DEBEZIUM_SOURCE_DATABASE_DBNAME=users_database
+  #     - DEBEZIUM_SOURCE_TOPIC_PREFIX=cdc
+  #     #rabbitmq
+  #     - DEBEZIUM_SINK_TYPE=rabbitmq
+  #     - DEBEZIUM_SINK_RABBITMQ_CONNECTION_HOST=rabbitmq
+  #     - DEBEZIUM_SINK_RABBITMQ_CONNECTION_PORT=5672
+  #     - DEBEZIUM_SINK_RABBITMQ_CONNECTION_USER=usuario
+  #     - DEBEZIUM_SINK_RABBITMQ_CONNECTION_PASSWORD=admin
+  #     - DEBEZIUM_SINK_RABBITMQ_EXCHANGE=app.exchange
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     users-database:
+  #       condition: service_started
+
   auth-database:
     image: mongo
     container_name: auth-database
