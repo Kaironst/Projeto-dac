@@ -6,10 +6,11 @@ import org.springframework.stereotype.Repository;
 
 import br.ufpr.dac.shared.dto.GerentesDto;
 import lombok.AllArgsConstructor;
+import tools.jackson.databind.JsonNode;
 
 @Repository
 @AllArgsConstructor
-public class GerenteDtoModel {
+public class GerenteDtoModel implements DebeziumModel {
 
   private final JdbcClient client;
 
@@ -23,6 +24,46 @@ public class GerenteDtoModel {
         .query(GerentesDto.Gerente.class).single();
 
     return gerente;
+  }
+
+  @Override
+  public void handleUpsert(JsonNode data) {
+    var id = data.path("id").asLong();
+    var cpf = data.path("cpf").asString();
+    var email = data.path("email").asString();
+    var nome = data.path("nome").asString();
+    var telefone = data.path("telefone").asString();
+    var administrador = data.path("administrador").asBoolean();
+
+    client.sql("""
+        INSERT INTO gerente (id, cpf, email, nome, telefone, administrador)
+        VALUES (:id, :cpf, :email, :nome, :telefone, :administrador)
+        ON CONFLICT (id)
+        DO UPDATE SET
+          cpf = excluded.cpf,
+          email = excluded.email,
+          nome = excluded.nome,
+          telefone = excluded.telefone,
+          administrador = excluded.administrador
+        """)
+        .param("id", id)
+        .param("cpf", cpf)
+        .param("email", email)
+        .param("nome", nome)
+        .param("telefone", telefone)
+        .param("administrador", administrador)
+        .update();
+  }
+
+  @Override
+  public void handleDelete(JsonNode data) {
+    var id = data.path("id").asLong();
+    client.sql("""
+        DELETE FROM gerente
+        WHERE id=:id
+        """)
+        .param("id", id)
+        .update();
   }
 
 }

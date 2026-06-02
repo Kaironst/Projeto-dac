@@ -1,14 +1,17 @@
 package br.ufpr.dac.cqrsService.model;
 
+import java.time.Instant;
+
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 import br.ufpr.dac.shared.dto.ItemHistoricoDto;
 import lombok.AllArgsConstructor;
+import tools.jackson.databind.JsonNode;
 
 @Repository
 @AllArgsConstructor
-public class ItemHistoricoDtoModel {
+public class ItemHistoricoDtoModel implements DebeziumModel {
 
   private final JdbcClient client;
 
@@ -24,4 +27,43 @@ public class ItemHistoricoDtoModel {
     return itemHistorico;
   }
 
+  @Override
+  public void handleUpsert(JsonNode data) {
+    var id = data.path("id").asLong();
+    var data_hora = data.path("data_hora").asLong();
+    var tipo = data.path("tipo").asInt();
+    var valor_movimentacao = data.path("valor_movimentacao").asDouble();
+    var conta_destino_id = data.path("conta_destino_id").asLong();
+    var conta_origem_id = data.path("conta_origem_id").asLong();
+
+    client.sql("""
+        INSERT INTO item_historico (id, data_hora, tipo, valor_movimentacao, conta_destino_id, conta_origem_id)
+        VALUES (:id, :data_hora, :tipo, :valor_movimentacao, :conta_destino_id, :conta_origem_id)
+        ON CONFLICT (id)
+        DO UPDATE SET
+          data_hora = excluded.data_hora,
+          tipo = excluded.tipo,
+          valor_movimentacao = excluded.valor_movimentacao,
+          conta_destino_id = excluded.conta_destino_id,
+          conta_origem_id = excluded.conta_origem_id
+        """)
+        .param("id", id)
+        .param("data_hora", Instant.ofEpochMilli(data_hora))
+        .param("tipo", tipo)
+        .param("valor_movimentacao", valor_movimentacao)
+        .param("conta_destino_id", conta_destino_id)
+        .param("conta_origem_id", conta_origem_id)
+        .update();
+  }
+
+  @Override
+  public void handleDelete(JsonNode data) {
+    var id = data.path("id").asLong();
+    client.sql("""
+        DELETE FROM item_historico
+        WHERE id=:id
+        """)
+        .param("id", id)
+        .update();
+  }
 }
