@@ -64,6 +64,11 @@ public class RabbitmqConsts {
 
   // --------------------------------------------------------------------------------------------------------
 
+  // queue do cqrsService
+  public static final String CQRS_QUEUE = "cqrs.queue";
+
+  // --------------------------------------------------------------------------------------------------------
+
   // key do apiGateway (queue em node apenas)
   public static final String API_GATEWAY_KEY = "apiGateway.key";
 
