@@ -11,11 +11,26 @@ router.post("/", async (req: Request, res: Response) => {
     const responseToken = await authProducer.requestService({ operation: "LOGIN", data: [loginRequest] });
     console.log(`recebido: data = ${responseToken.data} operation =${responseToken.operation}`)
     if (responseToken.operation === "ERROR_NO_LOGIN") {
-      res.status(401).send();
+      res.status(401).json({
+        message: "Usuário/Senha incorretos"
+      });
       return;
     }
 
-    res.status(200).json(responseToken.data?.at(0));
+    const loginResponse = {
+      access_token: responseToken.data?.at(0)?.token,
+      token_type: "bearer",
+
+      tipo: "CLIENTE",
+
+      usuario: {
+        nome: "Catharyna",
+        cpf: "12912861012",
+        email: "cli1@bantads.com.br"
+      }
+    };
+
+    res.status(200).json(loginResponse);
   } catch (error) {
     res.sendStatus(500);
   }
