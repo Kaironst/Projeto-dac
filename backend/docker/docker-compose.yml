@@ -17,31 +17,17 @@ services:
       retries: 5
       start_period: 5s
 
-  # debezium:
-  #   image: debezium/server:latest
-  #   container_name: debezium
-  #   environment:
-  #     #postgres
-  #     - DEBEZIUM_SOURCE_CONNECTOR_CLASS=io.debezium.connector.postgresql.PostgresConnector
-  #     - DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME=/data/offsets.dat
-  #     - DEBEZIUM_SOURCE_DATABASE_HOSTNAME=users-database
-  #     - DEBEZIUM_SOURCE_DATABASE_PORT=5432
-  #     - DEBEZIUM_SOURCE_DATABASE_USER=usuario
-  #     - DEBEZIUM_SOURCE_DATABASE_PASSWORD=admin
-  #     - DEBEZIUM_SOURCE_DATABASE_DBNAME=users_database
-  #     - DEBEZIUM_SOURCE_TOPIC_PREFIX=cdc
-  #     #rabbitmq
-  #     - DEBEZIUM_SINK_TYPE=rabbitmq
-  #     - DEBEZIUM_SINK_RABBITMQ_CONNECTION_HOST=rabbitmq
-  #     - DEBEZIUM_SINK_RABBITMQ_CONNECTION_PORT=5672
-  #     - DEBEZIUM_SINK_RABBITMQ_CONNECTION_USER=usuario
-  #     - DEBEZIUM_SINK_RABBITMQ_CONNECTION_PASSWORD=admin
-  #     - DEBEZIUM_SINK_RABBITMQ_EXCHANGE=app.exchange
-  #   depends_on:
-  #     rabbitmq:
-  #       condition: service_healthy
-  #     users-database:
-  #       condition: service_started
+  debezium:
+    image: quay.io/debezium/server
+    container_name: debezium
+    volumes:
+      - ./debezium/config:/debezium/config:readonly
+      - ./debezium/data:/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      users-database:
+        condition: service_started
 
   auth-database:
     image: mongo
@@ -68,6 +54,7 @@ services:
       POSTGRES_USER: usuario
       POSTGRES_PASSWORD: admin
       PGDATA: /var/lib/postgresql/data
+    command: ["postgres", "-c", "wal_level=logical"]
 
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -127,6 +114,26 @@ services:
       - "3006:3005"
     environment:
       - PORT=3005
+
+  cqrs-service:
+    build:
+      context: ..
+      dockerfile: docker/spring-boot-service.dockerfile
+      args:
+        PROJECT_DIR: cqrsService
+    restart: always
+    volumes:
+      - gradle-caches:/home/gradle/.gradle/caches
+      - gradle-wrapper:/home/gradle/.gradle/wrapper
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      users-database:
+        condition: service_started
+    ports:
+      - "8086:8080"
+    environment:
+      - GRADLE_OPTS=-Xmx512m -Xms256m -XX:+HeapDumpOnOutOfMemoryError
 
   users-service:
     build:
