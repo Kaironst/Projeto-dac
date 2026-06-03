@@ -1,7 +1,9 @@
 package br.ufpr.dac.cqrsService.messaging.consumer;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -42,17 +44,27 @@ public class MessageConsumer {
   }
 
   @RabbitListener(queues = RabbitmqConsts.CQRS_QUEUE)
-  public void recieve(String messageJson) {
-
+  public void recieve(Message message) {
+    System.out.println("msgreceb");
     try {
+
+      String messageJson = new String(message.getBody(), StandardCharsets.UTF_8);
 
       // trata a string como json e busca pelo nó payload
       JsonNode payload = objectMapper.readTree(messageJson).path("payload");
+      if (payload.isMissingNode() || payload.isNull()) {
+        System.err.println("sem payload");
+        return;
+      }
       // extrai informações sobre para onde enviar a atualização
       String table = payload.path("source").path("table").asString();
       String schema = payload.path("source").path("schema").asString();
       String target = schema + "." + table;
       String opcode = payload.path("op").asString();
+
+      if (routes.get(target) == null)
+        return;
+      System.out.println("menssagem válida recebida:" + messageJson);
 
       if (payload.isMissingNode() || payload.isNull()) {
         System.err.println("menssagem sem paylaod");

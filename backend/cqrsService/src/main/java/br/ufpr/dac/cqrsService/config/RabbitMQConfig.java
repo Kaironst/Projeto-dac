@@ -2,9 +2,9 @@ package br.ufpr.dac.cqrsService.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,7 +19,7 @@ public class RabbitMQConfig {
 
   @Bean
   public Exchange exchange() {
-    return new DirectExchange(RabbitmqConsts.APP_EXCHANGE);
+    return new TopicExchange("debezium.exchange");
   }
 
   @Bean
@@ -31,7 +31,7 @@ public class RabbitMQConfig {
   public Binding binding(Queue queue, Exchange exchange) {
     return BindingBuilder.bind(queue)
         .to(exchange)
-        .with("cdc.#")
+        .with("#")
         .noargs();
   }
 
