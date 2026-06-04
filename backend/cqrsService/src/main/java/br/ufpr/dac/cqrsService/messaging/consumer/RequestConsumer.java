@@ -17,7 +17,6 @@ import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.dto.UsersDto;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
-import jakarta.activation.UnsupportedDataTypeException;
 import lombok.AllArgsConstructor;
 
 @Component
@@ -32,11 +31,11 @@ public class RequestConsumer {
 
   @SuppressWarnings({ "unchecked", "unused" })
   @RabbitListener(queues = RabbitmqConsts.CQRS_REQUEST_QUEUE)
-  private MessageWrapper<?> recieve(MessageWrapper<?> message) throws UnsupportedDataTypeException {
+  private MessageWrapper<?> recieve(MessageWrapper<?> message) throws UnsupportedOperationException {
 
     var list = message.getData();
-    if (list.isEmpty())
-      throw new UnsupportedDataTypeException("lista do corpo vazia");
+    if (list.isEmpty() || list == null)
+      throw new UnsupportedOperationException("lista do corpo vazia ou nula");
 
     return switch (list.getFirst()) {
       case UsersDto.Cliente m ->
@@ -50,70 +49,70 @@ public class RequestConsumer {
       case ItemHistoricoDto.ItemHistorico m ->
         handleItemHistoricoRequest((MessageWrapper<ItemHistoricoDto.ItemHistorico>) message);
       case null, default ->
-        throw new UnsupportedDataTypeException("tipo de menssagem não suportado");
+        throw new UnsupportedOperationException("tipo de menssagem não suportado");
     };
 
   }
 
   private MessageWrapper<UsersDto.Cliente> handleClienteRequest(MessageWrapper<UsersDto.Cliente> message) {
     var target = message.getData().getFirst();
-    UsersDto.Cliente encontrado = null;
-
+    List<UsersDto.Cliente> encontrado = null;
     if (message.getOperation() == MessageOperations.READ)
-      encontrado = clienteDtoModel.handleRead(target.getId());
+      encontrado = List.of(clienteDtoModel.handleRead(target.getId()));
+    else if (message.getOperation() == MessageOperations.READ_ALL)
+      encontrado = clienteDtoModel.handleReadAll();
     if (encontrado == null)
       throw new UnsupportedOperationException("operação de leitura não implementada");
-
-    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, List.of(encontrado));
+    return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, encontrado);
   }
 
   private MessageWrapper<UsersDto.Endereco> handleEnderecoRequest(MessageWrapper<UsersDto.Endereco> message) {
     var target = message.getData().getFirst();
-    UsersDto.Endereco encontrado = null;
-
+    List<UsersDto.Endereco> encontrado = null;
     if (message.getOperation() == MessageOperations.READ)
-      encontrado = enderecoDtoModel.handleRead(target.getId());
+      encontrado = List.of(enderecoDtoModel.handleRead(target.getId()));
+    else if (message.getOperation() == MessageOperations.READ_ALL)
+      encontrado = enderecoDtoModel.handleReadAll();
     if (encontrado == null)
       throw new UnsupportedOperationException("operação de leitura não implementada");
-
-    return new MessageWrapper<UsersDto.Endereco>(MessageOperations.RESULT, List.of(encontrado));
+    return new MessageWrapper<UsersDto.Endereco>(MessageOperations.RESULT, encontrado);
   }
 
   private MessageWrapper<GerentesDto.Gerente> handleGerenteRequest(MessageWrapper<GerentesDto.Gerente> message) {
     var target = message.getData().getFirst();
-    GerentesDto.Gerente encontrado = null;
-
+    List<GerentesDto.Gerente> encontrado = null;
     if (message.getOperation() == MessageOperations.READ)
-      encontrado = gerenteDtoModel.handleRead(target.getId());
+      encontrado = List.of(gerenteDtoModel.handleRead(target.getId()));
+    else if (message.getOperation() == MessageOperations.READ_ALL)
+      encontrado = gerenteDtoModel.handleReadAll();
     if (encontrado == null)
       throw new UnsupportedOperationException("operação de leitura não implementada");
-
-    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, List.of(encontrado));
+    return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, encontrado);
   }
 
   private MessageWrapper<ContasDto.Conta> handleContaRequest(MessageWrapper<ContasDto.Conta> message) {
     var target = message.getData().getFirst();
-    ContasDto.Conta encontrado = null;
-
+    List<ContasDto.Conta> encontrado = null;
     if (message.getOperation() == MessageOperations.READ)
-      encontrado = contaDtoModel.handleRead(target.getId());
+      encontrado = List.of(contaDtoModel.handleRead(target.getId()));
+    else if (message.getOperation() == MessageOperations.READ_ALL)
+      encontrado = contaDtoModel.handleReadAll();
     if (encontrado == null)
       throw new UnsupportedOperationException("operação de leitura não implementada");
-
-    return new MessageWrapper<ContasDto.Conta>(MessageOperations.RESULT, List.of(encontrado));
+    return new MessageWrapper<ContasDto.Conta>(MessageOperations.RESULT, encontrado);
   }
 
   private MessageWrapper<ItemHistoricoDto.ItemHistorico> handleItemHistoricoRequest(
       MessageWrapper<ItemHistoricoDto.ItemHistorico> message) {
     var target = message.getData().getFirst();
-    ItemHistoricoDto.ItemHistorico encontrado = null;
-
+    List<ItemHistoricoDto.ItemHistorico> encontrado = null;
     if (message.getOperation() == MessageOperations.READ)
-      encontrado = itemHistoricoDtoModel.handleRead(target.getId());
+      encontrado = List.of(itemHistoricoDtoModel.handleRead(target.getId()));
+    else if (message.getOperation() == MessageOperations.READ_ALL)
+      encontrado = itemHistoricoDtoModel.handleReadAll();
     if (encontrado == null)
       throw new UnsupportedOperationException("operação de leitura não implementada");
-
-    return new MessageWrapper<ItemHistoricoDto.ItemHistorico>(MessageOperations.RESULT, List.of(encontrado));
+    return new MessageWrapper<ItemHistoricoDto.ItemHistorico>(MessageOperations.RESULT, encontrado);
   }
 
 }

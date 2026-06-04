@@ -1,5 +1,7 @@
 package br.ufpr.dac.cqrsService.model;
 
+import java.util.List;
+
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +25,16 @@ public class EnderecoDtoModel implements DebeziumModel {
         .query(UsersDto.Endereco.class).single();
 
     return endereco;
+  }
+
+  public List<UsersDto.Endereco> handleReadAll() {
+
+    var enderecos = client.sql("""
+        SELECT * FROM endereco
+        """)
+        .query(UsersDto.Endereco.class).list();
+
+    return enderecos;
   }
 
   @Override

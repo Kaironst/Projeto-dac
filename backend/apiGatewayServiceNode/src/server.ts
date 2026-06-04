@@ -5,7 +5,7 @@ import axios from "axios";
 import ClienteController from "./controller/ClienteController";
 import GerenteController from "./controller/GerenteController";
 import ConsultaClienteController from "./controller/ConsultaClienteController";
-import { authProducer, contasProducer, gerentesProducer, usersProducer } from './messaging/GenericProducerRPC';
+import { authProducer, contasProducer, contasProducerCqrs, gerentesProducer, gerentesProducerCqrs, usersProducer, usersProducerCqrs } from './messaging/GenericProducerRPC';
 import { sagaProducer } from './messaging/GenericProducer';
 import AuthController from './controller/AuthController';
 
@@ -59,8 +59,11 @@ async function startServer() {
   await Promise.all([
     authProducer.init(),
     usersProducer.init(),
+    usersProducerCqrs.init(),
     gerentesProducer.init(),
+    gerentesProducerCqrs.init(),
     contasProducer.init(),
+    contasProducerCqrs.init(),
     sagaProducer.init(),
   ]);
 

@@ -117,7 +117,10 @@ class GenericProducerRPC<ReqMessageType, ResMessageType> {
 }
 
 export default GenericProducerRPC;
-export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>, MessageWrapper<UsersDtoCliente>>("app.exchange", "orchestrator.users.key");
-export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>, MessageWrapper<GerentesDtoGerente>>("app.exchange", "orchestrator.gerentes.key");
+export const usersProducer = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>, MessageWrapper<UsersDtoCliente>>("app.exchange", "users.key");
+export const usersProducerCqrs = new GenericProducerRPC<MessageWrapper<UsersDtoCliente>, MessageWrapper<UsersDtoCliente>>("app.exchange", "cqrs.request.key");
+export const gerentesProducer = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>, MessageWrapper<GerentesDtoGerente>>("app.exchange", "gerentes.key");
+export const gerentesProducerCqrs = new GenericProducerRPC<MessageWrapper<GerentesDtoGerente>, MessageWrapper<GerentesDtoGerente>>("app.exchange", "cqrs.request.key");
 export const contasProducer = new GenericProducerRPC<MessageWrapper<ContasDtoConta>, MessageWrapper<ContasDtoConta>>("app.exchange", "contas.key");
+export const contasProducerCqrs = new GenericProducerRPC<MessageWrapper<ContasDtoConta>, MessageWrapper<ContasDtoConta>>("app.exchange", "cqrs.request.key");
 export const authProducer = new GenericProducerRPC<MessageWrapper<LoginRequest>, MessageWrapper<TokenDto>>("app.exchange", "auth.key")

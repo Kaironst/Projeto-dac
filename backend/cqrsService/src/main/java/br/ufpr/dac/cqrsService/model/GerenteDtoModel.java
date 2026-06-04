@@ -1,6 +1,8 @@
 
 package br.ufpr.dac.cqrsService.model;
 
+import java.util.List;
+
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -24,6 +26,16 @@ public class GerenteDtoModel implements DebeziumModel {
         .query(GerentesDto.Gerente.class).single();
 
     return gerente;
+  }
+
+  public List<GerentesDto.Gerente> handleReadAll() {
+
+    var gerentes = client.sql("""
+        SELECT * FROM gerente
+        """)
+        .query(GerentesDto.Gerente.class).list();
+
+    return gerentes;
   }
 
   @Override

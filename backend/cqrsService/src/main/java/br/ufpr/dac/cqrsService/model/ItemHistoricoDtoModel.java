@@ -2,6 +2,7 @@ package br.ufpr.dac.cqrsService.model;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -26,6 +27,16 @@ public class ItemHistoricoDtoModel implements DebeziumModel {
         .query(ItemHistoricoDto.ItemHistorico.class).single();
 
     return itemHistorico;
+  }
+
+  public List<ItemHistoricoDto.ItemHistorico> handleReadAll() {
+
+    var itensHistorico = client.sql("""
+        SELECT * FROM item_historico
+        """)
+        .query(ItemHistoricoDto.ItemHistorico.class).list();
+
+    return itensHistorico;
   }
 
   @Override

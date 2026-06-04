@@ -1,6 +1,7 @@
 package br.ufpr.dac.cqrsService.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -25,6 +26,17 @@ public class ContaDtoModel implements DebeziumModel {
         .query(ContasDto.Conta.class).single();
 
     return conta;
+  }
+
+  public List<ContasDto.Conta> handleReadAll() {
+
+    var contas = client.sql("""
+        SELECT * FROM conta
+        """)
+        .query(ContasDto.Conta.class).list();
+
+    return contas;
+
   }
 
   @Override

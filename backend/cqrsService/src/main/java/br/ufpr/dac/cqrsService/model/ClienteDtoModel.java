@@ -1,5 +1,10 @@
 package br.ufpr.dac.cqrsService.model;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +38,48 @@ public class ClienteDtoModel implements DebeziumModel {
     cliente.setEnderecos(enderecos);
 
     return cliente;
+  }
+
+  // usando extrator para evitar n+1 e overhead de memória
+  public List<UsersDto.Cliente> handleReadAll() {
+
+    return client
+        .sql(
+            """
+                SELECT c.id as id, c.nome as nome, c.email as email, c.cpf as cpf, c.estado as estado, c.telefone as telefone,
+                c.salario as salario, e.id as e_id, e.logradouro as logradouro, e.numero as numero,
+                e.complemento as complemento, e.cep as cep, e.cidade as cidade, e.estado as uf
+                FROM cliente c
+                LEFT JOIN endereco e ON c.id = e.id
+                """)
+        .query(rs -> {
+          Map<Long, UsersDto.Cliente> clienteMap = new LinkedHashMap<>();
+
+          while (rs.next()) {
+            var clienteId = rs.getLong("id");
+            // cria cliente não adicionado
+            UsersDto.Cliente cliente = clienteMap.computeIfAbsent(clienteId, id -> {
+              try {
+                return UsersDto.Cliente.builder().id(id).nome(rs.getString("nome")).email(rs.getString("email"))
+                    .cpf(rs.getString("cpf")).estado(rs.getInt("estado")).telefone(rs.getString("telefone"))
+                    .salario(rs.getDouble("salario")).enderecos(new ArrayList<>()).build();
+              } catch (Exception e) {
+                throw new RuntimeException("erro mapeando cliente", e);
+              }
+            });
+            // adiciona endereco
+            long enderecoId = rs.getLong("e_id");
+            if (!rs.wasNull()) {
+              UsersDto.Endereco endereco = UsersDto.Endereco.builder()
+                  .id(enderecoId).logradouro(rs.getString("logradouro")).numero(rs.getInt("numero"))
+                  .complemento(rs.getString("complemento")).cep(rs.getString("cep"))
+                  .cidade(rs.getString("cidade")).estado(rs.getString("uf")).build();
+              cliente.getEnderecos().add(endereco);
+            }
+          }
+          return new ArrayList<>(clienteMap.values());
+
+        });
   }
 
   @Override
