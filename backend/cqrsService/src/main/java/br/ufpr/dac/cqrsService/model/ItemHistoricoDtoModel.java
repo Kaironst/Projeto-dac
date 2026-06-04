@@ -1,6 +1,8 @@
 package br.ufpr.dac.cqrsService.model;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -30,6 +32,7 @@ public class ItemHistoricoDtoModel implements DebeziumModel {
   @Override
   public void handleUpsert(JsonNode data) {
     var id = data.path("id").asLong();
+    // timestamp(6) without timezone (no debezium microssegundos desde o epoch)
     var data_hora = data.path("data_hora").asLong();
     var tipo = data.path("tipo").asInt();
     var valor_movimentacao = data.path("valor_movimentacao").asDouble();
@@ -48,7 +51,12 @@ public class ItemHistoricoDtoModel implements DebeziumModel {
           conta_origem_id = excluded.conta_origem_id
         """)
         .param("id", id)
-        .param("data_hora", Instant.ofEpochMilli(data_hora))
+        .param("data_hora", LocalDateTime.ofEpochSecond(
+            // segundos desdo epoch
+            data_hora / 1000000,
+            // precisão adicional de nanossegundos
+            (int) ((data_hora % 1000000) * 1000),
+            ZoneOffset.UTC))
         .param("tipo", tipo)
         .param("valor_movimentacao", valor_movimentacao)
         .param("conta_destino_id", conta_destino_id)

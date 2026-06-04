@@ -46,7 +46,7 @@ public class EnderecoDtoModel implements DebeziumModel {
           complemento = excluded.complemento,
           estado = excluded.estado,
           logradouro = excluded.logradouro,
-          numero = excluded.numero
+          numero = excluded.numero,
           cliente_id = excluded.cliente_id
         """)
         .param("id", id)

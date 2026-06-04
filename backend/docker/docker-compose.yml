@@ -28,6 +28,8 @@ services:
         condition: service_healthy
       users-database:
         condition: service_started
+      cqrs-service:
+        condition: service_started
 
   auth-database:
     image: mongo

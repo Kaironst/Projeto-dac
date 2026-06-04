@@ -1,6 +1,7 @@
 package br.ufpr.dac.cqrsService.model;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -31,6 +32,7 @@ public class ContaDtoModel implements DebeziumModel {
   public void handleUpsert(JsonNode data) {
     var id = data.path("id").asLong();
     var cliente = data.path("cliente").asLong();
+    // data no debezium vem como dias desde o epoch
     var data_criacao = data.path("data_criacao").asLong();
     var gerente = data.path("gerente").asLong();
     var limite = data.path("limite").asDouble();
@@ -51,7 +53,7 @@ public class ContaDtoModel implements DebeziumModel {
         """)
         .param("id", id)
         .param("cliente", cliente)
-        .param("data_criacao", Instant.ofEpochMilli(data_criacao))
+        .param("data_criacao", LocalDate.ofEpochDay(data_criacao))
         .param("gerente", gerente)
         .param("limite", limite)
         .param("numero", numero)
