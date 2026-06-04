@@ -21,7 +21,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @Component
 @AllArgsConstructor
-public class MessageConsumer {
+public class DebeziumConsumer {
 
   private final ObjectMapper objectMapper;
 
@@ -43,8 +43,8 @@ public class MessageConsumer {
         "gerentes_schema.gerente", gerenteDtoModel);
   }
 
-  @RabbitListener(queues = RabbitmqConsts.CQRS_QUEUE)
-  public void recieve(Message message) {
+  @RabbitListener(queues = RabbitmqConsts.CQRS_DEBEZIUM_QUEUE)
+  private void recieve(Message message) {
     System.out.println("msgreceb");
     try {
 

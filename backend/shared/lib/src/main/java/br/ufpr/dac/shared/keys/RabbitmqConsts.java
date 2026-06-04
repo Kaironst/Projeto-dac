@@ -64,8 +64,13 @@ public class RabbitmqConsts {
 
   // --------------------------------------------------------------------------------------------------------
 
-  // queue do cqrsService
-  public static final String CQRS_QUEUE = "cqrs.queue";
+  // queue do cqrsService para a exchange do debezium
+  public static final String CQRS_DEBEZIUM_QUEUE = "cqrs.debezium.queue";
+
+  // queue do cqrsService para RPC com apiGateway
+  public static final String CQRS_REQUEST_QUEUE = "cqrs.request.queue";
+  // key do cqrsService para RPC com apiGateway
+  public static final String CQRS_REQUEST_KEY = "cqrs.request.key";
 
   // --------------------------------------------------------------------------------------------------------
 

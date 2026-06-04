@@ -2,6 +2,7 @@ package br.ufpr.dac.cqrsService.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
@@ -18,20 +19,38 @@ import br.ufpr.dac.shared.keys.RabbitmqConsts;
 public class RabbitMQConfig {
 
   @Bean
-  public Exchange exchange() {
+  public Exchange debeziumExchange() {
     return new TopicExchange("debezium.exchange");
   }
 
   @Bean
-  public Queue queue() {
-    return new Queue(RabbitmqConsts.CQRS_QUEUE);
+  public Queue debeziumQueue() {
+    return new Queue(RabbitmqConsts.CQRS_DEBEZIUM_QUEUE);
   }
 
   @Bean
-  public Binding binding(Queue queue, Exchange exchange) {
-    return BindingBuilder.bind(queue)
-        .to(exchange)
+  public Binding debeziumBinding(Queue debeziumQueue, Exchange debeziumExchange) {
+    return BindingBuilder.bind(debeziumQueue)
+        .to(debeziumExchange)
         .with("#")
+        .noargs();
+  }
+
+  @Bean
+  public Exchange requestExchange() {
+    return new DirectExchange(RabbitmqConsts.APP_EXCHANGE);
+  }
+
+  @Bean
+  public Queue requestQueue() {
+    return new Queue(RabbitmqConsts.CQRS_REQUEST_QUEUE);
+  }
+
+  @Bean
+  public Binding requestBinding(Queue requestQueue, Exchange requestExchange) {
+    return BindingBuilder.bind(requestQueue)
+        .to(requestExchange)
+        .with(RabbitmqConsts.CQRS_REQUEST_KEY)
         .noargs();
   }
 

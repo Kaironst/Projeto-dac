@@ -1,6 +1,5 @@
 package br.ufpr.dac.cqrsService.model;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
