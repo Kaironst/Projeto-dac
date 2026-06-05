@@ -8,7 +8,7 @@ const router = Router();
 router.post("/", async (req: Request, res: Response) => {
   try {
     const loginRequest = req.body as LoginRequest;
-    const responseToken = await authProducer.requestService({ operation: "LOGIN", data: [loginRequest] });
+    const responseToken = await authProducer.requestService({ operation: "LOGIN", data: [loginRequest], dataType: "login" });
     console.log(`recebido: data = ${responseToken.data} operation =${responseToken.operation}`)
     if (responseToken.operation === "ERROR_NO_LOGIN") {
       res.status(401).json({

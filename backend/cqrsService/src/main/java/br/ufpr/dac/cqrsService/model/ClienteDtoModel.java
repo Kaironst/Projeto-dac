@@ -43,15 +43,13 @@ public class ClienteDtoModel implements DebeziumModel {
   // usando extrator para evitar n+1 e overhead de memória
   public List<UsersDto.Cliente> handleReadAll() {
 
-    return client
-        .sql(
-            """
-                SELECT c.id as id, c.nome as nome, c.email as email, c.cpf as cpf, c.estado as estado, c.telefone as telefone,
-                c.salario as salario, e.id as e_id, e.logradouro as logradouro, e.numero as numero,
-                e.complemento as complemento, e.cep as cep, e.cidade as cidade, e.estado as uf
-                FROM cliente c
-                LEFT JOIN endereco e ON c.id = e.id
-                """)
+    return client.sql("""
+        SELECT c.id as id, c.nome as nome, c.email as email, c.cpf as cpf, c.estado as estado, c.telefone as telefone,
+        c.salario as salario, e.id as e_id, e.logradouro as logradouro, e.numero as numero,
+        e.complemento as complemento, e.cep as cep, e.cidade as cidade, e.estado as uf
+        FROM cliente c
+        LEFT JOIN endereco e ON c.id = e.id
+        """)
         .query(rs -> {
           Map<Long, UsersDto.Cliente> clienteMap = new LinkedHashMap<>();
 

@@ -18,6 +18,22 @@ public class SagaMessageWrapper<T> {
   private List<T> data;
   private UUID correlationId;
 
+  private String dataType;
+
+  public SagaMessageWrapper(String operation, List<T> data, UUID correlationId) {
+    this.operation = operation;
+    this.data = data;
+    this.correlationId = correlationId;
+  }
+
+  public static class DataTypes {
+    public static final String cliente = "cliente";
+    public static final String endereco = "endereco";
+    public static final String gerente = "gerente";
+    public static final String conta = "conta";
+    public static final String itemHistorico = "itemHistorico";
+  }
+
   public static <T> List<T> convertList(List<Object> original, Class<T> tipo) {
     return original.stream()
         .map(tipo::cast)
@@ -29,7 +45,8 @@ public class SagaMessageWrapper<T> {
     return new SagaMessageWrapper<T>(
         original.getOperation(),
         convertList(original.getData(), tipo),
-        original.getCorrelationId());
+        original.getCorrelationId(),
+        original.getDataType());
   }
 
 }

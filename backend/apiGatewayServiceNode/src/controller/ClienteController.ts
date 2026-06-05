@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { UsersDtoCliente } from "../dto/UsersDto";
-import { usersProducer } from "../messaging/GenericProducerRPC";
+import { usersProducer, usersProducerCqrs } from "../messaging/GenericProducerRPC";
 
 const router = Router();
 const CPF_DUPLICADO_ERROR = "ERROR_CPF_DUPLICADO";
@@ -10,7 +10,7 @@ const CPF_DUPLICADO_MESSAGE = "CPF já cadastrado ou aguardando aprovação.";
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const targetCliente = { id: parseInt(req.params.id) } as UsersDtoCliente;
-    const clientesMessage = await usersProducer.requestService({ operation: "READ", data: [targetCliente] });
+    const clientesMessage = await usersProducerCqrs.requestService({ operation: "READ", data: [targetCliente], dataType: "cliente" });
     res.status(200).json(clientesMessage.data);
   } catch (error) {
     res.sendStatus(500);
@@ -19,7 +19,8 @@ router.get("/:id", async (req: Request, res: Response) => {
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const clientesMessage = await usersProducer.requestService({ operation: "READ_ALL", data: null });
+    const targetCliente = { id: 0 } as UsersDtoCliente;
+    const clientesMessage = await usersProducerCqrs.requestService({ operation: "READ_ALL", data: [targetCliente], dataType: "cliente" });
     res.status(200).json(clientesMessage.data);
   } catch (error) {
     res.sendStatus(500);
@@ -30,7 +31,7 @@ router.post("/", async (req: Request, res: Response) => {
   try {
     const newCliente = req.body as UsersDtoCliente;
     console.log("enviando: ", req.body);
-    const clientesMessage = await usersProducer.requestService({ operation: "CREATE", data: [newCliente] });
+    const clientesMessage = await usersProducer.requestService({ operation: "CREATE", data: [newCliente], dataType: "cliente" });
 
     if (clientesMessage?.operation === CPF_DUPLICADO_ERROR) {
       return res.status(409).json({
@@ -57,7 +58,7 @@ router.put("/:id", async (req: Request, res: Response) => {
     const newCliente = req.body as UsersDtoCliente;
     newCliente.id = parseInt(req.params.id);
     console.log("enviando: ", req.body);
-    const clientesMessage = await usersProducer.requestService({ operation: "UPDATE", data: [newCliente] });
+    const clientesMessage = await usersProducer.requestService({ operation: "UPDATE", data: [newCliente], dataType: "cliente" });
     res.status(200).json(clientesMessage.data);
   } catch (error) {
     res.sendStatus(500);
@@ -67,7 +68,7 @@ router.put("/:id", async (req: Request, res: Response) => {
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const targetCliente = { id: parseInt(req.params.id) } as UsersDtoCliente;
-    const clientesMessage = await usersProducer.requestService({ operation: "DELETE", data: [targetCliente] });
+    const clientesMessage = await usersProducer.requestService({ operation: "DELETE", data: [targetCliente], dataType: "cliente" });
     res.sendStatus(204);
   } catch (error) {
     res.sendStatus(500);

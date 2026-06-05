@@ -2,14 +2,15 @@ import { Router, Request, Response } from "express";
 import { ContasDtoConta } from "../dto/ContasDto";
 import { ConsultaClienteDto } from "../dto/ConsultaClienteDto";
 import { UsersDtoCliente, UsersDtoEndereco } from "../dto/UsersDto";
-import { contasProducer, usersProducer } from "../messaging/GenericProducerRPC";
+import { contasProducer, contasProducerCqrs, usersProducer, usersProducerCqrs } from "../messaging/GenericProducerRPC";
+import { GerentesDtoGerente } from "../dto/GerentesDto";
 
 const router = Router();
 
 async function carregarClientesComContas(): Promise<ConsultaClienteDto[]> {
   const [clientesMessage, contasMessage] = await Promise.all([
-    usersProducer.requestService({ operation: "READ_ALL", data: null }),
-    contasProducer.requestService({ operation: "READ_ALL", data: null }),
+    usersProducerCqrs.requestService({ operation: "READ_ALL", data: [{ id: 0 } as UsersDtoCliente], dataType: "cliente" }),
+    contasProducerCqrs.requestService({ operation: "READ_ALL", data: [{ id: 0 } as ContasDtoConta], dataType: "conta" }),
   ]);
 
   if (clientesMessage.operation !== "RESULT" || contasMessage.operation !== "RESULT") {
