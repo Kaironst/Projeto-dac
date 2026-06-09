@@ -40,6 +40,50 @@ public class ClienteDtoModel implements DebeziumModel {
     return cliente;
   }
 
+  public UsersDto.Cliente handleReadByCpf(String cpf) {
+
+    var cliente = client.sql("""
+        SELECT * FROM cliente
+        WHERE cpf=:cpf
+        """)
+        .param("cpf", cpf)
+        .query(UsersDto.Cliente.class).single();
+
+    var enderecos = client.sql("""
+        SELECT * FROM endereco
+        WHERE cliente_id=:id
+        """)
+        .param("id", cliente.getId())
+        .query(UsersDto.Endereco.class)
+        .list();
+
+    cliente.setEnderecos(enderecos);
+
+    return cliente;
+  }
+
+  public UsersDto.Cliente handleReadByEmail(String email) {
+
+    var cliente = client.sql("""
+        SELECT * FROM cliente
+        WHERE email=:email
+        """)
+        .param("email", email)
+        .query(UsersDto.Cliente.class).single();
+
+    var enderecos = client.sql("""
+        SELECT * FROM endereco
+        WHERE cliente_id=:id
+        """)
+        .param("id", cliente.getId())
+        .query(UsersDto.Endereco.class)
+        .list();
+
+    cliente.setEnderecos(enderecos);
+
+    return cliente;
+  }
+
   // usando extrator para evitar n+1 e overhead de memória
   public List<UsersDto.Cliente> handleReadAll() {
 

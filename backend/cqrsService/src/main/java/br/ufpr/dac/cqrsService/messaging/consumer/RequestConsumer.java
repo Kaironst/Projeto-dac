@@ -66,6 +66,11 @@ public class RequestConsumer {
     else if (message.getOperation().equals(MessageOperations.READ_ALL))
       encontrado = clienteDtoModel.handleReadAll();
 
+    else if (message.getOperation().equals(MessageOperations.READ_BY_EMAIL))
+      encontrado = List.of(clienteDtoModel.handleReadByEmail(target.getEmail()));
+    else if (message.getOperation().equals(MessageOperations.READ_BY_CPF))
+      encontrado = List.of(clienteDtoModel.handleReadByCpf(target.getCpf()));
+
     if (encontrado == null)
       throw new AmqpRejectAndDontRequeueException("operação de leitura não implementada");
 
@@ -100,6 +105,11 @@ public class RequestConsumer {
 
     else if (message.getOperation().equals(MessageOperations.READ_ALL))
       encontrado = gerenteDtoModel.handleReadAll();
+
+    else if (message.getOperation().equals(MessageOperations.READ_BY_EMAIL))
+      encontrado = List.of(gerenteDtoModel.handleReadByEmail(target.getEmail()));
+    else if (message.getOperation().equals(MessageOperations.READ_BY_CPF))
+      encontrado = List.of(gerenteDtoModel.handleReadByCpf(target.getCpf()));
 
     if (encontrado == null)
       throw new AmqpRejectAndDontRequeueException("operação de leitura não implementada");

@@ -28,6 +28,30 @@ public class GerenteDtoModel implements DebeziumModel {
     return gerente;
   }
 
+  public GerentesDto.Gerente handleReadByCpf(String cpf) {
+
+    var gerente = client.sql("""
+        SELECT * FROM gerente
+        WHERE cpf=:cpf
+        """)
+        .param("cpf", cpf)
+        .query(GerentesDto.Gerente.class).single();
+
+    return gerente;
+  }
+
+  public GerentesDto.Gerente handleReadByEmail(String email) {
+
+    var gerente = client.sql("""
+        SELECT * FROM gerente
+        WHERE email=:email
+        """)
+        .param("email", email)
+        .query(GerentesDto.Gerente.class).single();
+
+    return gerente;
+  }
+
   public List<GerentesDto.Gerente> handleReadAll() {
 
     var gerentes = client.sql("""
