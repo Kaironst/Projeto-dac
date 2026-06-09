@@ -40,6 +40,14 @@ export class ClienteUtil extends ContatoComBanco {
     return this.http.get<Cliente>(`${this.requestUrl}/${id}`);
   }
 
+  getByEmail(email: string) {
+    return this.http.get<Cliente>(`${this.requestUrl}/email/${email}`);
+  }
+
+  getByCpf(cpf: string) {
+    return this.http.get<Cliente>(`${this.requestUrl}/cpf/${cpf}`);
+  }
+
   override create(cliente: Cliente) {
     return this.http.post<unknown>(this.requestUrl, cliente);
   }
