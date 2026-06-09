@@ -1,11 +1,103 @@
 import { Router, Request, Response } from "express";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
-import { gerentesProducer, gerentesProducerCqrs } from "../messaging/GenericProducerRPC";
+import { UsersDtoCliente } from "../dto/UsersDto";
+import { gerentesProducer, gerentesProducerCqrs, usersProducer } from "../messaging/GenericProducerRPC";
 import { sagaProducer } from "../messaging/GenericProducer";
 
 const router = Router();
 
-//GET /id
+// R09 - Tela inicial do gerente: lista clientes aguardando aprovação (estado = 0)
+router.get("/pedidos-aprovacao", async (req: Request, res: Response) => {
+  try {
+    const clientesMessage = await usersProducer.requestService({
+      operation: "READ_ALL",
+      data: [{ id: 0 } as UsersDtoCliente],
+      dataType: "cliente"
+    });
+
+    // Filtra apenas clientes com estado = 0 (pendentes de aprovação)
+    const pendentes = (clientesMessage.data ?? []).filter(
+      (c: UsersDtoCliente) => c.estado === 0
+    );
+
+    res.status(200).json(pendentes);
+  } catch (error) {
+    console.error("Erro ao buscar pedidos de aprovação:", error);
+    res.sendStatus(500);
+  }
+});
+
+// R10 - Aprovar cliente: atualiza estado para 1 (ativo) no usersService
+router.post("/aprovar-cliente", async (req: Request, res: Response) => {
+  try {
+    const { cpf, nome, email, telefone, salario } = req.body;
+
+    if (!cpf) {
+      return res.status(400).json({ message: "CPF é obrigatório." });
+    }
+
+    // Busca o cliente pelo CPF para obter o ID e dados completos
+    const clienteMessage = await usersProducer.requestService({
+      operation: "READ_BY_CPF",
+      data: [{ cpf } as UsersDtoCliente],
+      dataType: "cliente"
+    });
+
+    const cliente = clienteMessage.data?.[0];
+    if (!cliente) {
+      return res.status(404).json({ message: "Cliente não encontrado." });
+    }
+
+    // Atualiza estado para 1 (ativo/aprovado)
+    const atualizadoMsg = await usersProducer.requestService({
+      operation: "UPDATE",
+      data: [{ ...cliente, estado: 1 } as UsersDtoCliente],
+      dataType: "cliente"
+    });
+
+    res.status(200).json(atualizadoMsg.data?.[0] ?? { message: `Cliente ${nome} aprovado.` });
+  } catch (error) {
+    console.error("Erro ao aprovar cliente:", error);
+    res.sendStatus(500);
+  }
+});
+
+// R11 - Rejeitar cliente: atualiza estado para 2 (rejeitado) e registra motivo
+router.post("/rejeitar-cliente", async (req: Request, res: Response) => {
+  try {
+    const { cpf, motivo } = req.body;
+
+    if (!cpf) {
+      return res.status(400).json({ message: "CPF é obrigatório." });
+    }
+
+    // Busca o cliente pelo CPF para obter o ID
+    const clienteMessage = await usersProducer.requestService({
+      operation: "READ_BY_CPF",
+      data: [{ cpf } as UsersDtoCliente],
+      dataType: "cliente"
+    });
+
+    const cliente = clienteMessage.data?.[0];
+    if (!cliente) {
+      return res.status(404).json({ message: "Cliente não encontrado." });
+    }
+
+    // Atualiza estado para 2 (rejeitado)
+    await usersProducer.requestService({
+      operation: "UPDATE",
+      data: [{ ...cliente, estado: 2 } as UsersDtoCliente],
+      dataType: "cliente"
+    });
+
+    res.status(200).json({ message: `Cliente rejeitado. Motivo: ${motivo}` });
+  } catch (error) {
+    console.error("Erro ao rejeitar cliente:", error);
+    res.sendStatus(500);
+  }
+});
+
+//GET /:id
 router.get("/:id", async (req: Request, res: Response) => {
   try {
     const targetGerente = { id: parseInt(req.params.id) } as GerentesDtoGerente;
