@@ -17,6 +17,28 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
+//GET /email
+router.get("email/:email", async (req: Request, res: Response) => {
+  try {
+    const targetCliente = { email: req.params.email } as UsersDtoCliente;
+    const clientesMessage = await usersProducerCqrs.requestService({ operation: "READ_BY_EMAIL", data: [targetCliente], dataType: "cliente" });
+    res.status(200).json(clientesMessage.data);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
+//GET /cpf
+router.get("cpf/:cpf", async (req: Request, res: Response) => {
+  try {
+    const targetCliente = { cpf: req.params.cpf } as UsersDtoCliente;
+    const clientesMessage = await usersProducerCqrs.requestService({ operation: "READ_BY_CPF", data: [targetCliente], dataType: "cliente" });
+    res.status(200).json(clientesMessage.data);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
 router.get("/", async (req: Request, res: Response) => {
   try {
     const targetCliente = { id: 0 } as UsersDtoCliente;

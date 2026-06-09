@@ -23,7 +23,7 @@ app.use(cors());
 app.use("/clientes", ClienteController);
 app.use("/gerentes", GerenteController);
 app.use("/consultas", ConsultaClienteController);
-app.use("/login", AuthController);
+app.use("/", AuthController);
 
 // Email endpoint proxy
 app.post("/emails/enviar", async (req: Request, res: Response) => {

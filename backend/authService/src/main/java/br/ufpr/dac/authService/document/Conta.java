@@ -19,9 +19,9 @@ import lombok.NoArgsConstructor;
 public class Conta {
 
   public static enum Roles {
-    CLIENTE,
-    GERENTE,
-    ADMINISTRADOR,
+    ROLE_CLIENTE,
+    ROLE_GERENTE,
+    ROLE_ADMINISTRADOR,
   }
 
   @Id
