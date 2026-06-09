@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
 import { UsersDtoCliente } from "../dto/UsersDto";
-import { gerentesProducer, gerentesProducerCqrs, usersProducer } from "../messaging/GenericProducerRPC";
+import { gerentesProducer, gerentesProducerCqrs, usersProducer, usersProducerCqrs } from "../messaging/GenericProducerRPC";
 import { sagaProducer } from "../messaging/GenericProducer";
 
 const router = Router();
@@ -9,7 +9,7 @@ const router = Router();
 // R09 - Tela inicial do gerente: lista clientes aguardando aprovação (estado = 0)
 router.get("/pedidos-aprovacao", async (req: Request, res: Response) => {
   try {
-    const clientesMessage = await usersProducer.requestService({
+    const clientesMessage = await usersProducerCqrs.requestService({
       operation: "READ_ALL",
       data: [{ id: 0 } as UsersDtoCliente],
       dataType: "cliente"
@@ -37,7 +37,7 @@ router.post("/aprovar-cliente", async (req: Request, res: Response) => {
     }
 
     // Busca o cliente pelo CPF para obter o ID e dados completos
-    const clienteMessage = await usersProducer.requestService({
+    const clienteMessage = await usersProducerCqrs.requestService({
       operation: "READ_BY_CPF",
       data: [{ cpf } as UsersDtoCliente],
       dataType: "cliente"
@@ -72,7 +72,7 @@ router.post("/rejeitar-cliente", async (req: Request, res: Response) => {
     }
 
     // Busca o cliente pelo CPF para obter o ID
-    const clienteMessage = await usersProducer.requestService({
+    const clienteMessage = await usersProducerCqrs.requestService({
       operation: "READ_BY_CPF",
       data: [{ cpf } as UsersDtoCliente],
       dataType: "cliente"
