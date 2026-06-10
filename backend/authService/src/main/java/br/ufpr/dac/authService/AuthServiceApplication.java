@@ -104,7 +104,7 @@ public class AuthServiceApplication implements CommandLineRunner {
           .email(c.getEmail())
           .cpf(c.getCpf())
           .senha(passwordEncoder.encode("1234"))
-          .roles(List.of(Roles.CLIENTE))
+          .roles(List.of(Roles.ROLE_CLIENTE))
           .build();
       repo.save(conta);
     });
@@ -115,7 +115,8 @@ public class AuthServiceApplication implements CommandLineRunner {
           .email(c.getEmail())
           .cpf(c.getCpf())
           .senha(passwordEncoder.encode("1234"))
-          .roles(c.getAdministrador() ? List.of(Roles.GERENTE, Roles.ADMINISTRADOR) : List.of(Roles.GERENTE))
+          .roles(c.getAdministrador() ? List.of(Roles.ROLE_GERENTE, Roles.ROLE_ADMINISTRADOR)
+              : List.of(Roles.ROLE_GERENTE))
           .build();
       repo.save(conta);
     });

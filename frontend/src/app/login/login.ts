@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { Auth, LoginRequest } from '../services/auth/auth';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,8 @@ import { MatCardModule } from '@angular/material/card';
 
 export class Login {
   private router = inject(Router);
+  private auth = inject(Auth);
+  private changeDetectorRef = inject(ChangeDetectorRef);
   public formGroup: FormGroup;
   public mostrarMensagemSucesso = false;
 
@@ -40,7 +43,23 @@ export class Login {
       return;
     }
 
-    this.mostrarMensagemSucesso = true;
+    const loginRequest: LoginRequest = {
+      username: this.formGroup.value.email,
+      password: this.formGroup.value.senha,
+    };
+
+    this.auth.login(loginRequest).subscribe({
+      next: (res) => {
+        console.log("login ok", res)
+        this.mostrarMensagemSucesso = true
+        this.changeDetectorRef.markForCheck();
+      },
+      error: (err) => {
+        console.error(err);
+        alert(err.error?.message)
+      }
+    })
+
   }
 
   fecharMensagemSucesso() {
