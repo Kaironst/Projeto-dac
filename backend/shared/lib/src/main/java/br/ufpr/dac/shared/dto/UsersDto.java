@@ -22,6 +22,22 @@ public class UsersDto {
     private String telefone;
     private Double salario;
     private List<Endereco> enderecos;
+
+    // construtor sem senha
+    public Cliente(Long id, String nome, String email, String cpf, Integer estado, String telefone, Double salario,
+        List<Endereco> enderecos) {
+      this.id = id;
+      this.nome = nome;
+      this.email = email;
+      this.cpf = cpf;
+      this.estado = estado;
+      this.telefone = telefone;
+      this.salario = salario;
+      this.enderecos = enderecos;
+    }
+
+    private String senha;
+
   }
 
   @Data

@@ -61,6 +61,10 @@ public class RabbitmqConsts {
   public static final String AUTH_QUEUE = "auth.queue";
   // key do authservice
   public static final String AUTH_KEY = "auth.key";
+  // topicExchange de eventos de outbox para auth
+  public static final String AUTH_EVENT_EXCHANGE = "auth.event.exchange";
+  // queue de eventos de outbox para auth
+  public static final String AUTH_EVENT_QUEUE = "auth.event.queue";
 
   // --------------------------------------------------------------------------------------------------------
 

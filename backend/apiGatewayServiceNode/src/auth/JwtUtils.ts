@@ -1,4 +1,5 @@
 import jwt, { JwtPayload } from 'jsonwebtoken'
+import { jwtDecode } from 'jwt-decode';
 
 const GetPublicKey = () => process.env.JWT_PUBLIC_KEY!
   .replace("-----BEGIN PUBLIC KEY-----", "")
@@ -17,4 +18,17 @@ export function validateJwt(token: string) {
     result = null;
   }
   return result !== null ? true : false
+}
+
+export function getRoles(token: string) {
+  let roles: string[] = []
+  try {
+    let decoded = jwtDecode(token);
+    roles = (decoded as any).roles as string[]
+  }
+  catch (err) {
+    console.error(err);
+    roles = []
+  }
+  return roles
 }
