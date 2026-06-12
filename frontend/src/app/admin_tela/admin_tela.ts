@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ConsultaClienteUtil } from '../services/DBUtil/consulta-cliente-util';
+import { GerenteUtil } from '../services/DBUtil/gerente-util';
 
 interface Cliente {
   nome: string;
@@ -7,6 +9,7 @@ interface Cliente {
 }
 
 interface Gerente {
+  id: number;
   nome: string;
   clientes: Cliente[];
 }
@@ -25,41 +28,64 @@ interface GerenteResumo {
   templateUrl: './admin_tela.html',
   styleUrls: ['./admin_tela.css']
 })
-export class AdminTela {
+export class AdminTela implements OnInit {
+
+  private consultaUtil = inject(ConsultaClienteUtil);
+  private gerenteUtil = inject(GerenteUtil);
+  private cdr = inject(ChangeDetectorRef);
 
   gerentes: Gerente[] = [];
   resumoGerentes: GerenteResumo[] = [];
+  carregando = true;
+  erro = '';
 
-  constructor() {
+  ngOnInit(): void {
     this.carregarDados();
-    this.processarDados();
   }
 
   carregarDados() {
+    this.carregando = true;
 
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
-    const contas = JSON.parse(localStorage.getItem('contas') || '[]');
+    this.gerenteUtil.getAll().subscribe({
+      next: (gerentesList: any[]) => {
+        // Obter apenas gerentes de verdade, que não são administradores globais
+        const gerentesUsuarios = gerentesList.filter((g: any) => !g.administrador);
 
-    const gerentesUsuarios = usuarios.filter((u: any) => u.tipo === 'gerente');
+        this.consultaUtil.getAll().subscribe({
+          next: (clientesList: any[]) => {
+            
+            this.gerentes = gerentesUsuarios.map((g: any) => {
+              // Buscar todos os clientes cuja conta tem o gerenteId igual a g.id
+              const contasDoGerente = clientesList.filter((c: any) => c.conta && c.conta.gerenteId === g.id);
 
-    this.gerentes = gerentesUsuarios.map((g: any) => {
+              const clientesDoGerente: Cliente[] = contasDoGerente.map((c: any) => ({
+                nome: c.nome || 'Desconhecido',
+                saldo: c.conta?.saldo || 0
+              }));
 
-      const contasDoGerente = contas.filter((c: any) => c.gerente === g.nome);
+              return {
+                id: g.id,
+                nome: g.nome,
+                clientes: clientesDoGerente
+              };
+            });
 
-      const clientesDoGerente: Cliente[] = contasDoGerente.map((conta: any) => {
-        const cliente = clientes.find((c: any) => c.cpf === conta.clienteCpf);
-
-        return {
-          nome: cliente ? cliente.nome : 'Desconhecido',
-          saldo: conta.saldo
-        };
-      });
-
-      return {
-        nome: g.nome,
-        clientes: clientesDoGerente
-      };
+            this.processarDados();
+            this.carregando = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.erro = 'Erro ao carregar dados de clientes.';
+            this.carregando = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: (err) => {
+        this.erro = 'Erro ao carregar dados de gerentes.';
+        this.carregando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

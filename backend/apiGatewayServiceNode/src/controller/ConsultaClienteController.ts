@@ -47,7 +47,9 @@ function montarClienteConsulta(cliente: UsersDtoCliente, contas: ContasDtoConta[
       numero: conta?.numero ?? "",
       saldo: conta?.saldo ?? 0,
       limite: conta?.limite ?? 0,
-      gerenteId: conta?.gerente?.id ?? null,
+      // o ms de contas pode retornar o gerente diretamente como um número (id) ou como objeto
+      // validado o tipo para garantir que seja extraído corretamente
+      gerenteId: typeof conta?.gerente === 'number' ? conta.gerente : (conta?.gerente?.id ?? null),
       dataCriacao: conta?.dataCriacao ?? null,
       extrato: conta?.extrato ?? [],
     },

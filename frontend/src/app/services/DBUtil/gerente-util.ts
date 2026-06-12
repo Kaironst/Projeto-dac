@@ -17,7 +17,7 @@ export interface Gerente {
 })
 export class GerenteUtil extends ContatoComBanco {
 
-  protected requestUrl = "/gerentes";
+  protected requestUrl = "http://localhost:8080/gerentes";
 
   protected http = inject(HttpClient);
 

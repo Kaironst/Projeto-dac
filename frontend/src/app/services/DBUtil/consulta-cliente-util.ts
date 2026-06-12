@@ -31,7 +31,7 @@ export interface ClienteConsulta {
 })
 export class ConsultaClienteUtil {
   private readonly http = inject(HttpClient);
-  private readonly requestUrl = "/consultas/clientes";
+  private readonly requestUrl = "http://localhost:8080/consultas/clientes";
 
   getAll() {
     return this.http.get<ClienteConsulta[]>(this.requestUrl);

@@ -1,0 +1,54 @@
+<div class="relatorio-container">
+  <div class="header">
+    <h1>Relatório de Clientes</h1>
+    <p>Listagem completa de todos os clientes, contas e gerentes atrelados no sistema.</p>
+  </div>
+
+  <div *ngIf="carregando" class="loading">
+    Carregando dados do relatório...
+  </div>
+
+  <div *ngIf="erro" class="error">
+    {{ erro }}
+  </div>
+
+  <div class="table-container" *ngIf="!carregando && !erro">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>E-mail</th>
+          <th>Salário</th>
+          <th>Conta</th>
+          <th>Saldo</th>
+          <th>Limite</th>
+          <th>Gerente</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of clientes">
+          <td>
+            <div class="main-text">{{ c.nome }}</div>
+            <div class="sub-text">{{ c.cpf }}</div>
+          </td>
+          <td>{{ c.email }}</td>
+          <td>R$ {{ c.salario.toFixed(2) }}</td>
+          <td>{{ c.contaNumero }}</td>
+          <td>
+            <span [ngClass]="{'positivo': c.saldo >= 0, 'negativo': c.saldo < 0}">
+              R$ {{ c.saldo.toFixed(2) }}
+            </span>
+          </td>
+          <td>R$ {{ c.limite.toFixed(2) }}</td>
+          <td>
+            <div class="main-text">{{ c.gerenteNome }}</div>
+            <div class="sub-text">{{ c.gerenteCpf }}</div>
+          </td>
+        </tr>
+        <tr *ngIf="clientes.length === 0">
+          <td colspan="7" class="empty-state">Nenhum cliente cadastrado.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

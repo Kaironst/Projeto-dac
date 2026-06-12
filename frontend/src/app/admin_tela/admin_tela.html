@@ -6,7 +6,16 @@
       Visualize os dados financeiros e desempenho dos gerentes
     </p>
   </div>
-  <div class="cards-grid">
+
+  <div *ngIf="carregando" class="loading">
+    Carregando dados dos gerentes...
+  </div>
+
+  <div *ngIf="erro" class="error">
+    {{ erro }}
+  </div>
+
+  <div class="cards-grid" *ngIf="!carregando && !erro">
     @for (gerente of resumoGerentes; track gerente.nome) {
       <div class="gerente-card">
         <div class="card-topo">

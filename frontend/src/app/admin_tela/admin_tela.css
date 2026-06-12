@@ -152,3 +152,22 @@ body {
   }
 
 }
+.loading {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}

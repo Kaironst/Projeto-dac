@@ -28,7 +28,7 @@ export interface Endereco {
 })
 export class ClienteUtil extends ContatoComBanco {
 
-  protected requestUrl = "/clientes";
+  protected requestUrl = "http://localhost:8080/clientes";
 
   protected http = inject(HttpClient);
 

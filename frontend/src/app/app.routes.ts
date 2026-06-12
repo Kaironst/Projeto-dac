@@ -9,6 +9,7 @@ import { ConsultarCliente } from './consultar-cliente/consultar-cliente';
 import { AdminTela } from './admin_tela/admin_tela';
 import { GerenteTela } from './gerente_tela/gerente_tela';
 import { ClientePerfil } from './cliente_perfil/cliente_perfil';
+import { RelatorioClientes } from './relatorio-clientes/relatorio-clientes';
 
 export const routes: Routes = [
     { path:'tela-principal', component:TelaPrincipal},
@@ -20,5 +21,6 @@ export const routes: Routes = [
     { path: 'cliente-perfil', component: ClientePerfil },
     { path: 'consultar-cliente', component: ConsultarCliente },
     {path:'admin-tela', component: AdminTela},
+    {path:'relatorio-clientes', component: RelatorioClientes},
     {path:'gerente-tela', component: GerenteTela}
 ];
