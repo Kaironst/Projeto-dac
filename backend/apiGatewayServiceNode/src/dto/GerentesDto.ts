@@ -6,4 +6,6 @@ export interface GerentesDtoGerente {
   cpf: null | string;
   telefone: null | string;
   administrador: null | boolean;
+
+  senha: null | string;
 }

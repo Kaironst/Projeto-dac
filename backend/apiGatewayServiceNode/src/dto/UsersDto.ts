@@ -6,8 +6,10 @@ export interface UsersDtoCliente {
   cpf: null | string;
   estado: null | number
   telefone: null | string;
-  salario: null | number
+  salario: null | number;
   enderecos: null | UsersDtoEndereco[];
+
+  senha: null | string;
 }
 
 export interface UsersDtoEndereco {

@@ -2,6 +2,7 @@ package br.ufpr.dac.usersService.messaging.consumer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,6 +15,7 @@ import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import br.ufpr.dac.usersService.entity.Cliente;
 import br.ufpr.dac.usersService.entity.Endereco;
+import br.ufpr.dac.usersService.messaging.producer.OutboxProducer;
 import br.ufpr.dac.usersService.repository.ClienteRepository;
 import lombok.AllArgsConstructor;
 
@@ -22,6 +24,7 @@ import lombok.AllArgsConstructor;
 public class MessageConsumer {
 
   private final ClienteRepository repo;
+  private final OutboxProducer outboxProducer;
 
   @RabbitListener(queues = RabbitmqConsts.USERS_QUEUE)
   public MessageWrapper<UsersDto.Cliente> recieve(MessageWrapper<UsersDto.Cliente> message) {
@@ -71,7 +74,6 @@ public class MessageConsumer {
           .cpf(cliente.getCpf())
           .estado(cliente.getEstado())
           .telefone(cliente.getTelefone())
-          .senha(cliente.getSenha())
           .build();
 
       var enderecosCliente = new ArrayList<UsersDto.Endereco>();
@@ -108,7 +110,6 @@ public class MessageConsumer {
           .cpf(clienteDto.getCpf())
           .estado(clienteDto.getEstado())
           .telefone(clienteDto.getTelefone())
-          .senha(clienteDto.getSenha())
           .build();
 
       var enderecosCliente = new ArrayList<Endereco>();
@@ -140,10 +141,20 @@ public class MessageConsumer {
       for (UsersDto.Cliente cliente : clientes) {
         if (cliente.getCpf() != null && repo.findByCpf(cliente.getCpf()) != null) {
           return new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_CPF_DUPLICADO, null);
+
         }
       }
 
       List<Cliente> qResult = repo.saveAll(dtoToClientes(clientes));
+      // enche cada dto para outbox com seu id
+      clientes.forEach((cliente) -> {
+        cliente.setId(
+            qResult.stream()
+                .filter((c) -> c.getCpf().equals(cliente.getCpf()))
+                .collect(Collectors.toList())
+                .getFirst().getId());
+        outboxProducer.writeToOutbox("created", cliente);
+      });
       return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(qResult));
     } catch (DataIntegrityViolationException e) {
       return new MessageWrapper<UsersDto.Cliente>(MessageOperations.ERROR_CPF_DUPLICADO, null);
@@ -196,7 +207,7 @@ public class MessageConsumer {
   @Transactional
   private MessageWrapper<UsersDto.Cliente> handleUpdate(List<UsersDto.Cliente> clientes) {
     List<Cliente> clientesAtualizados = new ArrayList<>();
-    dtoToClientes(clientes).forEach(cliente -> {
+    clientes.forEach(cliente -> {
 
       System.out.println(cliente);
 
@@ -208,9 +219,10 @@ public class MessageConsumer {
       clienteAtual.setEstado(cliente.getEstado());
       clienteAtual.setTelefone(cliente.getTelefone());
       clienteAtual.setSalario(cliente.getSalario());
-      clienteAtual.setEnderecos(cliente.getEnderecos());
+      clienteAtual.setEnderecos(dtoToClientes(List.of(cliente)).getFirst().getEnderecos());
 
       clientesAtualizados.add(repo.save(clienteAtual));
+      outboxProducer.writeToOutbox("updated", cliente);
 
     });
     return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, clientesToDto(clientesAtualizados));
@@ -221,6 +233,9 @@ public class MessageConsumer {
     final var idList = new ArrayList<Long>();
     clientes.forEach(cliente -> idList.add(cliente.getId()));
     repo.deleteAllById(idList);
+    idList.forEach((id) -> {
+      outboxProducer.writeToOutbox("deleted", UsersDto.Cliente.builder().id(id).build());
+    });
     return new MessageWrapper<UsersDto.Cliente>(MessageOperations.RESULT, null);
   }
 

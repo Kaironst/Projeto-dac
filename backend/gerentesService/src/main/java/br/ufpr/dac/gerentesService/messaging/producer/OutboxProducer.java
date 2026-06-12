@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import lombok.AllArgsConstructor;
 import tools.jackson.databind.ObjectMapper;
@@ -22,6 +23,41 @@ public class OutboxProducer {
   private final JdbcClient jdbcClient;
   private final RabbitTemplate rabbitTemplate;
   private final ObjectMapper objectMapper;
+
+  public void writeToOutbox(String eventType, GerentesDto.Gerente gerente) {
+    try {
+
+      Map<String, Object> dataMap = null;
+      if ("deleted".equals(eventType)) {
+        dataMap = new HashMap<String, Object>();
+        dataMap.put("userId", gerente.getId());
+      } else {
+        dataMap = new HashMap<String, Object>();
+        dataMap.put("userId", gerente.getId());
+        dataMap.put("email", gerente.getEmail());
+        dataMap.put("senha", gerente.getSenha());
+        dataMap.put("cpf", gerente.getCpf());
+        dataMap.put("isAdmin", gerente.getAdministrador());
+      }
+
+      String dataJson = objectMapper.writeValueAsString(dataMap);
+
+      jdbcClient.sql("""
+          INSERT INTO outbox (event_type, data_type, data_id, data)
+          VALUES(:event_type, :data_type, :data_id, CAST(:data AS jsonb))
+          """)
+          .param("event_type", eventType)
+          .param("data_type", "gerente")
+          .param("data_id", gerente.getId())
+          .param("data", dataJson)
+          .update();
+
+      System.out.println("transação inserida no outbox");
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
   @Scheduled(fixedDelay = 500)
   @Transactional

@@ -52,6 +52,10 @@ router.get("/", async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   try {
     const newCliente = req.body as UsersDtoCliente;
+
+    const randomPassword: string = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    newCliente.senha = randomPassword;
+
     console.log("enviando: ", req.body);
     const clientesMessage = await usersProducer.requestService({ operation: "CREATE", data: [newCliente], dataType: "cliente" });
 

@@ -2,12 +2,14 @@ package br.ufpr.dac.gerentesService.messaging.consumer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.ufpr.dac.gerentesService.entity.Gerente;
+import br.ufpr.dac.gerentesService.messaging.producer.OutboxProducer;
 import br.ufpr.dac.gerentesService.repository.GerenteRepository;
 import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.dto.MessageWrapper;
@@ -20,6 +22,7 @@ import lombok.AllArgsConstructor;
 public class MessageConsumer {
 
   private final GerenteRepository repo;
+  private final OutboxProducer outboxProducer;
 
   @RabbitListener(queues = RabbitmqConsts.GERENTES_QUEUE)
   public MessageWrapper<GerentesDto.Gerente> recieve(MessageWrapper<GerentesDto.Gerente> message) {
@@ -68,7 +71,6 @@ public class MessageConsumer {
           .telefone(gerente.getTelefone())
           .cpf(gerente.getCpf())
           .administrador(gerente.getAdministrador())
-          .senha(gerente.getSenha())
           .build();
       gerentesDto.add(gerenteDto);
     });
@@ -85,7 +87,6 @@ public class MessageConsumer {
           .telefone(gerenteDto.getTelefone())
           .cpf(gerenteDto.getCpf())
           .administrador(gerenteDto.getAdministrador())
-          .senha(gerenteDto.getSenha())
           .build();
       gerentes.add(gerente);
     });
@@ -95,6 +96,14 @@ public class MessageConsumer {
   @Transactional
   private MessageWrapper<GerentesDto.Gerente> handleCreate(List<GerentesDto.Gerente> gerentes) {
     List<Gerente> queryResult = repo.saveAll(dtoToGerentes(gerentes));
+    gerentes.forEach((gerente) -> {
+      gerente.setId(
+          queryResult.stream()
+              .filter((g) -> g.getCpf().equals(gerente.getCpf()))
+              .collect(Collectors.toList())
+              .getFirst().getId());
+      outboxProducer.writeToOutbox("created", gerente);
+    });
     return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(queryResult));
   }
 
@@ -155,6 +164,7 @@ public class MessageConsumer {
       }
 
       gerentesAtualizados.add(repo.save(gerenteAtual));
+      outboxProducer.writeToOutbox("updated", gerente);
     });
     return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, gerentesToDto(gerentesAtualizados));
   }
@@ -163,7 +173,12 @@ public class MessageConsumer {
   private MessageWrapper<GerentesDto.Gerente> handleDelete(List<GerentesDto.Gerente> gerentes) {
     final var idList = new ArrayList<Long>();
     gerentes.forEach(gerente -> idList.add(gerente.getId()));
+
     repo.deleteAllById(idList);
+    idList.forEach((id) -> {
+      var gerente = GerentesDto.Gerente.builder().id(id).build();
+      outboxProducer.writeToOutbox("deleted", gerente);
+    });
     return new MessageWrapper<GerentesDto.Gerente>(MessageOperations.RESULT, null);
   }
 

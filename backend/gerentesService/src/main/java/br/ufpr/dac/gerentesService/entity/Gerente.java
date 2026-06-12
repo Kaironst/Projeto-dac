@@ -1,13 +1,10 @@
 package br.ufpr.dac.gerentesService.entity;
 
-import br.ufpr.dac.gerentesService.entity.listener.GerenteOutboxListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EntityListeners(GerenteOutboxListener.class)
 public class Gerente {
 
   @Id
@@ -32,8 +28,5 @@ public class Gerente {
   private String cpf;
   private String telefone;
   private Boolean administrador;
-
-  @Transient
-  private String senha;
 
 }

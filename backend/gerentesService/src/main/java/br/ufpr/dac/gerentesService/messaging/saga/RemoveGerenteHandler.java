@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import br.ufpr.dac.gerentesService.messaging.producer.OutboxProducer;
 import br.ufpr.dac.gerentesService.repository.GerenteRepository;
+import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
 import jakarta.transaction.Transactional;
@@ -18,6 +20,7 @@ public class RemoveGerenteHandler {
 
   private RabbitTemplate template;
   private GerenteRepository repo;
+  private OutboxProducer outboxProducer;
 
   @Transactional
   public void handleRemoveGerente(SagaMessageWrapper<Long> message) {
@@ -27,11 +30,12 @@ public class RemoveGerenteHandler {
       Long idARemover = message.getData().getFirst();
       long count = repo.count();
       if (count <= 1) {
-          // "Não permitir a remoção do último gerente do banco."
-          System.out.println("Remoção negada: não é possível remover o último gerente.");
-          sucesso = false;
+        // "Não permitir a remoção do último gerente do banco."
+        System.out.println("Remoção negada: não é possível remover o último gerente.");
+        sucesso = false;
       } else {
-          repo.deleteById(idARemover);
+        repo.deleteById(idARemover);
+        outboxProducer.writeToOutbox("deleted", GerentesDto.Gerente.builder().id(idARemover).build());
       }
     } catch (Exception e) {
       e.printStackTrace();

@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import br.ufpr.dac.gerentesService.messaging.producer.OutboxProducer;
 import br.ufpr.dac.gerentesService.repository.GerenteRepository;
+import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
 import jakarta.transaction.Transactional;
@@ -17,7 +19,8 @@ import lombok.AllArgsConstructor;
 public class RollbackRemoveGerenteHandler {
 
   private RabbitTemplate template;
-  GerenteRepository repo;
+  private GerenteRepository repo;
+  private OutboxProducer outboxProducer;
 
   @Transactional
   public void handleRemoveGerente(SagaMessageWrapper<Long> message) {
@@ -25,6 +28,9 @@ public class RollbackRemoveGerenteHandler {
     boolean sucesso = true;
     try {
       repo.deleteAllById(message.getData());
+      message.getData().forEach((id) -> {
+        outboxProducer.writeToOutbox("deleted", GerentesDto.Gerente.builder().id(id).build());
+      });
     } catch (Exception e) {
       e.printStackTrace();
       sucesso = false;
