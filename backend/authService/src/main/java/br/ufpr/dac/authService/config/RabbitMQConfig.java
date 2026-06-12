@@ -5,6 +5,7 @@ import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -16,6 +17,24 @@ import br.ufpr.dac.shared.keys.RabbitmqConsts;
 
 @Configuration
 public class RabbitMQConfig {
+
+  @Bean
+  public Exchange outboxExchange() {
+    return new TopicExchange(RabbitmqConsts.AUTH_EVENT_EXCHANGE);
+  }
+
+  @Bean
+  public Queue outboxQueue() {
+    return new Queue(RabbitmqConsts.AUTH_EVENT_QUEUE);
+  }
+
+  @Bean
+  public Binding outboxBinding(Queue outboxQueue, Exchange outboxExchange) {
+    return BindingBuilder.bind(outboxQueue)
+        .to(outboxExchange)
+        .with("#")
+        .noargs();
+  }
 
   @Bean
   public Exchange exchange() {
