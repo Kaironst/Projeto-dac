@@ -64,7 +64,17 @@ export class Login {
 
   fecharMensagemSucesso() {
     this.mostrarMensagemSucesso = false;
-    this.router.navigate(['/cliente-tela']);
+    
+    const roles = this.auth.getRoles();
+    if (roles.includes('ROLE_ADMINISTRADOR')) {
+      this.router.navigate(['/admin-tela']);
+    } else if (roles.includes('ROLE_GERENTE')) {
+      this.router.navigate(['/gerente-tela']);
+    } else if (roles.includes('ROLE_CLIENTE')) {
+      this.router.navigate(['/cliente-tela']);
+    } else {
+      this.router.navigate(['/tela-principal']);
+    }
   }
 
   voltar() {

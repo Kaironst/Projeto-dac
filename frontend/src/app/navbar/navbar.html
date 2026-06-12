@@ -5,15 +5,36 @@
   </div>
 
   <ul class="nav-links">
-    <li><a routerLink="/tela-principal">Home</a></li>
-    <li><a routerLink="/autocadastro">Autocadastro</a></li>
-    <li><a routerLink="/login">login</a></li>
-    <li><a routerLink="/crud-gerentes">Gerentes</a></li>
-    <li><a routerLink="/cliente-tela">ClienteTela</a></li>
-    <li><a routerLink="/cliente-perfil">ClientePerfil</a></li>
-    <li><a routerLink="/admin-tela">AdminTela</a></li>
-    <li><a routerLink="/gerente-tela">GerenteTela</a></li>
-    <li><a routerLink="/consultar-cliente">ConsultarCliente</a></li>
+    <!-- Links para usuários não logados -->
+    <ng-container *ngIf="!auth.isLoggedIn()">
+      <li><a routerLink="/tela-principal">Home</a></li>
+      <li><a routerLink="/autocadastro">Autocadastro</a></li>
+      <li><a routerLink="/login">Login</a></li>
+    </ng-container>
+
+    <!-- Links para Administrador -->
+    <ng-container *ngIf="auth.isAdmin()">
+      <li><a routerLink="/admin-tela">Home</a></li>
+      <li><a routerLink="/relatorio-clientes">Relatório de Clientes</a></li>
+      <li><a routerLink="/crud-gerentes">Gerentes</a></li>
+    </ng-container>
+
+    <!-- Links para Cliente -->
+    <ng-container *ngIf="auth.isCliente()">
+      <li><a routerLink="/cliente-tela">Home</a></li>
+      <li><a routerLink="/cliente-perfil">Meu Perfil</a></li>
+    </ng-container>
+
+    <!-- Links para Gerente -->
+    <ng-container *ngIf="auth.isGerente() && !auth.isAdmin()">
+      <li><a routerLink="/gerente-tela">Home</a></li>
+      <li><a routerLink="/consultar-cliente">Clientes</a></li>
+    </ng-container>
+
+    <!-- Link de Sair (apenas logados) -->
+    <ng-container *ngIf="auth.isLoggedIn()">
+      <li><a href="javascript:void(0)" (click)="logout()">Sair</a></li>
+    </ng-container>
   </ul>
   </div>
 </nav>

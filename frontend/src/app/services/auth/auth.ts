@@ -166,4 +166,16 @@ export class Auth {
     return this.getToken() != null;
   }
 
+  isAdmin(): boolean {
+    return this.getRoles().includes('ROLE_ADMINISTRADOR');
+  }
+
+  isGerente(): boolean {
+    return this.getRoles().includes('ROLE_GERENTE');
+  }
+
+  isCliente(): boolean {
+    return this.getRoles().includes('ROLE_CLIENTE');
+  }
+
 }
