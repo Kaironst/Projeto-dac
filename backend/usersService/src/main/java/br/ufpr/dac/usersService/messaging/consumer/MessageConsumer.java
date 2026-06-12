@@ -71,6 +71,7 @@ public class MessageConsumer {
           .cpf(cliente.getCpf())
           .estado(cliente.getEstado())
           .telefone(cliente.getTelefone())
+          .senha(cliente.getSenha())
           .build();
 
       var enderecosCliente = new ArrayList<UsersDto.Endereco>();
@@ -107,6 +108,7 @@ public class MessageConsumer {
           .cpf(clienteDto.getCpf())
           .estado(clienteDto.getEstado())
           .telefone(clienteDto.getTelefone())
+          .senha(clienteDto.getSenha())
           .build();
 
       var enderecosCliente = new ArrayList<Endereco>();
