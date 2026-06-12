@@ -49,6 +49,7 @@ function montarClienteConsulta(cliente: UsersDtoCliente, contas: ContasDtoConta[
       limite: conta?.limite ?? 0,
       gerenteId: conta?.gerente?.id ?? null,
       dataCriacao: conta?.dataCriacao ?? null,
+      extrato: conta?.extrato ?? [],
     },
   };
 }

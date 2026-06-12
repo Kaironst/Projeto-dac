@@ -20,9 +20,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+import ContaController from "./controller/ContaController";
+
 app.use("/clientes", ClienteController);
 app.use("/gerentes", GerenteController);
 app.use("/consultas", ConsultaClienteController);
+app.use("/contas", ContaController);
 app.use("/", AuthController);
 
 // Email endpoint proxy

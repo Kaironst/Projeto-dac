@@ -11,6 +11,9 @@ public class MessageOperations {
 
   public static final String READ_BY_EMAIL = "READ_BY_EMAIL";
   public static final String READ_BY_CPF = "READ_BY_CPF";
+  public static final String DEPOSITO = "DEPOSITO";
+  public static final String SAQUE = "SAQUE";
+  public static final String TRANSFERENCIA = "TRANSFERENCIA";
 
   // --------------------------------------------------------------------------------------------------------
 

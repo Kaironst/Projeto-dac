@@ -20,5 +20,6 @@ export interface ConsultaClienteDto {
     limite: number;
     gerenteId: null | number;
     dataCriacao: null | string;
+    extrato: any[];
   };
 }

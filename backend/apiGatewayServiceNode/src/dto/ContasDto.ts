@@ -9,4 +9,5 @@ export interface ContasDtoConta {
   saldo: null | number;
   limite: null | number;
   dataCriacao: null | string;
+  extrato?: any[];
 }

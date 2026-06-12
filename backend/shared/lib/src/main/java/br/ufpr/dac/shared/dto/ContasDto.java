@@ -23,6 +23,7 @@ public class ContasDto {
     private Double saldo;
     private Double limite;
     private LocalDate dataCriacao;
+    private java.util.List<ItemHistoricoDto.ItemHistorico> extrato;
 
   }
 

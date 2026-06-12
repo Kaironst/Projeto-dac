@@ -29,11 +29,13 @@ public class ContaDtoModel implements DebeziumModel {
                en.id as en_id, en.logradouro as en_logradouro, en.numero as en_numero,
                en.complemento as en_complemento, en.cidade as en_cidade, en.estado as en_estado, en.cep as en_cep,
                ge.id as ge_id, ge.administrador as ge_administrador, ge.cpf as ge_cpf,
-               ge.email as ge_email, ge.nome as ge_nome, ge.telefone as ge_telefone
+               ge.email as ge_email, ge.nome as ge_nome, ge.telefone as ge_telefone,
+               ih.id as ih_id, ih.data_hora as ih_data_hora, ih.tipo as ih_tipo, ih.valor_movimentacao as ih_valor
         FROM conta co
         LEFT JOIN cliente cl on cl.id = co.cliente
         LEFT JOIN endereco en on en.cliente_id = cl.id
         LEFT JOIN gerente ge on ge.id = co.gerente
+        LEFT JOIN item_historico ih on (ih.conta_origem_id = co.id OR ih.conta_destino_id = co.id)
         WHERE co.id = :id
         """)
         .param("id", id)
@@ -48,6 +50,7 @@ public class ContaDtoModel implements DebeziumModel {
                     .id(cid).numero(rs.getString("numero")).saldo(rs.getDouble("saldo"))
                     .limite(rs.getDouble("limite"))
                     .dataCriacao(rs.getDate("data_criacao") != null ? rs.getDate("data_criacao").toLocalDate() : null)
+                    .extrato(new ArrayList<>())
                     .build();
               } catch (Exception e) {
                 throw new RuntimeException("Erro ao mapear conta", e);
@@ -87,7 +90,25 @@ public class ContaDtoModel implements DebeziumModel {
                   .build();
               conta.setGerente(gerente);
             }
+            // cria item historico
+            long ihId = rs.getLong("ih_id");
+            if (!rs.wasNull()) {
+               boolean exists = conta.getExtrato().stream().anyMatch(h -> h.getId().equals(ihId));
+               if (!exists) {
+                   conta.getExtrato().add(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico.builder()
+                       .id(ihId)
+                       .tipo(rs.getInt("ih_tipo"))
+                       .valorMovimentacao(rs.getDouble("ih_valor"))
+                       .dataHora(rs.getTimestamp("ih_data_hora") != null ? rs.getTimestamp("ih_data_hora").toLocalDateTime() : null)
+                       .build());
+               }
+            }
           }
+          contaMap.values().forEach(c -> {
+              if (c.getExtrato() != null) {
+                  c.getExtrato().sort(java.util.Comparator.comparing(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico::getDataHora).reversed());
+              }
+          });
           return contaMap.values().stream().findFirst().orElse(null);
         });
   }
@@ -100,11 +121,13 @@ public class ContaDtoModel implements DebeziumModel {
                en.id as en_id, en.logradouro as en_logradouro, en.numero as en_numero,
                en.complemento as en_complemento, en.cidade as en_cidade, en.estado as en_estado, en.cep as en_cep,
                ge.id as ge_id, ge.administrador as ge_administrador, ge.cpf as ge_cpf,
-               ge.email as ge_email, ge.nome as ge_nome, ge.telefone as ge_telefone
+               ge.email as ge_email, ge.nome as ge_nome, ge.telefone as ge_telefone,
+               ih.id as ih_id, ih.data_hora as ih_data_hora, ih.tipo as ih_tipo, ih.valor_movimentacao as ih_valor
         FROM conta co
         LEFT JOIN cliente cl on cl.id = co.cliente
         LEFT JOIN endereco en on en.cliente_id = cl.id
         LEFT JOIN gerente ge on ge.id = co.gerente
+        LEFT JOIN item_historico ih on (ih.conta_origem_id = co.id OR ih.conta_destino_id = co.id)
         """)
         .query(rs -> {
           Map<Long, ContasDto.Conta> contaMap = new LinkedHashMap<>();
@@ -117,6 +140,7 @@ public class ContaDtoModel implements DebeziumModel {
                     .id(cid).numero(rs.getString("numero")).saldo(rs.getDouble("saldo"))
                     .limite(rs.getDouble("limite"))
                     .dataCriacao(rs.getDate("data_criacao") != null ? rs.getDate("data_criacao").toLocalDate() : null)
+                    .extrato(new ArrayList<>())
                     .build();
               } catch (Exception e) {
                 throw new RuntimeException("Erro ao mapear conta", e);
@@ -156,7 +180,25 @@ public class ContaDtoModel implements DebeziumModel {
                   .build();
               conta.setGerente(gerente);
             }
+            // cria item historico
+            long ihId = rs.getLong("ih_id");
+            if (!rs.wasNull()) {
+               boolean exists = conta.getExtrato().stream().anyMatch(h -> h.getId().equals(ihId));
+               if (!exists) {
+                   conta.getExtrato().add(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico.builder()
+                       .id(ihId)
+                       .tipo(rs.getInt("ih_tipo"))
+                       .valorMovimentacao(rs.getDouble("ih_valor"))
+                       .dataHora(rs.getTimestamp("ih_data_hora") != null ? rs.getTimestamp("ih_data_hora").toLocalDateTime() : null)
+                       .build());
+               }
+            }
           }
+          contaMap.values().forEach(c -> {
+              if (c.getExtrato() != null) {
+                  c.getExtrato().sort(java.util.Comparator.comparing(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico::getDataHora).reversed());
+              }
+          });
           return new ArrayList<>(contaMap.values());
         });
 

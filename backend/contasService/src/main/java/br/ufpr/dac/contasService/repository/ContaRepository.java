@@ -9,6 +9,8 @@ import br.ufpr.dac.contasService.entity.Conta;
 public interface ContaRepository extends JpaRepository<Conta, Long> {
 
   Conta findByCliente(Long idCliente);
+  
+  java.util.Optional<Conta> findByNumero(String numero);
 
   Conta findByGerente(Long idGerente);
 

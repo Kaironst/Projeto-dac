@@ -27,10 +27,11 @@ interface Transacao {
 })
 export class ClienteTela {
 
-  private readonly apiUrl = 'http://localhost:8080/clientes';
+  private readonly consultasUrl = 'http://localhost:8080/consultas/clientes/cpf';
+  private readonly contasUrl = 'http://localhost:8080/contas';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
-  cpf: string = '12912861012';
+  cpf: string = '12912861012'; // hardcoded para teste no front original
   clienteAtual: Cliente | null = null;
 
   numConta: string = '';
@@ -51,126 +52,143 @@ export class ClienteTela {
   dataFim: string = '';
 
   constructor() {
-
     this.carregarDadosCliente();
   }
 
+  private mapTipo(tipoId: number, valor: number): { tipo: string, desc: string, val: number } {
+    switch (tipoId) {
+      case 0: return { tipo: 'Depósito', desc: 'Depósito em conta', val: Math.abs(valor) };
+      case 1: return { tipo: 'Saque', desc: 'Saque realizado', val: -Math.abs(valor) };
+      case 2: return { tipo: 'Transferência', desc: 'Transferência realizada', val: -Math.abs(valor) }; // Simplificação
+      default: return { tipo: 'Outros', desc: 'Operação', val: valor };
+    }
+  }
 
-  private async buscarClienteNaApi(): Promise<Cliente | null> {
+  private async buscarClienteNaApi(): Promise<any> {
     try {
-      const response = await fetch(this.apiUrl);
-
+      const response = await fetch(`${this.consultasUrl}/${this.cpf}`);
       if (!response.ok) return null;
-
-      const clientes = await response.json();
-
-      return clientes.find((c: Cliente) => c.cpf === this.cpf) ?? null;
-
+      return await response.json();
     } catch {
       return null;
     }
   }
 
-  private async atualizarClienteNaApi(cliente: Cliente): Promise<boolean> {
-    if (!cliente.id) return false;
+  async carregarDadosCliente() {
+    const consulta = await this.buscarClienteNaApi();
+    if (!consulta) return;
+
+    this.clienteAtual = {
+      id: consulta.id,
+      cpf: consulta.cpf,
+      nome: consulta.nome,
+      email: consulta.email,
+      telefone: consulta.telefone,
+      salario: consulta.salario
+    };
+
+    if (consulta.conta) {
+      this.numConta = consulta.conta.numero;
+      this.saldo = consulta.conta.saldo;
+      this.limite = consulta.conta.limite;
+      this.gerente = consulta.conta.gerenteId ? `ID: ${consulta.conta.gerenteId}` : 'Não atribuído';
+      
+      this.extrato = (consulta.conta.extrato || []).map((h: any) => {
+        const info = this.mapTipo(h.tipo, h.valorMovimentacao);
+        return {
+          tipo: info.tipo,
+          valor: info.val,
+          descricao: info.desc,
+          data: new Date(h.dataHora)
+        };
+      });
+    }
+
+    this.atualizarFiltro();
+    this.changeDetectorRef.detectChanges();
+  }
+
+  async depositar() {
+    if (this.valorDeposito <= 0) return;
 
     try {
-      const response = await fetch(`${this.apiUrl}/${cliente.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(cliente)
+      const response = await fetch(`${this.contasUrl}/depositar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numero: this.numConta, valor: this.valorDeposito })
       });
 
-      return response.ok;
-    } catch {
-      return false;
+      if (response.ok) {
+        this.valorDeposito = 0;
+        await this.carregarDadosCliente();
+        alert('Depósito realizado com sucesso!');
+      } else {
+        alert('Erro ao depositar.');
+      }
+    } catch (e) {
+      alert('Falha na comunicação com o servidor.');
     }
   }
 
-  async carregarDadosCliente() {
-  const cliente = await this.buscarClienteNaApi();
-
-  if (!cliente) return;
-
-  this.clienteAtual = cliente;
-
-  this.limite = this.calcularLimite(cliente.salario);
-
-  // Mock enquanto não integra contas
-  this.numConta = '0001';
-  this.gerente = 'Gerente Padrão';
-  this.saldo = 0;
-
-  this.changeDetectorRef.detectChanges();
-}
-
-
-  depositar() {
-    if (this.valorDeposito <= 0) return;
-
-    this.saldo += this.valorDeposito;
-
-    this.extrato.unshift({
-      tipo: 'Depósito',
-      valor: this.valorDeposito,
-      descricao: 'Depósito em conta',
-      data: new Date()
-    });
-
-    this.valorDeposito = 0;
-    this.atualizarFiltro();
-  }
-
-  sacar() {
+  async sacar() {
     if (this.valorSaque <= 0) {
       alert('Valor inválido!');
       return;
     }
 
-    if (this.valorSaque > this.saldo) {
+    if (this.valorSaque > (this.saldo + this.limite)) {
       alert('Saldo insuficiente!');
       return;
     }
 
-    this.saldo -= this.valorSaque;
+    try {
+      const response = await fetch(`${this.contasUrl}/sacar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numero: this.numConta, valor: this.valorSaque })
+      });
 
-    this.extrato.unshift({
-      tipo: 'Saque',
-      valor: -this.valorSaque,
-      descricao: 'Saque realizado',
-      data: new Date()
-    });
-
-    this.valorSaque = 0;
-    this.atualizarFiltro();
+      if (response.ok) {
+        this.valorSaque = 0;
+        await this.carregarDadosCliente();
+        alert('Saque realizado com sucesso!');
+      } else {
+        alert('Erro ao sacar. Verifique o saldo.');
+      }
+    } catch (e) {
+      alert('Falha na comunicação com o servidor.');
+    }
   }
 
-  transferir() {
+  async transferir() {
     if (this.valorTransferencia <= 0 || !this.contaDestino) {
       alert('Dados inválidos!');
       return;
     }
 
-    if (this.valorTransferencia > this.saldo) {
+    if (this.valorTransferencia > (this.saldo + this.limite)) {
       alert('Saldo insuficiente!');
       return;
     }
 
-    this.saldo -= this.valorTransferencia;
+    try {
+      const response = await fetch(`${this.contasUrl}/transferir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ numeroOrigem: this.numConta, numeroDestino: this.contaDestino, valor: this.valorTransferencia })
+      });
 
-    this.extrato.unshift({
-      tipo: 'Transferência',
-      valor: -this.valorTransferencia,
-      descricao: `Para conta ${this.contaDestino}`,
-      data: new Date()
-    });
-
-    this.valorTransferencia = 0;
-    this.contaDestino = '';
-
-    this.atualizarFiltro();
+      if (response.ok) {
+        this.valorTransferencia = 0;
+        this.contaDestino = '';
+        await this.carregarDadosCliente();
+        alert('Transferência realizada com sucesso!');
+      } else {
+        alert('Erro ao transferir. Verifique os dados e tente novamente.');
+      }
+    } catch (e) {
+      alert('Falha na comunicação com o servidor.');
+    }
   }
 
   filtrarExtrato() {
@@ -195,9 +213,5 @@ export class ClienteTela {
     this.dataInicio = '';
     this.dataFim = '';
     this.extratoFiltrado = this.extrato;
-  }
-
-  calcularLimite(salario: number): number {
-    return salario * 0.5;
   }
 }
