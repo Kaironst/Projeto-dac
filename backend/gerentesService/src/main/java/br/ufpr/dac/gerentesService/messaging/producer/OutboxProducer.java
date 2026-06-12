@@ -1,5 +1,6 @@
 package br.ufpr.dac.gerentesService.messaging.producer;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -8,6 +9,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import lombok.AllArgsConstructor;
@@ -22,6 +24,7 @@ public class OutboxProducer {
   private final ObjectMapper objectMapper;
 
   @Scheduled(fixedDelay = 500)
+  @Transactional
   public void processOutbox() {
 
     List<Map<String, Object>> rows = jdbcClient.sql("""
@@ -41,25 +44,27 @@ public class OutboxProducer {
       String eventType = (String) row.get("event_type");
       String dataType = (String) row.get("data_type");
       Long dataId = (Long) row.get("data_id");
-      String dataJson = (String) row.get("data");
+      String dataJson = row.get("data") != null ? row.get("data").toString() : null;
 
       try {
 
         Object dataTree = objectMapper.readTree(dataJson);
 
-        Map<String, Object> message = Map.of(
-            "event_type", eventType,
-            "data_type", dataType,
-            "data_id", dataId,
-            "payload", dataTree);
+        Map<String, Object> message = new HashMap<>();
+        message.put("event_type", eventType);
+        message.put("data_type", dataType);
+        message.put("data_id", dataId);
+        message.put("payload", dataTree);
         String messageString = objectMapper.writeValueAsString(message);
 
-        String routingKey = "events.gerente" + eventType;
+        String routingKey = "events.gerente." + eventType;
         rabbitTemplate.convertAndSend(RabbitmqConsts.AUTH_EVENT_EXCHANGE, routingKey, messageString);
 
         jdbcClient.sql("DELETE FROM outbox WHERE id = :id")
             .param("id", id)
             .update();
+
+        System.out.println("MENSSAGEM OUTBOX ENVIADA (\" " + messageString + " \")");
 
       } catch (Exception e) {
         e.printStackTrace();

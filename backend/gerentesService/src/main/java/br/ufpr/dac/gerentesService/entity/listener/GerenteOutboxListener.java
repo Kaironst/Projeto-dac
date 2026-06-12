@@ -1,5 +1,6 @@
 package br.ufpr.dac.gerentesService.entity.listener;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.context.annotation.Lazy;
@@ -42,15 +43,17 @@ public class GerenteOutboxListener {
     try {
 
       Map<String, Object> dataMap = null;
-      if ("deleted".equals(eventType))
-        dataMap = Map.of("userId", gerente.getId());
-      else
-        dataMap = Map.of(
-            "userId", gerente.getId(),
-            "email", gerente.getEmail(),
-            "senha", gerente.getSenha(),
-            "cpf", gerente.getCpf(),
-            "isAdmin", gerente.getAdministrador());
+      if ("deleted".equals(eventType)) {
+        dataMap = new HashMap<String, Object>();
+        dataMap.put("userId", gerente.getId());
+      } else {
+        dataMap = new HashMap<String, Object>();
+        dataMap.put("userId", gerente.getId());
+        dataMap.put("email", gerente.getEmail());
+        dataMap.put("senha", gerente.getSenha());
+        dataMap.put("cpf", gerente.getCpf());
+        dataMap.put("isAdmin", gerente.getAdministrador());
+      }
 
       String dataJson = objectMapper.writeValueAsString(dataMap);
 
@@ -63,6 +66,8 @@ public class GerenteOutboxListener {
           .param("data_id", gerente.getId())
           .param("data", dataJson)
           .update();
+
+      System.out.println("transação inserida no outbox");
 
     } catch (Exception e) {
       e.printStackTrace();
