@@ -6,6 +6,7 @@ import { NgxMaskDirective } from 'ngx-mask';
 import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, switchMap } from 'rxjs';
 import { CepService } from '../services/cep.service';
 import { UFS } from '../shared/ufs';
+import { Auth } from '../services/auth/auth';
 
 interface Cliente {
   id?: number;
@@ -29,10 +30,11 @@ export class ClientePerfil {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly cepService = inject(CepService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(Auth);
 
   perfilForm: FormGroup;
 
-  cpf: string = '12912861012';
+  cpf: string = '';
   clienteAtual: Cliente | null = null;
 
   numConta: string = '';
@@ -58,7 +60,12 @@ export class ClientePerfil {
     });
 
     this.configurarAutocompleteCep();
-    this.carregarDadosCliente();
+    this.auth.getClienteAtual().subscribe(cliente => {
+      if (cliente && cliente.cpf) {
+        this.cpf = cliente.cpf;
+        this.carregarDadosCliente();
+      }
+    });
   }
 
   private configurarAutocompleteCep(): void {

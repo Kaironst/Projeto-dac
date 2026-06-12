@@ -1,6 +1,7 @@
 import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule} from '@angular/forms';
+import { Auth } from '../services/auth/auth';
 
 interface Cliente {
   id?: number;
@@ -30,8 +31,9 @@ export class ClienteTela {
   private readonly consultasUrl = 'http://localhost:8080/consultas/clientes/cpf';
   private readonly contasUrl = 'http://localhost:8080/contas';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly auth = inject(Auth);
 
-  cpf: string = '12912861012'; // hardcoded para teste no front original
+  cpf: string = '';
   clienteAtual: Cliente | null = null;
 
   numConta: string = '';
@@ -52,7 +54,12 @@ export class ClienteTela {
   dataFim: string = '';
 
   constructor() {
-    this.carregarDadosCliente();
+    this.auth.getClienteAtual().subscribe(cliente => {
+      if (cliente && cliente.cpf) {
+        this.cpf = cliente.cpf;
+        this.carregarDadosCliente();
+      }
+    });
   }
 
   private mapTipo(tipoId: number, valor: number): { tipo: string, desc: string, val: number } {

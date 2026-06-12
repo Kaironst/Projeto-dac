@@ -18,7 +18,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 //GET /email
-router.get("email/:email", async (req: Request, res: Response) => {
+router.get("/email/:email", async (req: Request, res: Response) => {
   try {
     const targetCliente = { email: req.params.email } as UsersDtoCliente;
     const clientesMessage = await usersProducerCqrs.requestService({ operation: "READ_BY_EMAIL", data: [targetCliente], dataType: "cliente" });
@@ -29,7 +29,7 @@ router.get("email/:email", async (req: Request, res: Response) => {
 });
 
 //GET /cpf
-router.get("cpf/:cpf", async (req: Request, res: Response) => {
+router.get("/cpf/:cpf", async (req: Request, res: Response) => {
   try {
     const targetCliente = { cpf: req.params.cpf } as UsersDtoCliente;
     const clientesMessage = await usersProducerCqrs.requestService({ operation: "READ_BY_CPF", data: [targetCliente], dataType: "cliente" });

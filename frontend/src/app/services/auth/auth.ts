@@ -144,14 +144,14 @@ export class Auth {
   getGerenteAtual(): Observable<Gerente | null> {
     if (!this.getRoles().includes("ROLE_GERENTE"))
       return of(null);
-    return this.gerenteUtil.getByEmail(this.getEmail());
+    return this.gerenteUtil.getByEmail(this.getEmail()).pipe(map((res: any) => Array.isArray(res) ? res[0] : res));
   }
 
   getClienteAtual(): Observable<Cliente | null> {
     if (!this.getRoles().includes("ROLE_CLIENTE")) {
       return of(null);
     }
-    return this.clienteUtil.getByEmail(this.getEmail());
+    return this.clienteUtil.getByEmail(this.getEmail()).pipe(map((res: any) => Array.isArray(res) ? res[0] : res));
   }
 
   logout() {
