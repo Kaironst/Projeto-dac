@@ -71,7 +71,24 @@ public class MessageOperations {
       public static final String REMOVER_GERENTE_ERROR = "REMOVE_GERENTE_REMOVER_GERENTE_ERROR";
       public static final String ROLLBACK_REVERTER_MOVER_CONTAS_RESULT = "REMOVE_GERENTE_ROLLBACK_REVERTER_MOVE_RESULT";
       public static final String ROLLBACK_REVERTER_MOVER_CONTAS_ERROR = "REMOVE_GERENTE_ROLLBACK_REVERTER_MOVE_ERROR";
+    }
 
+    public static class Autocadastro {
+      // Autocadastro
+      public static final String START = "AUTOCADASTRO_START_AUTOCADASTRO";
+      public static final String INSERIR_NOVO = "AUTOCADASTRO_INSERT_NOVO";
+      public static final String GET_GERENTE_MENOS_CONTAS = "AUTOCADASTRO_GET_COM_MENOS_CONTAS";
+      public static final String CRIAR_CONTA = "AUTOCADASTRO_CRIAR_CONTA";
+      public static final String ROLLBACK_REVERTER_INSERIR_NOVO = "AUTOCADASTRO_ROLLBACK_REVERTER_INSERIR_NOVO";
+      // Autocadastro - Resultado de operações
+      public static final String INSERIR_NOVO_RESULT = "AUTOCADASTRO_INSERT_NOVO_RESULT";
+      public static final String INSERIR_NOVO_ERROR = "AUTOCADASTRO_INSERT_NOVO_ERROR";
+      public static final String GET_GERENTE_MENOS_CONTAS_RESULT = "AUTOCADASTRO_GET_COM_MENOS_CONTAS_RESULT";
+      public static final String GET_GERENTE_MENOS_CONTAS_ERROR = "AUTOCADASTRO_GET_COM_MENOS_CONTAS_ERROR";
+      public static final String CRIAR_CONTA_RESULT = "AUTOCADASTRO_CRIAR_CONTA_RESULT";
+      public static final String CRIAR_CONTA_ERROR = "AUTOCADASTRO_CRIAR_CONTA_ERROR";
+      public static final String ROLLBACK_REVERTER_INSERIR_NOVO_RESULT = "AUTOCADASTRO_ROLLBACK_REVERTER_INSERIR_NOVO_RESULT";
+      public static final String ROLLBACK_REVERTER_INSERIR_NOVO_ERROR = "AUTOCADASTRO_ROLLBACK_REVERTER_INSERIR_NOVO_ERROR";
     }
 
   }

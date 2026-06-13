@@ -27,7 +27,7 @@ public class Conta {
 
   private Long id;
 
-  @Column(unique = true)
+  @Column(unique = true, columnDefinition = "varchar(255) default gerar_numero()")
   private String numero;
 
   // deve ser o id do cliente em UsersService
