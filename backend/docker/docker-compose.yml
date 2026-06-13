@@ -117,6 +117,9 @@ services:
     environment:
       - PORT=3005
 
+    env_file:
+      - .env.mail
+
   cqrs-service:
     build:
       context: ..
