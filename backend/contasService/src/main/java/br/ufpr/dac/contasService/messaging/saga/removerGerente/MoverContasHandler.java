@@ -1,4 +1,4 @@
-package br.ufpr.dac.contasService.messaging.saga;
+package br.ufpr.dac.contasService.messaging.saga.removerGerente;
 
 import java.util.List;
 import java.util.Random;
@@ -27,11 +27,11 @@ public class MoverContasHandler {
     try {
       List<Conta> contasGerenteAntigo = repo.findAllByGerente(message.getData().getFirst());
       if (contasGerenteAntigo != null && !contasGerenteAntigo.isEmpty()) {
-          contaEscolhida = contasGerenteAntigo.get(new Random().nextInt(contasGerenteAntigo.size()));
-          contaEscolhida.setGerente(message.getData().getLast());
-          repo.save(contaEscolhida);
+        contaEscolhida = contasGerenteAntigo.get(new Random().nextInt(contasGerenteAntigo.size()));
+        contaEscolhida.setGerente(message.getData().getLast());
+        repo.save(contaEscolhida);
       } else {
-          sucesso = false;
+        sucesso = false;
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -54,8 +54,8 @@ public class MoverContasHandler {
       Long idGerenteDestino = message.getData().getLast();
       List<Conta> contasGerenteAntigo = repo.findAllByGerente(idGerenteARemover);
       for (Conta conta : contasGerenteAntigo) {
-          conta.setGerente(idGerenteDestino);
-          contasMovidasIds.add(conta.getId());
+        conta.setGerente(idGerenteDestino);
+        contasMovidasIds.add(conta.getId());
       }
       repo.saveAll(contasGerenteAntigo);
     } catch (Exception e) {
@@ -72,28 +72,28 @@ public class MoverContasHandler {
 
   @Transactional
   public void handleRollbackMoverContasRemove(SagaMessageWrapper<Long> message) {
-      boolean sucesso = true;
-      try {
-        if (message.getData() != null && message.getData().size() > 2) {
-          Long idGerenteDestino = message.getData().get(0); 
-          Long idGerenteRemovido = message.getData().get(1);
-          List<Long> contasIds = message.getData().subList(2, message.getData().size());
-          List<Conta> contas = repo.findAllById(contasIds);
-          for (Conta conta : contas) {
-              conta.setGerente(idGerenteRemovido);
-          }
-          repo.saveAll(contas);
+    boolean sucesso = true;
+    try {
+      if (message.getData() != null && message.getData().size() > 2) {
+        Long idGerenteDestino = message.getData().get(0);
+        Long idGerenteRemovido = message.getData().get(1);
+        List<Long> contasIds = message.getData().subList(2, message.getData().size());
+        List<Conta> contas = repo.findAllById(contasIds);
+        for (Conta conta : contas) {
+          conta.setGerente(idGerenteRemovido);
         }
-      } catch (Exception e) {
-        e.printStackTrace();
-        sucesso = false;
+        repo.saveAll(contas);
       }
-      this.enviarMenssagem(
-          new SagaMessageWrapper<Long>(
-              sucesso ? SagaOperations.RemoveGerente.ROLLBACK_REVERTER_MOVER_CONTAS_RESULT
-                  : SagaOperations.RemoveGerente.ROLLBACK_REVERTER_MOVER_CONTAS_ERROR,
-              List.of(),
-              message.getCorrelationId()));
+    } catch (Exception e) {
+      e.printStackTrace();
+      sucesso = false;
+    }
+    this.enviarMenssagem(
+        new SagaMessageWrapper<Long>(
+            sucesso ? SagaOperations.RemoveGerente.ROLLBACK_REVERTER_MOVER_CONTAS_RESULT
+                : SagaOperations.RemoveGerente.ROLLBACK_REVERTER_MOVER_CONTAS_ERROR,
+            List.of(),
+            message.getCorrelationId()));
   }
 
   public void enviarMenssagem(SagaMessageWrapper<Long> message) {

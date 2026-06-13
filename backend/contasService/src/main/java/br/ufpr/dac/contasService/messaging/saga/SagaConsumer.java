@@ -3,6 +3,9 @@ package br.ufpr.dac.contasService.messaging.saga;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import br.ufpr.dac.contasService.messaging.saga.insertGerente.GetIdGerenteComMaisContasHandler;
+import br.ufpr.dac.contasService.messaging.saga.removerGerente.GetIdGerenteComMenosContasHandler;
+import br.ufpr.dac.contasService.messaging.saga.removerGerente.MoverContasHandler;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;

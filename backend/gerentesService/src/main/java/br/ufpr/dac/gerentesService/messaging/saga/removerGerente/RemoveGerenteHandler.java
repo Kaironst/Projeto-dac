@@ -1,4 +1,4 @@
-package br.ufpr.dac.gerentesService.messaging.saga;
+package br.ufpr.dac.gerentesService.messaging.saga.removerGerente;
 
 import java.util.List;
 
