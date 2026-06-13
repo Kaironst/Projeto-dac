@@ -172,7 +172,12 @@ router.put("/:id", async (req: Request, res: Response) => {
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const targetGerente = { id: parseInt(req.params.id) } as GerentesDtoGerente;
-    const gerentesMessage = await gerentesProducer.requestService({ operation: "DELETE", data: [targetGerente], dataType: "gerente" });
+    const gerentesMessage = await sagaProducer.messageService({
+      operation: "REMOVE_GERENTE_START_REMOVER_GERENTE",
+      data: [targetGerente.id],
+      correlationId: null,
+      dataType: "gerente"
+    });
     res.sendStatus(204);
   } catch (error) {
     res.sendStatus(500);

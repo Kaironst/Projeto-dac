@@ -28,6 +28,7 @@ public class GetAllGerentesHandler {
     List<Long> gerentesIds = List.of();
     try {
       gerentesIds = repo.findAll().stream()
+          .filter(g -> g.getAdministrador() == null || !g.getAdministrador())
           .map(Gerente::getId)
           .collect(Collectors.toList());
     } catch (Exception e) {

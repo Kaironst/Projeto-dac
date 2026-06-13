@@ -108,7 +108,7 @@ public class RemoveGerentesOrchestration {
   }
 
   // PASSO 3, REMOVER GERENTE NO BANCO DE DADOS
-  public void handleContasSwapped(SagaMessageWrapper<Object> message) {
+  public void handleContasSwapped(SagaMessageWrapper<Long> message) {
     System.out.println("removerGerente acionado");
     var state = sagas.get(message.getCorrelationId());
 
@@ -118,6 +118,7 @@ public class RemoveGerentesOrchestration {
     }
 
     state.setStep(RemoveGerentesPasso.REMOVENDO_GERENTE);
+    state.getSagaData().setContasMovidas(message.getData());
 
     SagaProducer<Long> longMessageProducer = producerFactory.create();
     longMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
@@ -128,7 +129,7 @@ public class RemoveGerentesOrchestration {
   }
 
   // finalizar
-  public void handleGerenteRemoved(SagaMessageWrapper<Object> message) {
+  public void handleGerenteRemoved(SagaMessageWrapper<Long> message) {
     System.out.println("finalizar acionado");
     var state = sagas.get(message.getCorrelationId());
 
@@ -142,8 +143,12 @@ public class RemoveGerentesOrchestration {
 
     System.out.println("saga removerGerentes finalizada!");
 
-    // TODO: mandar menssagem para o api gateway com o retorno da saga para
-    // atualização dinâmica das páginas
+    SagaProducer<Long> longMessageProducer = producerFactory.create();
+    longMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
+        SagaOperations.RemoveGerente.REMOVER_GERENTE_RESULT,
+        List.of(state.getSagaData().getIdGerenteARemover()),
+        message.getCorrelationId()),
+        RabbitmqConsts.API_GATEWAY_KEY);
 
     // cleanup
     sagas.remove(message.getCorrelationId());
@@ -155,9 +160,15 @@ public class RemoveGerentesOrchestration {
     switch (state.getStep()) {
       // gerente não removido, troca de volta as contas entre os 2
       case RemoveGerentesPasso.REMOVENDO_GERENTE:
+        List<Long> dataToSend = new java.util.ArrayList<>();
+        dataToSend.add(state.getSagaData().getIdGerenteComMenosContas());
+        dataToSend.add(state.getSagaData().getIdGerenteARemover());
+        if (state.getSagaData().getContasMovidas() != null) {
+            dataToSend.addAll(state.getSagaData().getContasMovidas());
+        }
         longMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
             SagaOperations.RemoveGerente.ROLLBACK_REVERTER_MOVER_CONTAS,
-            List.of(state.getSagaData().getIdGerenteComMenosContas(), state.getSagaData().getIdGerenteARemover()),
+            dataToSend,
             state.getCorrelationId()), RabbitmqConsts.CONTAS_SAGA_KEY);
         // troca falha, não há operações a serem revertidas
       case RemoveGerentesPasso.DANDO_CONTAS_AO_GERENTE_COM_MENOS:
@@ -170,6 +181,13 @@ public class RemoveGerentesOrchestration {
     state.setStep(RemoveGerentesPasso.FINALIZADO);
     state.setStatus(SagaStatus.FAILED);
     System.out.println("rollback completo!");
+    
+    longMessageProducer.enviarMenssagem(new SagaMessageWrapper<Long>(
+        SagaOperations.RemoveGerente.REMOVER_GERENTE_ERROR,
+        List.of(state.getSagaData().getIdGerenteARemover()),
+        state.getCorrelationId()),
+        RabbitmqConsts.API_GATEWAY_KEY);
+
     // cleanup
     sagas.remove(state.getCorrelationId());
 

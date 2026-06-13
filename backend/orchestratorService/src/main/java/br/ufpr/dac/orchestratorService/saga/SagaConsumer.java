@@ -80,10 +80,16 @@ public class SagaConsumer {
                   }));
         }
         case RemoveGerente.MOVER_CONTAS_RESULT, RemoveGerente.MOVER_CONTAS_ERROR -> {
-          removeGerentesOrchestration.handleContasSwapped(message);
+          removeGerentesOrchestration.handleContasSwapped(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<Long>>() {
+                  }));
         }
         case RemoveGerente.REMOVER_GERENTE_RESULT, RemoveGerente.REMOVER_GERENTE_ERROR -> {
-          removeGerentesOrchestration.handleGerenteRemoved(message);
+          removeGerentesOrchestration.handleGerenteRemoved(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<Long>>() {
+                  }));
         }
         // ===================================================================
 

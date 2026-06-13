@@ -207,8 +207,8 @@ export class CrudGerente implements OnInit {
         body: JSON.stringify(payload)
       });
 
-      // Aguarda 1.5 segundos para a SAGA assíncrona concluir
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Aguarda 2.5 segundos para a SAGA e o CQRS sincronizarem
+      await new Promise(resolve => setTimeout(resolve, 2500));
       return response.ok;
     } catch {
       return false;
@@ -240,6 +240,8 @@ export class CrudGerente implements OnInit {
         body: JSON.stringify(payload)
       });
 
+      // Aguarda 2.5 segundos para o CQRS sincronizar
+      await new Promise(resolve => setTimeout(resolve, 2500));
       return response.ok;
     } catch {
       return false;
@@ -256,8 +258,8 @@ export class CrudGerente implements OnInit {
         method: 'DELETE'
       });
 
-      // Aguarda 1 segundo para a SAGA assíncrona concluir
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Aguarda 2.5 segundos para a SAGA e o CQRS sincronizarem
+      await new Promise(resolve => setTimeout(resolve, 2500));
       return response.ok;
     } catch {
       return false;

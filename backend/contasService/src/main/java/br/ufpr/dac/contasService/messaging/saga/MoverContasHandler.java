@@ -48,12 +48,14 @@ public class MoverContasHandler {
   @Transactional
   public void handleMoverContasRemove(SagaMessageWrapper<Long> message) {
     boolean sucesso = true;
+    List<Long> contasMovidasIds = new java.util.ArrayList<>();
     try {
       Long idGerenteARemover = message.getData().getFirst();
       Long idGerenteDestino = message.getData().getLast();
       List<Conta> contasGerenteAntigo = repo.findAllByGerente(idGerenteARemover);
       for (Conta conta : contasGerenteAntigo) {
           conta.setGerente(idGerenteDestino);
+          contasMovidasIds.add(conta.getId());
       }
       repo.saveAll(contasGerenteAntigo);
     } catch (Exception e) {
@@ -64,18 +66,28 @@ public class MoverContasHandler {
         new SagaMessageWrapper<Long>(
             sucesso ? SagaOperations.RemoveGerente.MOVER_CONTAS_RESULT
                 : SagaOperations.RemoveGerente.MOVER_CONTAS_ERROR,
-            List.of(),
+            contasMovidasIds,
             message.getCorrelationId()));
   }
 
   @Transactional
   public void handleRollbackMoverContasRemove(SagaMessageWrapper<Long> message) {
-      // Data format: [idGerenteDestino, idGerenteRemovido] -> we need to revert this.
-      // But wait! Which accounts? We can't tell which accounts belonged to the removed gerente if we already moved them!
-      // This is a complex rollback. As a simplification, we can just say rollback fails, 
-      // or we should have saved the account IDs that were moved in the SAGA data.
-      // For now, let's just return a success result as a placeholder for rollback, since the remove SAGA shouldn't fail easily.
       boolean sucesso = true;
+      try {
+        if (message.getData() != null && message.getData().size() > 2) {
+          Long idGerenteDestino = message.getData().get(0); 
+          Long idGerenteRemovido = message.getData().get(1);
+          List<Long> contasIds = message.getData().subList(2, message.getData().size());
+          List<Conta> contas = repo.findAllById(contasIds);
+          for (Conta conta : contas) {
+              conta.setGerente(idGerenteRemovido);
+          }
+          repo.saveAll(contas);
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+        sucesso = false;
+      }
       this.enviarMenssagem(
           new SagaMessageWrapper<Long>(
               sucesso ? SagaOperations.RemoveGerente.ROLLBACK_REVERTER_MOVER_CONTAS_RESULT
