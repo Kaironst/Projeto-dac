@@ -20,7 +20,7 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
-public class GetIdGerenteComMenosContasHandler {
+public class RemoverGerenteGetIdGerenteComMenosContasHandler {
 
   private RabbitTemplate template;
   private ContaRepository repo;

@@ -62,7 +62,7 @@ public class MessageConsumer {
     }
   }
 
-  private static List<UsersDto.Cliente> clientesToDto(List<Cliente> clientes) {
+  public static List<UsersDto.Cliente> clientesToDto(List<Cliente> clientes) {
     var clientesDto = new ArrayList<UsersDto.Cliente>();
 
     clientes.forEach(cliente -> {
@@ -98,7 +98,7 @@ public class MessageConsumer {
 
   }
 
-  private static List<Cliente> dtoToClientes(List<UsersDto.Cliente> clientesDto) {
+  public static List<Cliente> dtoToClientes(List<UsersDto.Cliente> clientesDto) {
     var clientes = new ArrayList<Cliente>();
 
     clientesDto.forEach(clienteDto -> {
