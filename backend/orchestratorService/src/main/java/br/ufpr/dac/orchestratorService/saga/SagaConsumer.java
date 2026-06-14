@@ -3,7 +3,7 @@ package br.ufpr.dac.orchestratorService.saga;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-import br.ufpr.dac.orchestratorService.saga.clientesSaga.AutoCadastroOrchestration;
+import br.ufpr.dac.orchestratorService.saga.clientesSaga.autocadastro.AutocadastroOrchestration;
 import br.ufpr.dac.orchestratorService.saga.gerentesSaga.insertGerentes.InsertGerentesOrchestration;
 import br.ufpr.dac.orchestratorService.saga.gerentesSaga.removeGerentes.RemoveGerentesOrchestration;
 import br.ufpr.dac.shared.dto.GerentesDto;
@@ -23,7 +23,7 @@ public class SagaConsumer {
 
   private final InsertGerentesOrchestration insertGerentesOrchestration;
   private final RemoveGerentesOrchestration removeGerentesOrchestration;
-  private final AutoCadastroOrchestration autoCadastroOrchestration;
+  private final AutocadastroOrchestration autocadastroOrchestration;
   private final ObjectMapper mapper;
 
   @RabbitListener(queues = RabbitmqConsts.ORCHESTRATOR_SAGA_QUEUE)
@@ -100,28 +100,28 @@ public class SagaConsumer {
         // para a saga autocadastro
         // ====================================================================
         case Autocadastro.START -> {
-          autoCadastroOrchestration
+          autocadastroOrchestration
               .startSaga(mapper.convertValue(
                   message,
                   new TypeReference<SagaMessageWrapper<UsersDto.Cliente>>() {
                   }));
         }
         case Autocadastro.INSERIR_NOVO_RESULT, Autocadastro.INSERIR_NOVO_ERROR -> {
-          autoCadastroOrchestration
+          autocadastroOrchestration
               .handleClienteInserted(mapper.convertValue(
                   message,
                   new TypeReference<SagaMessageWrapper<Long>>() {
                   }));
         }
         case Autocadastro.GET_GERENTE_MENOS_CONTAS_RESULT, Autocadastro.GET_GERENTE_MENOS_CONTAS_ERROR -> {
-          autoCadastroOrchestration
+          autocadastroOrchestration
               .handleGerenteFound(mapper.convertValue(
                   message,
                   new TypeReference<SagaMessageWrapper<Long>>() {
                   }));
         }
         case Autocadastro.CRIAR_CONTA_RESULT, Autocadastro.CRIAR_CONTA_ERROR -> {
-          autoCadastroOrchestration
+          autocadastroOrchestration
               .handleContaCriada(mapper.convertValue(
                   message,
                   new TypeReference<SagaMessageWrapper<Long>>() {

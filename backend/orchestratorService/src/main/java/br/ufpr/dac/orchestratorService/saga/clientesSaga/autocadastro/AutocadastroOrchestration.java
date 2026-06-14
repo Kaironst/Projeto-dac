@@ -1,4 +1,4 @@
-package br.ufpr.dac.orchestratorService.saga.clientesSaga;
+package br.ufpr.dac.orchestratorService.saga.clientesSaga.autocadastro;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ import lombok.Getter;
 
 @Component
 @AllArgsConstructor
-public class AutoCadastroOrchestration {
+public class AutocadastroOrchestration {
 
   @Getter
   private final Map<UUID, SagaState<AutocadastroData>> sagas = new ConcurrentHashMap<>();
@@ -156,6 +156,11 @@ public class AutoCadastroOrchestration {
       default:
         break;
     }
+
+    state.setStep(AutocadastroPasso.FINALIZADO);
+    state.setStatus(SagaStatus.FAILED);
+    // cleanup
+    sagas.remove(state.getCorrelationId());
   }
 
 }

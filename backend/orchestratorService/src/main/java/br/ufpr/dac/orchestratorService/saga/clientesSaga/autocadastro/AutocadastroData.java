@@ -1,4 +1,4 @@
-package br.ufpr.dac.orchestratorService.saga.clientesSaga;
+package br.ufpr.dac.orchestratorService.saga.clientesSaga.autocadastro;
 
 import br.ufpr.dac.shared.dto.UsersDto;
 import lombok.AllArgsConstructor;

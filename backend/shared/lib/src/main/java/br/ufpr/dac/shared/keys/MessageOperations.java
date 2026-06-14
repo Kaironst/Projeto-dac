@@ -91,6 +91,21 @@ public class MessageOperations {
       public static final String ROLLBACK_REVERTER_INSERIR_NOVO_ERROR = "AUTOCADASTRO_ROLLBACK_REVERTER_INSERIR_NOVO_ERROR";
     }
 
+    public static class AtualizarLimite {
+      // AtualizarLimite
+      public static final String START = "ATUALIZAR_LIMITE_START_ATUALIZAR_LIMITE";
+      public static final String ATUALIZAR_CLIENTE = "ATUALIZAR_LIMITE_ATUALIZAR_CLIENTE";
+      public static final String ATUALIZAR_CONTA = "ATUALIZAR_LIMITE_ATUALIZAR_CONTA";
+      public static final String ROLLBACK_RESTAURAR_CLIENTE = "ATUALIZAR_LIMITE_ROLLBACK_RESTAURAR_CLIENTE";
+      // AtualizarLimite - Resultado de Operações
+      public static final String ATUALIZAR_CLIENTE_RESULT = "ATUALIZAR_LIMITE_ATUALIZAR_CLIENTE_RESULT";
+      public static final String ATUALIZAR_CLIENTE_ERROR = "ATUALIZAR_LIMITE_ATUALIZAR_CLIENTE_ERROR";
+      public static final String ATUALIZAR_CONTA_RESULT = "ATUALIZAR_LIMITE_ATUALIZAR_CONTA_RESULT";
+      public static final String ATUALIZAR_CONTA_ERROR = "ATUALIZAR_LIMITE_ATUALIZAR_CONTA_ERROR";
+      public static final String ROLLBACK_RESTAURAR_CLIENTE_RESULT = "ATUALIZAR_LIMITE_ROLLBACK_RESTAURAR_CLIENTE_RESULT";
+      public static final String ROLLBACK_RESTAURAR_CLIENTE_ERROR = "ATUALIZAR_LIMITE_ROLLBACK_RESTAURAR_CLIENTE_ERROR";
+    }
+
   }
 
 }
