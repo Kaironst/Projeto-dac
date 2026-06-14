@@ -3,6 +3,7 @@ package br.ufpr.dac.contasService.messaging.saga;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import br.ufpr.dac.contasService.messaging.saga.atualizarLimite.AtualizarLimiteAtualizarLimite;
 import br.ufpr.dac.contasService.messaging.saga.autocadastro.AutocadastroCriarConta;
 import br.ufpr.dac.contasService.messaging.saga.autocadastro.AutocadastroGetIdGerenteComMenosContasHandler;
 import br.ufpr.dac.contasService.messaging.saga.insertGerente.GetIdGerenteComMaisContasHandler;
@@ -19,11 +20,12 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class SagaConsumer {
 
-  private GetIdGerenteComMaisContasHandler getIdGerenteComMaisContasHandler;
-  private RemoverGerenteGetIdGerenteComMenosContasHandler removerGerenteGetIdGerenteComMenosContasHandler;
-  private AutocadastroGetIdGerenteComMenosContasHandler autocadastroGetIdGerenteComMenosContasHandler;
-  private MoverContasHandler moverContasHandler;
-  private AutocadastroCriarConta autocadastroCriarConta;
+  private final GetIdGerenteComMaisContasHandler getIdGerenteComMaisContasHandler;
+  private final RemoverGerenteGetIdGerenteComMenosContasHandler removerGerenteGetIdGerenteComMenosContasHandler;
+  private final AutocadastroGetIdGerenteComMenosContasHandler autocadastroGetIdGerenteComMenosContasHandler;
+  private final AtualizarLimiteAtualizarLimite atualizarLimiteAtualizarLimite;
+  private final MoverContasHandler moverContasHandler;
+  private final AutocadastroCriarConta autocadastroCriarConta;
   private final ObjectMapper mapper;
 
   @RabbitListener(queues = RabbitmqConsts.CONTAS_SAGA_QUEUE)
@@ -68,6 +70,12 @@ public class SagaConsumer {
       }
       case SagaOperations.Autocadastro.CRIAR_CONTA -> {
         autocadastroCriarConta.handleCriarConta(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<Double>>() {
+                }));
+      }
+      case SagaOperations.AtualizarLimite.ATUALIZAR_CONTA -> {
+        atualizarLimiteAtualizarLimite.handleAtualizarLimite(
             mapper.convertValue(message,
                 new TypeReference<SagaMessageWrapper<Double>>() {
                 }));

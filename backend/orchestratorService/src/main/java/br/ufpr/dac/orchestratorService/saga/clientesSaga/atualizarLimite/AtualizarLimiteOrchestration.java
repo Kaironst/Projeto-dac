@@ -12,7 +12,6 @@ import br.ufpr.dac.orchestratorService.saga.SagaProducerFactory;
 import br.ufpr.dac.orchestratorService.saga.SagaState;
 import br.ufpr.dac.orchestratorService.saga.SagaStatus;
 import br.ufpr.dac.orchestratorService.saga.SagaProducerFactory.SagaProducer;
-import br.ufpr.dac.orchestratorService.saga.clientesSaga.autocadastro.AutocadastroPasso;
 import br.ufpr.dac.shared.dto.UsersDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations;

@@ -3,6 +3,7 @@ package br.ufpr.dac.orchestratorService.saga;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import br.ufpr.dac.orchestratorService.saga.clientesSaga.atualizarLimite.AtualizarLimiteOrchestration;
 import br.ufpr.dac.orchestratorService.saga.clientesSaga.autocadastro.AutocadastroOrchestration;
 import br.ufpr.dac.orchestratorService.saga.gerentesSaga.insertGerentes.InsertGerentesOrchestration;
 import br.ufpr.dac.orchestratorService.saga.gerentesSaga.removeGerentes.RemoveGerentesOrchestration;
@@ -10,6 +11,7 @@ import br.ufpr.dac.shared.dto.GerentesDto;
 import br.ufpr.dac.shared.dto.UsersDto;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
+import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations.AtualizarLimite;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations.Autocadastro;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations.InsertGerente;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations.RemoveGerente;
@@ -24,6 +26,7 @@ public class SagaConsumer {
   private final InsertGerentesOrchestration insertGerentesOrchestration;
   private final RemoveGerentesOrchestration removeGerentesOrchestration;
   private final AutocadastroOrchestration autocadastroOrchestration;
+  private final AtualizarLimiteOrchestration atualizarLimiteOrchestration;
   private final ObjectMapper mapper;
 
   @RabbitListener(queues = RabbitmqConsts.ORCHESTRATOR_SAGA_QUEUE)
@@ -123,6 +126,31 @@ public class SagaConsumer {
         case Autocadastro.CRIAR_CONTA_RESULT, Autocadastro.CRIAR_CONTA_ERROR -> {
           autocadastroOrchestration
               .handleContaCriada(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<Long>>() {
+                  }));
+        }
+        // ===================================================================
+
+        // para a saga atualizarLimte
+        // ====================================================================
+        case AtualizarLimite.START -> {
+          atualizarLimiteOrchestration
+              .startSaga(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<UsersDto.Cliente>>() {
+                  }));
+        }
+        case AtualizarLimite.ATUALIZAR_CLIENTE_RESULT, AtualizarLimite.ATUALIZAR_CLIENTE_ERROR -> {
+          atualizarLimiteOrchestration
+              .handleClienteAtualizado(mapper.convertValue(
+                  message,
+                  new TypeReference<SagaMessageWrapper<UsersDto.Cliente>>() {
+                  }));
+        }
+        case AtualizarLimite.ATUALIZAR_CONTA_RESULT, AtualizarLimite.ATUALIZAR_CONTA_ERROR -> {
+          atualizarLimiteOrchestration
+              .handleContaAtualizada(mapper.convertValue(
                   message,
                   new TypeReference<SagaMessageWrapper<Long>>() {
                   }));
