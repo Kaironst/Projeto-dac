@@ -5,7 +5,7 @@ import { usersProducer, usersProducerCqrs } from "../messaging/GenericProducerRP
 const router = Router();
 const CPF_DUPLICADO_ERROR = "ERROR_CPF_DUPLICADO";
 const CPF_DUPLICADO_MESSAGE = "CPF já cadastrado ou aguardando aprovação.";
-
+  
 //GET /id
 router.get("/:id", async (req: Request, res: Response) => {
   try {

@@ -8,10 +8,10 @@ import ConsultaClienteController from "./controller/ConsultaClienteController";
 import { authProducer, contasProducer, contasProducerCqrs, gerentesProducer, gerentesProducerCqrs, usersProducer, usersProducerCqrs } from './messaging/GenericProducerRPC';
 import { sagaProducer } from './messaging/GenericProducer';
 import AuthController from './controller/AuthController';
+import emailController from "./controller/EmailController";
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
-const emailServiceUrl = process.env.EMAIL_SERVICE_URL || "http://email-service:3005";
 export const rabbitmqUrl = "amqp://usuario:admin@rabbitmq";
 
 //passei um tempo enorme tentando entender por que o orquestrator tava mandando como se a menssagem fosse null
@@ -27,36 +27,7 @@ app.use("/gerentes", GerenteController);
 app.use("/consultas", ConsultaClienteController);
 app.use("/contas", ContaController);
 app.use("/", AuthController);
-
-// Email endpoint proxy
-app.post("/emails/enviar", async (req: Request, res: Response) => {
-  try {
-    const { destinatario, assunto, conteudoHtml } = req.body;
-
-    if (!destinatario || !assunto || !conteudoHtml) {
-      return res.status(400).json({
-        error: "Missing required fields: destinatario, assunto, conteudoHtml"
-      });
-    }
-
-    await axios.post(`${emailServiceUrl}/send-email`, {
-      destinatario,
-      assunto,
-      conteudoHtml
-    });
-
-    res.status(200).json({
-      message: "Email enviado com sucesso",
-      destinatario
-    });
-  } catch (error: any) {
-    console.error("Erro ao enviar email:", error.message);
-    res.status(500).json({
-      error: "Erro ao enviar email",
-      details: error.message
-    });
-  }
-});
+app.use("/email", emailController);
 
 async function startServer() {
   await Promise.all([
