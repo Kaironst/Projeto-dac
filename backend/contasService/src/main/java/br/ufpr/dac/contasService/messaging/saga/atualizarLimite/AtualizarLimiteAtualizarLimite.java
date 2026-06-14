@@ -20,6 +20,8 @@ public class AtualizarLimiteAtualizarLimite {
 
   public void handleAtualizarLimite(SagaMessageWrapper<Double> message) {
 
+    System.out.println("handleAtualizarLimite triggered");
+
     Long contaId = null;
     boolean sucesso = true;
     try {
@@ -43,6 +45,7 @@ public class AtualizarLimiteAtualizarLimite {
         sucesso ? List.of(contaId)
             : List.of(),
         message.getCorrelationId()));
+    System.out.println("menssagem de retorno enviada");
   }
 
   private void enviarMenssagem(SagaMessageWrapper<Long> message) {

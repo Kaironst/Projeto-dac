@@ -65,7 +65,7 @@ public class AtualizarLimiteOrchestration {
 
     // falha no primeiro passo - nada fo inserido
     if (errors.contains(message.getOperation())) {
-      // handleRollback(state);
+      handleRollback(state);
       return;
     }
 
@@ -94,7 +94,7 @@ public class AtualizarLimiteOrchestration {
 
     // falha na atualização da conta, restaurar cliente
     if (errors.contains(message.getOperation())) {
-      // handleRollback(state)
+      handleRollback(state);
       return;
     }
 

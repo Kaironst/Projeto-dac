@@ -2,6 +2,9 @@ package br.ufpr.dac.usersService.messaging.saga.atualizarLimite;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +37,11 @@ public class AtualizarClienteHandler {
       var cliente = message.getData().getFirst();
       var clienteAtual = repo.findById(cliente.getId()).orElseThrow();
       // copia valor do cliente para rollback serializando e desserializando
-      var clienteAntigo = objectMapper.readValue(
-          objectMapper.writeValueAsString(clienteAtual),
-          Cliente.class);
+      var clienteAntigo = clienteAtual.toBuilder().enderecos(
+          clienteAtual.getEnderecos().stream()
+              .map((e) -> e.toBuilder().cliente(null).build())
+              .collect(Collectors.toList()))
+          .build();
 
       clienteAtual.setNome(cliente.getNome());
       clienteAtual.setCpf(cliente.getCpf());
