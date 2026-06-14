@@ -1,4 +1,4 @@
-package br.ufpr.dac.contasService.messaging.saga;
+package br.ufpr.dac.contasService.messaging.saga.insertGerente;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -37,48 +36,48 @@ public class GetIdGerenteComMaisContasHandler {
       var contasPorGerente = new HashMap<Long, List<Conta>>();
       repo.findAll().forEach(conta -> {
         if (conta.getGerente() != null) {
-            contasPorGerente.computeIfAbsent(conta.getGerente(), key -> new ArrayList<Conta>()).add(conta);
+          contasPorGerente.computeIfAbsent(conta.getGerente(), key -> new ArrayList<Conta>()).add(conta);
         }
       });
 
       if (contasPorGerente.isEmpty()) {
-          gerenteEscolhido = 0L;
+        gerenteEscolhido = 0L;
       } else {
-          // transforma lista no tamanho dela
-          var numeroDeContasPorGerente = new HashMap<Long, Integer>();
-          contasPorGerente.forEach((gerenteId, contas) -> {
-            numeroDeContasPorGerente.put(gerenteId, contas.size());
-          });
+        // transforma lista no tamanho dela
+        var numeroDeContasPorGerente = new HashMap<Long, Integer>();
+        contasPorGerente.forEach((gerenteId, contas) -> {
+          numeroDeContasPorGerente.put(gerenteId, contas.size());
+        });
 
-          // coleta gerentes com a maior conta
-          Optional<Integer> maiorValorOpt = numeroDeContasPorGerente.entrySet()
+        // coleta gerentes com a maior conta
+        Optional<Integer> maiorValorOpt = numeroDeContasPorGerente.entrySet()
+            .stream()
+            .max(Comparator.comparingInt(Map.Entry::getValue))
+            .map(Map.Entry::getValue);
+
+        int maiorValor = maiorValorOpt.orElse(0);
+
+        if (maiorValor <= 1 && contasPorGerente.size() <= 1) {
+          gerenteEscolhido = 0L;
+        } else {
+          List<Long> gerentesComMaisContas = numeroDeContasPorGerente.entrySet()
               .stream()
-              .max(Comparator.comparingInt(Map.Entry::getValue))
-              .map(Map.Entry::getValue);
-          
-          int maiorValor = maiorValorOpt.orElse(0);
+              .filter(entry -> entry.getValue() == maiorValor)
+              .map(Map.Entry::getKey)
+              .collect(Collectors.toList());
 
-          if (maiorValor <= 1 && contasPorGerente.size() <= 1) {
-              gerenteEscolhido = 0L;
+          if (gerentesComMaisContas.size() == 1) {
+            gerenteEscolhido = gerentesComMaisContas.get(0);
           } else {
-              List<Long> gerentesComMaisContas = numeroDeContasPorGerente.entrySet()
-                  .stream()
-                  .filter(entry -> entry.getValue() == maiorValor)
-                  .map(Map.Entry::getKey)
-                  .collect(Collectors.toList());
-
-              if (gerentesComMaisContas.size() == 1) {
-                  gerenteEscolhido = gerentesComMaisContas.get(0);
-              } else {
-                  // Desempate: menor saldo positivo
-                  gerenteEscolhido = gerentesComMaisContas.stream().min(Comparator.comparingDouble(gId -> {
-                      return contasPorGerente.get(gId).stream()
-                          .filter(c -> c.getSaldo() != null && c.getSaldo() >= 0)
-                          .mapToDouble(Conta::getSaldo)
-                          .sum();
-                  })).orElse(0L);
-              }
+            // Desempate: menor saldo positivo
+            gerenteEscolhido = gerentesComMaisContas.stream().min(Comparator.comparingDouble(gId -> {
+              return contasPorGerente.get(gId).stream()
+                  .filter(c -> c.getSaldo() != null && c.getSaldo() >= 0)
+                  .mapToDouble(Conta::getSaldo)
+                  .sum();
+            })).orElse(0L);
           }
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();

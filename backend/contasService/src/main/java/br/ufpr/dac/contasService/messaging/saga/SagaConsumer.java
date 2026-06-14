@@ -3,6 +3,11 @@ package br.ufpr.dac.contasService.messaging.saga;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import br.ufpr.dac.contasService.messaging.saga.autocadastro.AutocadastroCriarConta;
+import br.ufpr.dac.contasService.messaging.saga.autocadastro.AutocadastroGetIdGerenteComMenosContasHandler;
+import br.ufpr.dac.contasService.messaging.saga.insertGerente.GetIdGerenteComMaisContasHandler;
+import br.ufpr.dac.contasService.messaging.saga.removerGerente.MoverContasHandler;
+import br.ufpr.dac.contasService.messaging.saga.removerGerente.RemoverGerenteGetIdGerenteComMenosContasHandler;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
 import br.ufpr.dac.shared.keys.MessageOperations.SagaOperations;
@@ -15,8 +20,10 @@ import tools.jackson.databind.ObjectMapper;
 public class SagaConsumer {
 
   private GetIdGerenteComMaisContasHandler getIdGerenteComMaisContasHandler;
-  private GetIdGerenteComMenosContasHandler getIdGerenteComMenosContasHandler;
+  private RemoverGerenteGetIdGerenteComMenosContasHandler removerGerenteGetIdGerenteComMenosContasHandler;
+  private AutocadastroGetIdGerenteComMenosContasHandler autocadastroGetIdGerenteComMenosContasHandler;
   private MoverContasHandler moverContasHandler;
+  private AutocadastroCriarConta autocadastroCriarConta;
   private final ObjectMapper mapper;
 
   @RabbitListener(queues = RabbitmqConsts.CONTAS_SAGA_QUEUE)
@@ -36,7 +43,7 @@ public class SagaConsumer {
                 }));
       }
       case SagaOperations.RemoveGerente.GET_COM_MENOS_CONTAS -> {
-        getIdGerenteComMenosContasHandler.HandleGetIdGerenteComMenosContas(
+        removerGerenteGetIdGerenteComMenosContasHandler.HandleGetIdGerenteComMenosContas(
             mapper.convertValue(message,
                 new TypeReference<SagaMessageWrapper<Long>>() {
                 }));
@@ -51,6 +58,18 @@ public class SagaConsumer {
         moverContasHandler.handleRollbackMoverContasRemove(
             mapper.convertValue(message,
                 new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.Autocadastro.GET_GERENTE_MENOS_CONTAS -> {
+        autocadastroGetIdGerenteComMenosContasHandler.handleGetIdGerenteComMenosContas(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<Long>>() {
+                }));
+      }
+      case SagaOperations.Autocadastro.CRIAR_CONTA -> {
+        autocadastroCriarConta.handleCriarConta(
+            mapper.convertValue(message,
+                new TypeReference<SagaMessageWrapper<Double>>() {
                 }));
       }
     }
