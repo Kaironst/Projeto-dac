@@ -25,16 +25,17 @@ public class AutocadastroCriarConta {
 
     boolean sucesso = true;
     Long contaId = null;
+    
     try {
       // pega os valores enviados da lista
       Long idCliente = message.getData().get(0).longValue();
       Long idGerente = message.getData().get(1).longValue();
-      Double salarioCliente = message.getData().get(3);
+      Double salarioCliente = message.getData().get(2);
 
       Conta novaConta = Conta.builder()
           .cliente(idCliente)
           .gerente(idGerente)
-          .limite(salarioCliente / 2)
+          .limite(salarioCliente >= 2000.0 ? salarioCliente / 2.0 : 0.0)
           .saldo(0d)
           .dataCriacao(LocalDate.now())
           .build();
