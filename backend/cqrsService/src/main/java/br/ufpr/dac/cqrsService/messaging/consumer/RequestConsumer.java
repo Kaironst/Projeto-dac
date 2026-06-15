@@ -61,15 +61,15 @@ public class RequestConsumer {
     List<UsersDto.Cliente> encontrado = null;
 
     if (message.getOperation().equals(MessageOperations.READ))
-      encontrado = List.of(clienteDtoModel.handleRead(target.getId()));
+      encontrado = clienteDtoModel.handleRead(target.getId());
 
     else if (message.getOperation().equals(MessageOperations.READ_ALL))
       encontrado = clienteDtoModel.handleReadAll();
 
     else if (message.getOperation().equals(MessageOperations.READ_BY_EMAIL))
-      encontrado = List.of(clienteDtoModel.handleReadByEmail(target.getEmail()));
+      encontrado = clienteDtoModel.handleReadByEmail(target.getEmail());
     else if (message.getOperation().equals(MessageOperations.READ_BY_CPF))
-      encontrado = List.of(clienteDtoModel.handleReadByCpf(target.getCpf()));
+      encontrado = clienteDtoModel.handleReadByCpf(target.getCpf());
 
     if (encontrado == null)
       throw new AmqpRejectAndDontRequeueException("operação de leitura não implementada");
@@ -84,7 +84,7 @@ public class RequestConsumer {
     List<UsersDto.Endereco> encontrado = null;
 
     if (message.getOperation().equals(MessageOperations.READ))
-      encontrado = List.of(enderecoDtoModel.handleRead(target.getId()));
+      encontrado = enderecoDtoModel.handleRead(target.getId());
 
     else if (message.getOperation().equals(MessageOperations.READ_ALL))
       encontrado = enderecoDtoModel.handleReadAll();
@@ -101,15 +101,15 @@ public class RequestConsumer {
     List<GerentesDto.Gerente> encontrado = null;
 
     if (message.getOperation().equals(MessageOperations.READ))
-      encontrado = List.of(gerenteDtoModel.handleRead(target.getId()));
+      encontrado = gerenteDtoModel.handleRead(target.getId());
 
     else if (message.getOperation().equals(MessageOperations.READ_ALL))
       encontrado = gerenteDtoModel.handleReadAll();
 
     else if (message.getOperation().equals(MessageOperations.READ_BY_EMAIL))
-      encontrado = List.of(gerenteDtoModel.handleReadByEmail(target.getEmail()));
+      encontrado = gerenteDtoModel.handleReadByEmail(target.getEmail());
     else if (message.getOperation().equals(MessageOperations.READ_BY_CPF))
-      encontrado = List.of(gerenteDtoModel.handleReadByCpf(target.getCpf()));
+      encontrado = gerenteDtoModel.handleReadByCpf(target.getCpf());
 
     if (encontrado == null)
       throw new AmqpRejectAndDontRequeueException("operação de leitura não implementada");
@@ -123,7 +123,7 @@ public class RequestConsumer {
     List<ContasDto.Conta> encontrado = null;
 
     if (message.getOperation().equals(MessageOperations.READ))
-      encontrado = List.of(contaDtoModel.handleRead(target.getId()));
+      encontrado = contaDtoModel.handleRead(target.getId());
 
     else if (message.getOperation().equals(MessageOperations.READ_ALL))
       encontrado = contaDtoModel.handleReadAll();
@@ -141,7 +141,7 @@ public class RequestConsumer {
     List<ItemHistoricoDto.ItemHistorico> encontrado = null;
 
     if (message.getOperation().equals(MessageOperations.READ))
-      encontrado = List.of(itemHistoricoDtoModel.handleRead(target.getId()));
+      encontrado = itemHistoricoDtoModel.handleRead(target.getId());
 
     else if (message.getOperation().equals(MessageOperations.READ_ALL))
       encontrado = itemHistoricoDtoModel.handleReadAll();

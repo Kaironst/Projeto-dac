@@ -16,38 +16,41 @@ public class GerenteDtoModel implements DebeziumModel {
 
   private final JdbcClient client;
 
-  public GerentesDto.Gerente handleRead(Long id) {
+  public List<GerentesDto.Gerente> handleRead(Long id) {
 
     var gerente = client.sql("""
         SELECT * FROM gerente
         WHERE id=:id
+        LIMIT 1
         """)
         .param("id", id)
-        .query(GerentesDto.Gerente.class).single();
+        .query(GerentesDto.Gerente.class).list();
 
     return gerente;
   }
 
-  public GerentesDto.Gerente handleReadByCpf(String cpf) {
+  public List<GerentesDto.Gerente> handleReadByCpf(String cpf) {
 
     var gerente = client.sql("""
         SELECT * FROM gerente
         WHERE cpf=:cpf
+        LIMIT 1
         """)
         .param("cpf", cpf)
-        .query(GerentesDto.Gerente.class).single();
+        .query(GerentesDto.Gerente.class).list();
 
     return gerente;
   }
 
-  public GerentesDto.Gerente handleReadByEmail(String email) {
+  public List<GerentesDto.Gerente> handleReadByEmail(String email) {
 
     var gerente = client.sql("""
         SELECT * FROM gerente
         WHERE email=:email
+        LIMIT 1
         """)
         .param("email", email)
-        .query(GerentesDto.Gerente.class).single();
+        .query(GerentesDto.Gerente.class).list();
 
     return gerente;
   }

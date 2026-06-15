@@ -21,7 +21,7 @@ public class ContaDtoModel implements DebeziumModel {
 
   private final JdbcClient client;
 
-  public ContasDto.Conta handleRead(Long id) {
+  public List<ContasDto.Conta> handleRead(Long id) {
     return client.sql("""
         SELECT co.id, co.data_criacao, co.limite, co.numero, co.saldo,
                cl.id as cl_id, cl.cpf as cl_cpf, cl.email as cl_email,
@@ -93,23 +93,26 @@ public class ContaDtoModel implements DebeziumModel {
             // cria item historico
             long ihId = rs.getLong("ih_id");
             if (!rs.wasNull()) {
-               boolean exists = conta.getExtrato().stream().anyMatch(h -> h.getId().equals(ihId));
-               if (!exists) {
-                   conta.getExtrato().add(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico.builder()
-                       .id(ihId)
-                       .tipo(rs.getInt("ih_tipo"))
-                       .valorMovimentacao(rs.getDouble("ih_valor"))
-                       .dataHora(rs.getTimestamp("ih_data_hora") != null ? rs.getTimestamp("ih_data_hora").toLocalDateTime() : null)
-                       .build());
-               }
+              boolean exists = conta.getExtrato().stream().anyMatch(h -> h.getId().equals(ihId));
+              if (!exists) {
+                conta.getExtrato().add(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico.builder()
+                    .id(ihId)
+                    .tipo(rs.getInt("ih_tipo"))
+                    .valorMovimentacao(rs.getDouble("ih_valor"))
+                    .dataHora(
+                        rs.getTimestamp("ih_data_hora") != null ? rs.getTimestamp("ih_data_hora").toLocalDateTime()
+                            : null)
+                    .build());
+              }
             }
           }
           contaMap.values().forEach(c -> {
-              if (c.getExtrato() != null) {
-                  c.getExtrato().sort(java.util.Comparator.comparing(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico::getDataHora).reversed());
-              }
+            if (c.getExtrato() != null) {
+              c.getExtrato().sort(java.util.Comparator
+                  .comparing(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico::getDataHora).reversed());
+            }
           });
-          return contaMap.values().stream().findFirst().orElse(null);
+          return new ArrayList<>(contaMap.values());
         });
   }
 
@@ -183,21 +186,24 @@ public class ContaDtoModel implements DebeziumModel {
             // cria item historico
             long ihId = rs.getLong("ih_id");
             if (!rs.wasNull()) {
-               boolean exists = conta.getExtrato().stream().anyMatch(h -> h.getId().equals(ihId));
-               if (!exists) {
-                   conta.getExtrato().add(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico.builder()
-                       .id(ihId)
-                       .tipo(rs.getInt("ih_tipo"))
-                       .valorMovimentacao(rs.getDouble("ih_valor"))
-                       .dataHora(rs.getTimestamp("ih_data_hora") != null ? rs.getTimestamp("ih_data_hora").toLocalDateTime() : null)
-                       .build());
-               }
+              boolean exists = conta.getExtrato().stream().anyMatch(h -> h.getId().equals(ihId));
+              if (!exists) {
+                conta.getExtrato().add(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico.builder()
+                    .id(ihId)
+                    .tipo(rs.getInt("ih_tipo"))
+                    .valorMovimentacao(rs.getDouble("ih_valor"))
+                    .dataHora(
+                        rs.getTimestamp("ih_data_hora") != null ? rs.getTimestamp("ih_data_hora").toLocalDateTime()
+                            : null)
+                    .build());
+              }
             }
           }
           contaMap.values().forEach(c -> {
-              if (c.getExtrato() != null) {
-                  c.getExtrato().sort(java.util.Comparator.comparing(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico::getDataHora).reversed());
-              }
+            if (c.getExtrato() != null) {
+              c.getExtrato().sort(java.util.Comparator
+                  .comparing(br.ufpr.dac.shared.dto.ItemHistoricoDto.ItemHistorico::getDataHora).reversed());
+            }
           });
           return new ArrayList<>(contaMap.values());
         });

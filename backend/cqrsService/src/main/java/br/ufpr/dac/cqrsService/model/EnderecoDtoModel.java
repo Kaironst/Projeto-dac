@@ -15,14 +15,15 @@ public class EnderecoDtoModel implements DebeziumModel {
 
   private final JdbcClient client;
 
-  public UsersDto.Endereco handleRead(Long id) {
+  public List<UsersDto.Endereco> handleRead(Long id) {
 
     var endereco = client.sql("""
         SELECT * FROM endereco
         WHERE id=:id
+        LIMIT 1
         """)
         .param("id", id)
-        .query(UsersDto.Endereco.class).single();
+        .query(UsersDto.Endereco.class).list();
 
     return endereco;
   }

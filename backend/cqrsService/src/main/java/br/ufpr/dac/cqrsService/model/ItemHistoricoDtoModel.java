@@ -17,14 +17,14 @@ public class ItemHistoricoDtoModel implements DebeziumModel {
 
   private final JdbcClient client;
 
-  public ItemHistoricoDto.ItemHistorico handleRead(Long id) {
+  public List<ItemHistoricoDto.ItemHistorico> handleRead(Long id) {
 
     var itemHistorico = client.sql("""
         SELECT * FROM item_historico
         WHERE id=:id
         """)
         .param("id", id)
-        .query(ItemHistoricoDto.ItemHistorico.class).single();
+        .query(ItemHistoricoDto.ItemHistorico.class).list();
 
     return itemHistorico;
   }

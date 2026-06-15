@@ -18,68 +18,74 @@ public class ClienteDtoModel implements DebeziumModel {
 
   private final JdbcClient client;
 
-  public UsersDto.Cliente handleRead(Long id) {
+  public List<UsersDto.Cliente> handleRead(Long id) {
 
     var cliente = client.sql("""
         SELECT * FROM cliente
         WHERE id=:id
+        LIMIT 1
         """)
         .param("id", id)
-        .query(UsersDto.Cliente.class).single();
+        .query(UsersDto.Cliente.class).list();
 
-    var enderecos = client.sql("""
-        SELECT * FROM endereco
-        WHERE cliente_id=:id
-        """)
-        .param("id", id)
-        .query(UsersDto.Endereco.class)
-        .list();
-
-    cliente.setEnderecos(enderecos);
+    if (!cliente.isEmpty()) {
+      var enderecos = client.sql("""
+          SELECT * FROM endereco
+          WHERE cliente_id=:id
+          """)
+          .param("id", id)
+          .query(UsersDto.Endereco.class)
+          .list();
+      cliente.getFirst().setEnderecos(enderecos);
+    }
 
     return cliente;
   }
 
-  public UsersDto.Cliente handleReadByCpf(String cpf) {
+  public List<UsersDto.Cliente> handleReadByCpf(String cpf) {
 
     var cliente = client.sql("""
         SELECT * FROM cliente
         WHERE cpf=:cpf
+        LIMIT 1
         """)
         .param("cpf", cpf)
-        .query(UsersDto.Cliente.class).single();
+        .query(UsersDto.Cliente.class).list();
 
-    var enderecos = client.sql("""
-        SELECT * FROM endereco
-        WHERE cliente_id=:id
-        """)
-        .param("id", cliente.getId())
-        .query(UsersDto.Endereco.class)
-        .list();
-
-    cliente.setEnderecos(enderecos);
+    if (!cliente.isEmpty()) {
+      var enderecos = client.sql("""
+          SELECT * FROM endereco
+          WHERE cliente_id=:id
+          """)
+          .param("id", cliente.getFirst().getId())
+          .query(UsersDto.Endereco.class)
+          .list();
+      cliente.getFirst().setEnderecos(enderecos);
+    }
 
     return cliente;
   }
 
-  public UsersDto.Cliente handleReadByEmail(String email) {
+  public List<UsersDto.Cliente> handleReadByEmail(String email) {
 
     var cliente = client.sql("""
         SELECT * FROM cliente
         WHERE email=:email
+        LIMIT 1
         """)
         .param("email", email)
-        .query(UsersDto.Cliente.class).single();
+        .query(UsersDto.Cliente.class).list();
 
-    var enderecos = client.sql("""
-        SELECT * FROM endereco
-        WHERE cliente_id=:id
-        """)
-        .param("id", cliente.getId())
-        .query(UsersDto.Endereco.class)
-        .list();
-
-    cliente.setEnderecos(enderecos);
+    if (!cliente.isEmpty()) {
+      var enderecos = client.sql("""
+          SELECT * FROM endereco
+          WHERE cliente_id=:id
+          """)
+          .param("id", cliente.getFirst().getId())
+          .query(UsersDto.Endereco.class)
+          .list();
+      cliente.getFirst().setEnderecos(enderecos);
+    }
 
     return cliente;
   }
