@@ -18,3 +18,20 @@ BEGIN
     END LOOP;
 END;
 ' LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION forcar_numero_conta()
+RETURNS TRIGGER AS '
+BEGIN
+    IF NEW.numero IS NULL OR NEW.numero = '''' THEN
+        NEW.numero := gerar_numero();
+    END IF;
+    RETURN NEW;
+END;
+' LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_gerar_numero_conta ON conta;
+
+CREATE TRIGGER trigger_gerar_numero_conta
+BEFORE INSERT ON conta
+FOR EACH ROW
+EXECUTE FUNCTION forcar_numero_conta();
