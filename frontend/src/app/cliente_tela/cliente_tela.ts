@@ -87,7 +87,7 @@ export class ClienteTela {
         };
 
         if (consulta.conta) {
-          this.numConta = consulta.conta.id;
+          this.numConta = consulta.conta.numero;
           this.saldo = consulta.conta.saldo;
           this.limite = consulta.conta.limite;
           this.gerente = consulta.conta.gerenteId
@@ -131,6 +131,7 @@ export class ClienteTela {
       this.valorDeposito = 0;
       this.carregarDadosCliente();
       alert('Depósito realizado com sucesso!');
+      window.location.reload();
     },
     error: (erro) => {
       console.error('Erro ao depositar:', erro);
@@ -160,7 +161,8 @@ export class ClienteTela {
     next: () => {
       this.valorSaque = 0;
       this.carregarDadosCliente();
-      alert('Saque realizado com sucesso!');
+      alert('Saque realizado com sucesso!');  
+      window.location.reload();
     },
     error: (erro) => {
       console.error('Erro ao sacar:', erro);
@@ -193,6 +195,7 @@ export class ClienteTela {
       this.contaDestino = '';
       this.carregarDadosCliente();
       alert('Transferência realizada com sucesso!');
+      window.location.reload();
     },
     error: (erro) => {
       console.error('Erro ao transferir:', erro);

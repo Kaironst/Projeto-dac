@@ -122,11 +122,20 @@ export class ClientePerfil {
         salario: consulta.salario
       };
 
+      const endereco = consulta.endereco ?? {};
+
       this.perfilForm.patchValue({
         nome: consulta.nome,
         email: consulta.email,
         telefone: consulta.telefone,
-        salario: consulta.salario
+        salario: consulta.salario,
+
+        cep: endereco.cep,
+        logradouro: endereco.logradouro,
+        numero: endereco.numero,
+        complemento: endereco.complemento,
+        cidade: endereco.cidade,
+        estado: endereco.estado
       });
 
       if (consulta.conta) {
@@ -160,24 +169,42 @@ export class ClientePerfil {
   }
 
   const {
-    nome,
-    email,
-    telefone,
-    salario
-  } = this.perfilForm.value;
+  nome,
+  email,
+  telefone,
+  salario,
+  cep,
+  logradouro,
+  numero,
+  complemento,
+  cidade,
+  estado
+} = this.perfilForm.value;
 
   if (salario <= 0) {
     alert('Salário inválido!');
     return;
   }
 
-  const atualizado: Cliente = {
-    ...this.clienteAtual,
-    nome,
-    email,
-    telefone,
-    salario
-  };
+  const atualizado = {
+  ...this.clienteAtual,
+
+  nome,
+  email,
+  telefone,
+  salario,
+
+  enderecos: [
+    {
+      logradouro,
+      numero,
+      complemento,
+      cep,
+      cidade,
+      estado
+    }
+  ]
+};
 
   this.http.put(
     `${this.clientesUrl}/${this.clienteAtual.id}`,
