@@ -2,6 +2,7 @@ import { Component, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule} from '@angular/forms';
 import { Auth } from '../services/auth/auth';
+import { HttpClient } from '@angular/common/http';
 
 interface Cliente {
   id?: number;
@@ -32,6 +33,7 @@ export class ClienteTela {
   private readonly contasUrl = 'http://localhost:8080/contas';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly auth = inject(Auth);
+  private http = inject(HttpClient); 
 
   cpf: string = '';
   clienteAtual: Cliente | null = null;
@@ -71,132 +73,133 @@ export class ClienteTela {
     }
   }
 
-  private async buscarClienteNaApi(): Promise<any> {
-    try {
-      const response = await fetch(`${this.consultasUrl}/${this.cpf}`);
-      if (!response.ok) return null;
-      return await response.json();
-    } catch {
-      return null;
-    }
-  }
-
-  async carregarDadosCliente() {
-    const consulta = await this.buscarClienteNaApi();
-    if (!consulta) return;
-
-    this.clienteAtual = {
-      id: consulta.id,
-      cpf: consulta.cpf,
-      nome: consulta.nome,
-      email: consulta.email,
-      telefone: consulta.telefone,
-      salario: consulta.salario
-    };
-
-    if (consulta.conta) {
-      this.numConta = consulta.conta.numero;
-      this.saldo = consulta.conta.saldo;
-      this.limite = consulta.conta.limite;
-      this.gerente = consulta.conta.gerenteId ? `ID: ${consulta.conta.gerenteId}` : 'Não atribuído';
-      
-      this.extrato = (consulta.conta.extrato || []).map((h: any) => {
-        const info = this.mapTipo(h.tipo, h.valorMovimentacao);
-        return {
-          tipo: info.tipo,
-          valor: info.val,
-          descricao: info.desc,
-          data: new Date(h.dataHora)
+  carregarDadosCliente() {
+  this.http.get<any>(`${this.consultasUrl}/${this.cpf}`)
+    .subscribe({
+      next: (consulta) => {
+        this.clienteAtual = {
+          id: consulta.id,
+          cpf: consulta.cpf,
+          nome: consulta.nome,
+          email: consulta.email,
+          telefone: consulta.telefone,
+          salario: consulta.salario
         };
-      });
-    }
 
-    this.atualizarFiltro();
-    this.changeDetectorRef.detectChanges();
-  }
+        if (consulta.conta) {
+          this.numConta = consulta.conta.id;
+          this.saldo = consulta.conta.saldo;
+          this.limite = consulta.conta.limite;
+          this.gerente = consulta.conta.gerenteId
+            ? `ID: ${consulta.conta.gerenteId}`
+            : 'Não atribuído';
 
-  async depositar() {
-    if (this.valorDeposito <= 0) return;
+          this.extrato = (consulta.conta.extrato || []).map((h: any) => {
+            const info = this.mapTipo(h.tipo, h.valorMovimentacao);
 
-    try {
-      const response = await fetch(`${this.contasUrl}/depositar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numero: this.numConta, valor: this.valorDeposito })
-      });
+            return {
+              tipo: info.tipo,
+              valor: info.val,
+              descricao: info.desc,
+              data: new Date(h.dataHora)
+            };
+          });
+        }
 
-      if (response.ok) {
-        this.valorDeposito = 0;
-        await this.carregarDadosCliente();
-        alert('Depósito realizado com sucesso!');
-      } else {
-        alert('Erro ao depositar.');
+        this.atualizarFiltro();
+        this.changeDetectorRef.detectChanges();
+      },
+      error: (erro) => {
+        console.error('Erro ao carregar cliente:', erro);
       }
-    } catch (e) {
-      alert('Falha na comunicação com o servidor.');
-    }
+    });
+}
+
+  depositar() {
+  if (this.valorDeposito <= 0) {
+    return;
   }
 
-  async sacar() {
-    if (this.valorSaque <= 0) {
-      alert('Valor inválido!');
-      return;
+  this.http.post(
+    `${this.contasUrl}/depositar`,
+    {
+      numero: this.numConta,
+      valor: this.valorDeposito
     }
-
-    if (this.valorSaque > (this.saldo + this.limite)) {
-      alert('Saldo insuficiente!');
-      return;
+  ).subscribe({
+    next: () => {
+      this.valorDeposito = 0;
+      this.carregarDadosCliente();
+      alert('Depósito realizado com sucesso!');
+    },
+    error: (erro) => {
+      console.error('Erro ao depositar:', erro);
+      alert(`Erro ao depositar. ${this.valorDeposito} | ${this.numConta}`);
     }
+  });
+}
 
-    try {
-      const response = await fetch(`${this.contasUrl}/sacar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numero: this.numConta, valor: this.valorSaque })
-      });
-
-      if (response.ok) {
-        this.valorSaque = 0;
-        await this.carregarDadosCliente();
-        alert('Saque realizado com sucesso!');
-      } else {
-        alert('Erro ao sacar. Verifique o saldo.');
-      }
-    } catch (e) {
-      alert('Falha na comunicação com o servidor.');
-    }
+  sacar() {
+  if (this.valorSaque <= 0) {
+    alert('Valor inválido!');
+    return;
   }
 
-  async transferir() {
-    if (this.valorTransferencia <= 0 || !this.contaDestino) {
-      alert('Dados inválidos!');
-      return;
-    }
-
-    if (this.valorTransferencia > (this.saldo + this.limite)) {
-      alert('Saldo insuficiente!');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${this.contasUrl}/transferir`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numeroOrigem: this.numConta, numeroDestino: this.contaDestino, valor: this.valorTransferencia })
-      });
-
-      if (response.ok) {
-        this.valorTransferencia = 0;
-        this.contaDestino = '';
-        await this.carregarDadosCliente();
-        alert('Transferência realizada com sucesso!');
-      } else {
-        alert('Erro ao transferir. Verifique os dados e tente novamente.');
-      }
-    } catch (e) {
-      alert('Falha na comunicação com o servidor.');
-    }
+  if (this.valorSaque > (this.saldo + this.limite)) {
+    alert('Saldo insuficiente!');
+    return;
   }
+
+  this.http.post(
+    `${this.contasUrl}/sacar`,
+    {
+      numero: this.numConta,
+      valor: this.valorSaque
+    }
+  ).subscribe({
+    next: () => {
+      this.valorSaque = 0;
+      this.carregarDadosCliente();
+      alert('Saque realizado com sucesso!');
+    },
+    error: (erro) => {
+      console.error('Erro ao sacar:', erro);
+      alert('Erro ao sacar. Verifique o saldo.');
+    }
+  });
+}
+
+  transferir() {
+  if (this.valorTransferencia <= 0 || !this.contaDestino) {
+    alert('Dados inválidos!');
+    return;
+  }
+
+  if (this.valorTransferencia > (this.saldo + this.limite)) {
+    alert('Saldo insuficiente!');
+    return;
+  }
+
+  this.http.post(
+    `${this.contasUrl}/transferir`,
+    {
+      numeroOrigem: this.numConta,
+      numeroDestino: this.contaDestino,
+      valor: this.valorTransferencia
+    }
+  ).subscribe({
+    next: () => {
+      this.valorTransferencia = 0;
+      this.contaDestino = '';
+      this.carregarDadosCliente();
+      alert('Transferência realizada com sucesso!');
+    },
+    error: (erro) => {
+      console.error('Erro ao transferir:', erro);
+      alert('Erro ao transferir. Verifique os dados e tente novamente.');
+    }
+  });
+}
 
   filtrarExtrato() {
     const inicio = this.dataInicio ? new Date(this.dataInicio) : null;

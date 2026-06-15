@@ -6,13 +6,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import br.ufpr.dac.orchestratorService.saga.SagaProducerFactory;
 import br.ufpr.dac.orchestratorService.saga.SagaState;
 import br.ufpr.dac.orchestratorService.saga.SagaStatus;
 import br.ufpr.dac.orchestratorService.saga.SagaProducerFactory.SagaProducer;
+import br.ufpr.dac.shared.dto.EmailDto;
+import br.ufpr.dac.shared.dto.MessageWrapper;
 import br.ufpr.dac.shared.dto.UsersDto;
+import br.ufpr.dac.shared.dto.EmailDto.EmailDtoBuilder;
 import br.ufpr.dac.shared.dto.saga.SagaMessageWrapper;
 import br.ufpr.dac.shared.keys.MessageOperations;
 import br.ufpr.dac.shared.keys.RabbitmqConsts;
@@ -28,6 +32,7 @@ public class AutocadastroOrchestration {
   @Getter
   private final Map<UUID, SagaState<AutocadastroData>> sagas = new ConcurrentHashMap<>();
   private final SagaProducerFactory producerFactory;
+  private final RabbitTemplate rabbitTemplate;
   private final Set<String> errors = Set.of(
       Autocadastro.INSERIR_NOVO_ERROR,
       Autocadastro.GET_GERENTE_MENOS_CONTAS_ERROR,
@@ -138,6 +143,15 @@ public class AutocadastroOrchestration {
 
     state.setStatus(SagaStatus.COMPENSATING);
 
+    rabbitTemplate.convertSendAndReceive(RabbitmqConsts.APP_EXCHANGE, RabbitmqConsts.EMAIL_KEY, new MessageWrapper<EmailDto>(
+      MessageOperations.SEND,
+      List.of(EmailDto.builder()
+        .assunto("Houve um erro durante seu cadastro!")
+        .destinatario(state.getSagaData().getClienteAInserir().getEmail())
+        .conteudoHtml("<h1>Houve algum erro no nosso lado! Tente realizar seu cadastro para nosso serviço mais tarde!<h1>")
+        .build()
+    )));
+
     switch (state.getStep()) {
       // falha ao criar conta - remover cliente
       case AutocadastroPasso.CRIANDO_CONTA:
@@ -161,6 +175,7 @@ public class AutocadastroOrchestration {
     state.setStatus(SagaStatus.FAILED);
     // cleanup
     sagas.remove(state.getCorrelationId());
+
   }
 
 }

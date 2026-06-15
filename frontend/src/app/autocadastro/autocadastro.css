@@ -187,4 +187,159 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* BACKDROPS */
+
+.success-backdrop,
+.error-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease;
+}
+
+/* CARDS */
+
+.success-card,
+.error-card {
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  animation: modalEnter 0.25s ease;
+}
+
+/* CABEÇALHOS */
+
+.success-content,
+.error-content {
+  padding: 32px;
+  text-align: center;
+}
+
+.success-content h2,
+.error-content h2 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.success-content p,
+.error-content p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* SUCESSO */
+
+.success-content h2 {
+  color: #16a34a;
+}
+
+/* ERRO */
+
+.error-content h2 {
+  color: #dc2626;
+}
+
+/* AÇÕES */
+
+.success-actions,
+.error-actions {
+  padding: 20px 32px 32px;
+}
+
+.success-actions button,
+.error-actions button {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* BOTÃO SUCESSO */
+
+.success-actions button {
+  background: linear-gradient(
+    135deg,
+    #16a34a 0%,
+    #15803d 100%
+  );
+}
+
+.success-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(22, 163, 74, 0.35);
+}
+
+/* BOTÃO ERRO */
+
+.error-actions button {
+  background: linear-gradient(
+    135deg,
+    #ef4444 0%,
+    #dc2626 100%
+  );
+}
+
+.error-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.35);
+}
+
+/* ANIMAÇÃO DO MODAL */
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 768px) {
+
+  .success-card,
+  .error-card {
+    max-width: 100%;
+  }
+
+  .success-content,
+  .error-content {
+    padding: 24px;
+  }
+
+  .success-actions,
+  .error-actions {
+    padding: 16px 24px 24px;
+  }
+
+}
+
 }

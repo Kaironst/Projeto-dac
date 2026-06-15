@@ -1,8 +1,9 @@
 import { Router, Request, Response } from "express";
 import { GerentesDtoGerente } from "../dto/GerentesDto";
 import { UsersDtoCliente } from "../dto/UsersDto";
-import { gerentesProducer, gerentesProducerCqrs, usersProducer, usersProducerCqrs } from "../messaging/GenericProducerRPC";
+import { gerentesProducer, gerentesProducerCqrs, usersProducer, usersProducerCqrs, emailProducer } from "../messaging/GenericProducerRPC";
 import { sagaProducer } from "../messaging/GenericProducer";
+import { EmailDto } from "../dto/EmailDto";
 
 const router = Router();
 
@@ -49,12 +50,41 @@ router.post("/aprovar-cliente", async (req: Request, res: Response) => {
     }
 
     // Atualiza estado para 1 (ativo/aprovado)
+
+    const senha:string | undefined = Math.floor(Math.random() * 10000).toString().padStart(4,"0")
+
     const atualizadoMsg = await usersProducer.requestService({
       operation: "UPDATE",
-      data: [{ ...cliente, estado: 1 } as UsersDtoCliente],
+      data: [{ ...cliente, estado: 1, senha: senha} as UsersDtoCliente],
       dataType: "cliente"
     });
 
+    try {
+    const clientesMessage = await usersProducerCqrs.requestService({
+      operation: "READ_ALL",
+      data: [{ id: 0 } as UsersDtoCliente],
+      dataType: "cliente"
+
+    });
+
+    // Filtra apenas clientes com estado = 0 (pendentes de aprovação)
+    const pendentes = (clientesMessage.data ?? []).filter(
+      (c: UsersDtoCliente) => c.estado === 0
+    );
+
+    //manda senha para o email do cliente
+    await emailProducer.requestService({
+      operation: "SEND",
+      data: [{assunto:"Aprovação",destinatario:cliente.email,conteudoHtml:`<h1>Sua conta para o banco BANTADS foi aprovada! Sua senha gerada é <b>${senha}</b><h1>`} as EmailDto],
+      dataType: "email"
+    });
+  
+    res.status(200).json(pendentes);
+  } catch (error) {
+    console.error("Erro ao buscar pedidos de aprovação:", error);
+    res.sendStatus(500);
+  }
+  
     res.status(200).json(atualizadoMsg.data?.[0] ?? { message: `Cliente ${nome} aprovado.` });
   } catch (error) {
     console.error("Erro ao aprovar cliente:", error);
@@ -88,6 +118,14 @@ router.post("/rejeitar-cliente", async (req: Request, res: Response) => {
       operation: "UPDATE",
       data: [{ ...cliente, estado: 2 } as UsersDtoCliente],
       dataType: "cliente"
+    });
+
+    await emailProducer.requestService({
+      operation: "SEND",
+      data: [{assunto:"Cadastro recusado",destinatario:cliente.email,conteudoHtml:
+        `<h1>Parece que o gerente responsável por sua avaliação acabou recusando seu cadastro.</h1><br/>
+        <h1>Motivo: <b>${motivo}</b><h1>`} as EmailDto],
+      dataType: "email"
     });
 
     res.status(200).json({ message: `Cliente rejeitado. Motivo: ${motivo}` });

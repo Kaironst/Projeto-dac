@@ -7,6 +7,7 @@ import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, swi
 import { CepService } from '../services/cep.service';
 import { UFS } from '../shared/ufs';
 import { Auth } from '../services/auth/auth';
+import { HttpClient } from '@angular/common/http';
 
 interface Cliente {
   id?: number;
@@ -26,11 +27,13 @@ interface Cliente {
 })
 export class ClientePerfil {
 
-  private readonly apiUrl = 'http://localhost:8080/clientes';
+  private readonly consultasUrl ='http://localhost:8080/consultas/clientes/cpf';
+  private readonly clientesUrl = 'http://localhost:8080/clientes';
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly cepService = inject(CepService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(Auth);
+  private readonly http = inject(HttpClient);
 
   perfilForm: FormGroup;
 
@@ -103,93 +106,105 @@ export class ClientePerfil {
   }
 
 
-  private async buscarClienteNaApi(): Promise<Cliente | null> {
-    try {
-      const response = await fetch(this.apiUrl);
 
-      if (!response.ok) return null;
+  carregarDadosCliente() {
+  this.http.get<any>(
+    `${this.consultasUrl}/${this.cpf}`
+  ).subscribe({
+    next: (consulta) => {
 
-      const clientes = await response.json();
+      this.clienteAtual = {
+        id: consulta.id,
+        cpf: consulta.cpf,
+        nome: consulta.nome,
+        email: consulta.email,
+        telefone: consulta.telefone,
+        salario: consulta.salario
+      };
 
-      return clientes.find((c: Cliente) => c.cpf === this.cpf) ?? null;
-
-    } catch {
-      return null;
-    }
-  }
-
-  private async atualizarClienteNaApi(cliente: Cliente): Promise<boolean> {
-    if (!cliente.id) return false;
-
-    try {
-      const response = await fetch(`${this.apiUrl}/${cliente.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(cliente)
+      this.perfilForm.patchValue({
+        nome: consulta.nome,
+        email: consulta.email,
+        telefone: consulta.telefone,
+        salario: consulta.salario
       });
 
-      return response.ok;
-    } catch {
-      return false;
+      if (consulta.conta) {
+        this.numConta = consulta.conta.id;
+
+        this.saldo = consulta.conta.saldo;
+
+        this.limite = consulta.conta.limite;
+
+        this.gerente = consulta.conta.gerenteId
+          ? `ID: ${consulta.conta.gerenteId}`
+          : 'Não atribuído';
+      }
+
+      this.changeDetectorRef.detectChanges();
+    },
+
+    error: (erro) => {
+      console.error(
+        'Erro ao carregar perfil:',
+        erro
+      );
     }
+  });
+}
+
+  atualizarPerfil() {
+
+  if (!this.clienteAtual) {
+    return;
   }
 
-  async carregarDadosCliente() {
-    const cliente = await this.buscarClienteNaApi();
+  const {
+    nome,
+    email,
+    telefone,
+    salario
+  } = this.perfilForm.value;
 
-    if (!cliente) return;
-
-    this.clienteAtual = cliente;
-
-    this.perfilForm.patchValue({
-      nome: cliente.nome,
-      email: cliente.email,
-      telefone: cliente.telefone,
-      salario: cliente.salario
-    });
-
-    this.limite = this.calcularLimite(cliente.salario);
-
-    // Mock enquanto não integra contas
-    this.numConta = '0001';
-    this.gerente = 'Gerente Padrão';
-    this.saldo = 0;
-
-    this.changeDetectorRef.detectChanges();
+  if (salario <= 0) {
+    alert('Salário inválido!');
+    return;
   }
 
-  async atualizarPerfil() {
-    if (!this.clienteAtual) return;
+  const atualizado: Cliente = {
+    ...this.clienteAtual,
+    nome,
+    email,
+    telefone,
+    salario
+  };
 
-    const { nome, email, telefone, salario } = this.perfilForm.value;
+  this.http.put(
+    `${this.clientesUrl}/${this.clienteAtual.id}`,
+    atualizado
+  ).subscribe({
 
-    if (salario <= 0) {
-      alert('Salário inválido!');
-      return;
-    }
+    next: () => {
 
-    const atualizado: Cliente = {
-      ...this.clienteAtual,
-      nome,
-      email,
-      telefone,
-      salario
-    };
+      this.clienteAtual = atualizado;
 
-    const sucesso = await this.atualizarClienteNaApi(atualizado);
+      this.limite =
+        this.calcularLimite(salario);
 
-    if (!sucesso) {
+      alert('Perfil atualizado!');
+      this.carregarDadosCliente();
+    },
+
+    error: (erro) => {
+      console.error(
+        'Erro ao atualizar perfil:',
+        erro
+      );
+
       alert('Erro ao atualizar!');
-      return;
     }
-
-    this.clienteAtual = atualizado;
-    this.limite = this.calcularLimite(salario);
-
-    alert('Perfil atualizado!');
-  }
+  });
+}
 
   calcularLimite(salario: number): number {
     return salario * 0.5;

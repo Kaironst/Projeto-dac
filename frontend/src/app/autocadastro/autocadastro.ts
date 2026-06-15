@@ -128,6 +128,7 @@ export class Autocadastro {
     this.clienteUtil.create(novoCliente).subscribe({
       next: () => {
         this.mostrarMensagemSucesso = true;
+        this.changeDetectorRef.markForCheck();
       },
       error: (erro: HttpErrorResponse) => {
         console.error('Erro detalhado do backend:', erro);
@@ -135,17 +136,20 @@ export class Autocadastro {
         if (erro.status === 0) {
           this.mensagemErro = 'Nao foi possivel conectar com o backend. Verifique se a API gateway esta rodando na porta 8080.';
           this.mostrarMensagemErro = true;
+          this.changeDetectorRef.markForCheck();
           return;
         }
 
         if (erro.status === 409) {
           this.mensagemErro = erro.error?.message ?? 'CPF já cadastrado ou aguardando aprovação.';
           this.mostrarMensagemErro = true;
+          this.changeDetectorRef.markForCheck();
           return;
         }
 
         this.mensagemErro = erro.error?.message ?? 'Erro ao realizar autocadastro. Verifique os logs do backend para mais detalhes.';
         this.mostrarMensagemErro = true;
+        this.changeDetectorRef.markForCheck();
       }
     });
   }
