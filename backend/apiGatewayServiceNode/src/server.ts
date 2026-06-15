@@ -5,7 +5,7 @@ import axios from "axios";
 import ClienteController from "./controller/ClienteController";
 import GerenteController from "./controller/GerenteController";
 import ConsultaClienteController from "./controller/ConsultaClienteController";
-import { authProducer, contasProducer, contasProducerCqrs, gerentesProducer, gerentesProducerCqrs, usersProducer, usersProducerCqrs } from './messaging/GenericProducerRPC';
+import { authProducer, contasProducer, contasProducerCqrs, emailProducer, gerentesProducer, gerentesProducerCqrs, usersProducer, usersProducerCqrs } from './messaging/GenericProducerRPC';
 import { sagaProducer } from './messaging/GenericProducer';
 import AuthController from './controller/AuthController';
 import emailController from "./controller/EmailController";
@@ -39,6 +39,7 @@ async function startServer() {
     contasProducer.init(),
     contasProducerCqrs.init(),
     sagaProducer.init(),
+    emailProducer.init(),
   ]);
 
   app.listen(port, () => {

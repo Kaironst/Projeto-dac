@@ -32,6 +32,7 @@ public class MessageWrapper<T> {
     public static final String gerente = "gerente";
     public static final String conta = "conta";
     public static final String itemHistorico = "itemHistorico";
+    public static final String email = "email";
   }
 
 }

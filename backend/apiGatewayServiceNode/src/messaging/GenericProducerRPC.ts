@@ -7,6 +7,7 @@ import { MessageWrapper } from "../dto/MessageWrapper";
 import { ContasDtoConta } from "../dto/ContasDto";
 import { LoginRequest } from "../dto/LoginRequest";
 import { TokenDto } from "../dto/TokenDto";
+import { EmailDto } from "../dto/EmailDto";
 
 //diferentemente do spring não temos uma função pré feita para fazer tudo
 //(temos que configurar do 0)
@@ -124,3 +125,4 @@ export const gerentesProducerCqrs = new GenericProducerRPC<MessageWrapper<Gerent
 export const contasProducer = new GenericProducerRPC<MessageWrapper<ContasDtoConta>, MessageWrapper<ContasDtoConta>>("app.exchange", "contas.key");
 export const contasProducerCqrs = new GenericProducerRPC<MessageWrapper<ContasDtoConta>, MessageWrapper<ContasDtoConta>>("app.exchange", "cqrs.request.key");
 export const authProducer = new GenericProducerRPC<MessageWrapper<LoginRequest>, MessageWrapper<TokenDto>>("app.exchange", "auth.key")
+export const emailProducer = new GenericProducerRPC<MessageWrapper<EmailDto>, MessageWrapper<EmailDto>>("app.exchange", "email.key")

@@ -31,6 +31,12 @@ public class MessageOperations {
 
   // --------------------------------------------------------------------------------------------------------
 
+  // Operações de Email
+  public static final String SEND = "SEND";
+
+  // --------------------------------------------------------------------------------------------------------
+
+
   // Operações e resultados de saga
   public static class SagaOperations {
 

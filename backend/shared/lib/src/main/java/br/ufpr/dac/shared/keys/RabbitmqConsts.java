@@ -81,4 +81,10 @@ public class RabbitmqConsts {
   // key do apiGateway (queue em node apenas)
   public static final String API_GATEWAY_KEY = "apiGateway.key";
 
+  // --------------------------------------------------------------------------------------------------------
+
+  // queue do emailService
+  public static final String EMAIL_QUEUE = "email.queue";
+  // key do emailService
+  public static final String EMAIL_KEY = "email.key";
 }
