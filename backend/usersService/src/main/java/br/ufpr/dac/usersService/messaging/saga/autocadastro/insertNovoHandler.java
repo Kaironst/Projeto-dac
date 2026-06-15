@@ -26,7 +26,6 @@ public class insertNovoHandler {
   private final ClienteRepository repo;
   private final OutboxProducer outboxProducer;
 
-  @Transactional
   public void handleInserirNovo(SagaMessageWrapper<UsersDto.Cliente> message) {
 
     final List<Cliente> queryResult = new ArrayList<>();
