@@ -73,6 +73,7 @@ router.post("/aprovar-cliente", async (req: Request, res: Response) => {
     );
 
     //manda senha para o email do cliente
+    
     await emailProducer.requestService({
       operation: "SEND",
       data: [{assunto:"Aprovação",destinatario:cliente.email,conteudoHtml:`<h1>Sua conta para o banco BANTADS foi aprovada! Sua senha gerada é <b>${senha}</b><h1>`} as EmailDto],
@@ -82,7 +83,7 @@ router.post("/aprovar-cliente", async (req: Request, res: Response) => {
     res.status(200).json(pendentes);
   } catch (error) {
     console.error("Erro ao buscar pedidos de aprovação:", error);
-    res.sendStatus(500);
+    return res.sendStatus(500);
   }
   
     res.status(200).json(atualizadoMsg.data?.[0] ?? { message: `Cliente ${nome} aprovado.` });

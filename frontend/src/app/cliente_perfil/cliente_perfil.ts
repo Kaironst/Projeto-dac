@@ -231,6 +231,8 @@ export class ClientePerfil {
       alert('Erro ao atualizar!');
     }
   });
+
+  window.location.reload();
 }
 
   calcularLimite(salario: number): number {

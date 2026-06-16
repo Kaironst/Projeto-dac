@@ -42,7 +42,7 @@ export class Autocadastro {
   public mostrarMensagemErro = false;
   public mensagemErro = '';
   public readonly ufs = UFS;
-
+  
   constructor() {
     this.formGroup = new FormGroup({
       nome: new FormControl('', [Validators.required]),
@@ -56,6 +56,7 @@ export class Autocadastro {
       complemento: new FormControl(''),
       cidade: new FormControl('', [Validators.required]),
       estado: new FormControl('', [Validators.required])
+      
     });
 
     this.configurarAutocompleteCep();
@@ -95,17 +96,19 @@ export class Autocadastro {
     });
   }
 
-  cadastrar() {
+  async cadastrar() {
     if (this.formGroup.invalid) {
       this.formGroup.markAllAsTouched();
       return;
     }
-
     this.mostrarMensagemSucesso = false;
+    
+
     this.mostrarMensagemErro = false;
     this.mensagemErro = '';
 
     const form = this.formGroup.value;
+    const temporizador = new Temporizador();
 
     const novoCliente = {
       nome: form.nome,
@@ -132,6 +135,7 @@ export class Autocadastro {
       },
       error: (erro: HttpErrorResponse) => {
         console.error('Erro detalhado do backend:', erro);
+        temporizador.cancelar();
 
         if (erro.status === 0) {
           this.mensagemErro = 'Nao foi possivel conectar com o backend. Verifique se a API gateway esta rodando na porta 8080.';
@@ -151,7 +155,14 @@ export class Autocadastro {
         this.mostrarMensagemErro = true;
         this.changeDetectorRef.markForCheck();
       }
+
     });
+
+  temporizador.iniciar(3000, () => {
+    this.mostrarMensagemSucesso = true;
+  });
+
+
   }
 
   fecharMensagemSucesso() {
@@ -178,4 +189,26 @@ export class Autocadastro {
   private normalizarCep(cep: string): string {
     return cep.replace(/\D/g, '');
   }
+}
+
+class Temporizador {
+
+  private timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  iniciar(delayMs: number, callback: () => void): void {
+    this.cancelar();
+
+    this.timeoutId = setTimeout(() => {
+      this.timeoutId = null;
+      callback();
+    }, delayMs);
+  }
+
+  cancelar(): void {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+  }
+
 }

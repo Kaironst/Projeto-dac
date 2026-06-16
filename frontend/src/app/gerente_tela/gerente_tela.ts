@@ -46,7 +46,7 @@ export class GerenteTela implements OnInit {
   }
 
   carregarPedidos() {
-    this.carregando = true;
+    this.carregando = false;
     // Chamar endpoint GET para buscar pedidos pendentes de aprovação
     this.http.get<PedidoAprovacao[]>('/gerentes/pedidos-aprovacao')
       .subscribe({
